@@ -3,12 +3,14 @@ export interface Profile {
   username: string | null
   email: string | null
   fullname: string | null
+  avatar_url: string | null
   country: string | null
   address: string | null
   latitude: number | null
   longitude: number | null
   role: string | null
   last_active: string | null
+  is_blocked: boolean | null
 }
 
 export interface Quiz {
