@@ -104,7 +104,7 @@ export function DataTable({
                 "px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors",
                 currentPage === 1
                   ? "border-border bg-secondary/50 text-muted-foreground cursor-not-allowed"
-                  : "border-border bg-card text-foreground hover:bg-secondary/80"
+                  : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer"
               )}
             >
               Previous
@@ -147,7 +147,7 @@ export function DataTable({
                       key={page}
                       onClick={() => onPageChange(page as number)}
                       className={cn(
-                        "w-9 h-9 text-sm font-medium rounded-lg border transition-colors",
+                        "w-9 h-9 text-sm font-medium rounded-lg border transition-colors cursor-pointer",
                         currentPage === page
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-border bg-card text-foreground hover:bg-secondary/80"
@@ -167,7 +167,7 @@ export function DataTable({
                 "px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors",
                 currentPage === totalPages
                   ? "border-border bg-secondary/50 text-muted-foreground cursor-not-allowed"
-                  : "border-border bg-card text-foreground hover:bg-secondary/80"
+                  : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer"
               )}
             >
               Next
