@@ -6,11 +6,11 @@ import {
   MoreVertical,
   UserPen,
   Trash2,
+  Search,
+  SlidersHorizontal,
 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 import { useState, useMemo } from "react";
 
-import { SectionHeader } from "@/components/dashboard/section-header";
 import { DataTable, StatusBadge } from "@/components/dashboard/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +32,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { useProfiles } from "@/hooks/useProfiles";
 
@@ -55,8 +62,13 @@ export default function AdministratorUserPage() {
     deleteProfile,
   } = useProfiles();
   const { toast } = useToast();
-  const searchParams = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Search and filter state
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   // Confirmation dialog state
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -85,6 +97,9 @@ export default function AdministratorUserPage() {
     phone: string;
     organization: string;
     address: string;
+    role: string;
+    status: string;
+    showConfirm: boolean;
   }>({
     open: false,
     id: "",
@@ -94,6 +109,9 @@ export default function AdministratorUserPage() {
     phone: "",
     organization: "",
     address: "",
+    role: "user",
+    status: "active",
+    showConfirm: false,
   });
 
   // Delete user dialog state
@@ -180,10 +198,18 @@ export default function AdministratorUserPage() {
       phone: (row.phone as string) || "",
       organization: (row.organization as string) || "",
       address: (row.address as string) || "",
+      role: ((row.role as string) || "user").toLowerCase(),
+      status: (row.status as string) === "Blocked" ? "blocked" : "active",
+      showConfirm: false,
     });
   };
 
   const handleEditSave = async () => {
+    if (!editDialog.showConfirm) {
+      setEditDialog((prev) => ({ ...prev, showConfirm: true }));
+      return;
+    }
+
     const { error } = await updateProfile(editDialog.id, {
       fullname: editDialog.fullname,
       username: editDialog.username,
@@ -191,6 +217,8 @@ export default function AdministratorUserPage() {
       phone: editDialog.phone,
       organization: editDialog.organization,
       address: editDialog.address,
+      role: editDialog.role,
+      is_blocked: editDialog.status === "blocked",
     });
 
     if (error) {
@@ -204,7 +232,7 @@ export default function AdministratorUserPage() {
         title: "Berhasil",
         description: "Data pengguna berhasil diperbarui",
       });
-      setEditDialog((prev) => ({ ...prev, open: false }));
+      setEditDialog((prev) => ({ ...prev, open: false, showConfirm: false }));
     }
   };
 
@@ -375,10 +403,11 @@ export default function AdministratorUserPage() {
       label: "Location",
       render: (_: unknown, row: Record<string, unknown>) => {
         const address = row.address as string;
-        const lat = row.latitude as number | null;
-        const long = row.longitude as number | null;
+        // Koordinat - uncomment jika diperlukan
+        // const lat = row.latitude as number | null;
+        // const long = row.longitude as number | null;
 
-        if (!address && (!lat || !long))
+        if (!address)
           return <span className="text-muted-foreground">—</span>;
 
         return (
@@ -391,6 +420,7 @@ export default function AdministratorUserPage() {
                 {address}
               </span>
             )}
+            {/* Koordinat - uncomment jika diperlukan
             {lat && long && (
               <a
                 href={`https://www.google.com/maps?q=${lat},${long}`}
@@ -402,6 +432,7 @@ export default function AdministratorUserPage() {
                 {lat.toFixed(4)}, {long.toFixed(4)}
               </a>
             )}
+            */}
           </div>
         );
       },
@@ -445,14 +476,23 @@ export default function AdministratorUserPage() {
     },
   ];
 
-  const tableData = useMemo(() => {
-    const searchQuery = searchParams.get("search")?.toLowerCase() || "";
+  const handleSearch = () => {
+    setSearchQuery(searchInput.toLowerCase());
+    setCurrentPage(1);
+  };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  const tableData = useMemo(() => {
     let filteredProfiles = profiles;
 
     // Apply search filter
     if (searchQuery) {
-      filteredProfiles = profiles.filter((profile) => {
+      filteredProfiles = filteredProfiles.filter((profile) => {
         const searchableFields = [
           profile.username,
           profile.email,
@@ -469,6 +509,21 @@ export default function AdministratorUserPage() {
       });
     }
 
+    // Apply role filter
+    if (roleFilter !== "all") {
+      filteredProfiles = filteredProfiles.filter(
+        (profile) => (profile.role ?? "user").toLowerCase() === roleFilter
+      );
+    }
+
+    // Apply status filter
+    if (statusFilter !== "all") {
+      filteredProfiles = filteredProfiles.filter((profile) => {
+        const status = profile.is_blocked ? "blocked" : "active";
+        return status === statusFilter;
+      });
+    }
+
     return filteredProfiles.map((profile) => ({
       id: profile.id,
       account: profile.id,
@@ -482,10 +537,9 @@ export default function AdministratorUserPage() {
       address: profile.address,
       latitude: profile.latitude,
       longitude: profile.longitude,
-
       status: profile.is_blocked ? "Blocked" : "Active",
     }));
-  }, [profiles, searchParams]);
+  }, [profiles, searchQuery, roleFilter, statusFilter]);
 
   // Pagination calculations
   const totalPages = Math.ceil(tableData.length / ITEMS_PER_PAGE);
@@ -499,9 +553,59 @@ export default function AdministratorUserPage() {
   };
 
   return (
-    <div className="space-y-8">
-      <div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">Manage Users</h1>
+
+        {/* Search and Filters */}
+        <div className="flex items-center gap-3">
+          {/* Search */}
+          <div className="relative flex gap-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Cari pengguna..."
+                className="pl-10 w-64 bg-background border-border"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+              />
+            </div>
+            <Button size="icon" onClick={handleSearch}>
+              <Search className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Role Filter */}
+          <Select value={roleFilter} onValueChange={(value) => { setRoleFilter(value); setCurrentPage(1); }}>
+            <SelectTrigger className="w-32">
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal className="h-4 w-4" />
+                <SelectValue placeholder="Role" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Role</SelectItem>
+              <SelectItem value="user">User</SelectItem>
+              <SelectItem value="admin">Admin</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Status Filter */}
+          <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value); setCurrentPage(1); }}>
+            <SelectTrigger className="w-36">
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal className="h-4 w-4" />
+                <SelectValue placeholder="Status" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="blocked">Blocked</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {error ? (
@@ -562,98 +666,160 @@ export default function AdministratorUserPage() {
       {/* Edit User Dialog */}
       <Dialog
         open={editDialog.open}
-        onOpenChange={(open) => setEditDialog((prev) => ({ ...prev, open }))}
+        onOpenChange={(open) => setEditDialog((prev) => ({ ...prev, open, showConfirm: false }))}
       >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit User</DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="fullname">Nama Lengkap</Label>
-              <Input
-                id="fullname"
-                value={editDialog.fullname}
-                onChange={(e) =>
-                  setEditDialog((prev) => ({
-                    ...prev,
-                    fullname: e.target.value,
-                  }))
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                value={editDialog.username}
-                onChange={(e) =>
-                  setEditDialog((prev) => ({
-                    ...prev,
-                    username: e.target.value,
-                  }))
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={editDialog.email}
-                onChange={(e) =>
-                  setEditDialog((prev) => ({ ...prev, email: e.target.value }))
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="phone">Telepon</Label>
-              <Input
-                id="phone"
-                value={editDialog.phone}
-                onChange={(e) =>
-                  setEditDialog((prev) => ({ ...prev, phone: e.target.value }))
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="organization">Organisasi</Label>
-              <Input
-                id="organization"
-                value={editDialog.organization}
-                onChange={(e) =>
-                  setEditDialog((prev) => ({
-                    ...prev,
-                    organization: e.target.value,
-                  }))
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="address">Alamat</Label>
-              <Input
-                id="address"
-                value={editDialog.address}
-                onChange={(e) =>
-                  setEditDialog((prev) => ({
-                    ...prev,
-                    address: e.target.value,
-                  }))
-                }
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() =>
-                setEditDialog((prev) => ({ ...prev, open: false }))
-              }
-            >
-              Batal
-            </Button>
-            <Button onClick={handleEditSave}>Simpan</Button>
-          </DialogFooter>
+          
+          {!editDialog.showConfirm ? (
+            <>
+              <div className="grid grid-cols-2 gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="fullname">Nama Lengkap</Label>
+                  <Input
+                    id="fullname"
+                    value={editDialog.fullname}
+                    onChange={(e) =>
+                      setEditDialog((prev) => ({
+                        ...prev,
+                        fullname: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    id="username"
+                    value={editDialog.username}
+                    onChange={(e) =>
+                      setEditDialog((prev) => ({
+                        ...prev,
+                        username: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={editDialog.email}
+                    onChange={(e) =>
+                      setEditDialog((prev) => ({ ...prev, email: e.target.value }))
+                    }
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="phone">Telepon</Label>
+                  <Input
+                    id="phone"
+                    value={editDialog.phone}
+                    onChange={(e) =>
+                      setEditDialog((prev) => ({ ...prev, phone: e.target.value }))
+                    }
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="organization">Organisasi</Label>
+                  <Input
+                    id="organization"
+                    value={editDialog.organization}
+                    onChange={(e) =>
+                      setEditDialog((prev) => ({
+                        ...prev,
+                        organization: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="address">Alamat</Label>
+                  <Input
+                    id="address"
+                    value={editDialog.address}
+                    onChange={(e) =>
+                      setEditDialog((prev) => ({
+                        ...prev,
+                        address: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Role</Label>
+                  <Select
+                    value={editDialog.role}
+                    onValueChange={(value) =>
+                      setEditDialog((prev) => ({ ...prev, role: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <span>{editDialog.role === "user" ? "User" : "Admin"}</span>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {editDialog.role === "user" ? (
+                        <SelectItem value="admin">Admin</SelectItem>
+                      ) : (
+                        <SelectItem value="user">User</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Status</Label>
+                  <Select
+                    value={editDialog.status}
+                    onValueChange={(value) =>
+                      setEditDialog((prev) => ({ ...prev, status: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <span>{editDialog.status === "active" ? "Active" : "Blocked"}</span>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {editDialog.status === "active" ? (
+                        <SelectItem value="blocked">Blocked</SelectItem>
+                      ) : (
+                        <SelectItem value="active">Active</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    setEditDialog((prev) => ({ ...prev, open: false }))
+                  }
+                >
+                  Batal
+                </Button>
+                <Button onClick={handleEditSave}>Simpan</Button>
+              </DialogFooter>
+            </>
+          ) : (
+            <>
+              <DialogDescription className="py-4">
+                Apakah Anda yakin ingin menyimpan perubahan data pengguna ini?
+              </DialogDescription>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    setEditDialog((prev) => ({ ...prev, showConfirm: false }))
+                  }
+                >
+                  Kembali
+                </Button>
+                <Button onClick={handleEditSave}>Ya, Simpan</Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
 
