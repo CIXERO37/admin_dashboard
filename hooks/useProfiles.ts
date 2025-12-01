@@ -15,25 +15,39 @@ export function useProfiles() {
     const supabase = getSupabaseBrowserClient()
 
     async function fetchProfiles() {
-      setLoading(true)
-      setError(null)
+      try {
+        setLoading(true)
+        setError(null)
 
-      const { data, error } = await supabase
-        .from("profiles")
-        .select(
-          "id, username, email, fullname, avatar_url, country, address, latitude, longitude, role, last_active, is_blocked",
-        )
-        .order("last_active", { ascending: false, nullsFirst: false })
-        .abortSignal(controller.signal)
+        const { data, error } = await supabase
+          .from("profiles")
+          .select(
+            "id, username, email, fullname, avatar_url, country, address, latitude, longitude, role, last_active, is_blocked, phone, organization, birthdate",
+          )
+          .order("last_active", { ascending: false, nullsFirst: false })
+          .abortSignal(controller.signal)
 
-      if (error) {
-        setError(error.message)
-        setData([])
-      } else {
-        setData(data ?? [])
+        if (error) {
+          // Ignore abort errors - they happen when component unmounts
+          if (error.message.includes("aborted") || error.name === "AbortError") {
+            return
+          }
+          setError(error.message)
+          setData([])
+        } else {
+          setData(data ?? [])
+        }
+
+        setLoading(false)
+      } catch (err) {
+        // Catch any other errors (like network errors)
+        // Ignore abort errors
+        if (err instanceof Error && (err.name === "AbortError" || err.message.includes("aborted"))) {
+          return
+        }
+        setError(err instanceof Error ? err.message : "An error occurred")
+        setLoading(false)
       }
-
-      setLoading(false)
     }
 
     fetchProfiles()
@@ -94,6 +108,38 @@ export function useProfiles() {
     }
   }, [data])
 
-  return { data, loading, error, aggregates }
+  const updateProfile = async (id: string, updates: Partial<Profile>) => {
+    const supabase = getSupabaseBrowserClient()
+
+    // Optimistic update
+    setData((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)))
+
+    const { error } = await supabase.from("profiles").update(updates).eq("id", id)
+
+    if (error) {
+      console.error("Error updating profile:", error)
+      return { error }
+    }
+
+    return { error: null }
+  }
+
+  const deleteProfile = async (id: string) => {
+    const supabase = getSupabaseBrowserClient()
+
+    // Optimistic update
+    setData((prev) => prev.filter((p) => p.id !== id))
+
+    const { error } = await supabase.from("profiles").delete().eq("id", id)
+
+    if (error) {
+      console.error("Error deleting profile:", error)
+      return { error }
+    }
+
+    return { error: null }
+  }
+
+  return { data, loading, error, aggregates, updateProfile, deleteProfile }
 }
 
