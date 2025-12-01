@@ -1,7 +1,6 @@
 "use client";
 
-import { Bell, Search, User } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Bell, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,60 +12,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
 
 export function Header() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // Sync with URL on mount
-  useEffect(() => {
-    const query = searchParams.get("search");
-    if (query) {
-      setSearchQuery(query);
-    }
-  }, [searchParams]);
-
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("search", searchQuery.trim());
-      router.push(`?${params.toString()}`);
-    } else {
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete("search");
-      router.push(`?${params.toString()}`);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
-  };
-
   return (
-    <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6">
-      {/* Search */}
-      <div className="relative w-full max-w-md flex gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search..."
-            className="pl-10 bg-background border-border"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-        </div>
-        <Button size="icon" onClick={handleSearch} className="shrink-0">
-          <Search className="h-4 w-4" />
-        </Button>
-      </div>
-
-      {/* Actions */}
+    <header className="flex h-16 items-center justify-end border-b border-border bg-card px-6">
       <div className="flex items-center gap-4">
         {/* Notifications */}
         <DropdownMenu>
