@@ -11,6 +11,9 @@ export interface Profile {
   role: string | null
   last_active: string | null
   is_blocked: boolean | null
+  phone: string | null
+  organization: string | null
+  birthdate: string | null
 }
 
 export interface Quiz {
