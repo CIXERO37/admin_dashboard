@@ -25,6 +25,11 @@ export interface Quiz {
   is_public: boolean | null
   created_at: string | null
   language: string | null
+  creator?: {
+    email: string | null
+    fullname: string | null
+    avatar_url: string | null
+  } | null
 }
 
 export interface Report {

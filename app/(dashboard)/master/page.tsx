@@ -1,33 +1,34 @@
-"use client"
+"use client";
 
-import { BookOpen, Globe, MapPin, Database } from "lucide-react"
+import { BookOpen, Globe, MapPin, Database } from "lucide-react";
 
-import { StatCard } from "@/components/dashboard/stat-card"
-import { ActionCard } from "@/components/dashboard/action-card"
-import { SectionHeader } from "@/components/dashboard/section-header"
-import { useQuizzes } from "@/hooks/useQuizzes"
-import { useProfiles } from "@/hooks/useProfiles"
+import { StatCard } from "@/components/dashboard/stat-card";
+import { ActionCard } from "@/components/dashboard/action-card";
+import { SectionHeader } from "@/components/dashboard/section-header";
+import { useQuizzes } from "@/hooks/useQuizzes";
+import { useProfiles } from "@/hooks/useProfiles";
 
 export default function MasterDashboardPage() {
-  const { data: quizzes } = useQuizzes()
-  const { aggregates } = useProfiles()
+  const { data: quizzes } = useQuizzes();
+  const { aggregates } = useProfiles();
 
-  const activeQuizzes = quizzes.filter((quiz) => !(quiz.is_hidden ?? false))
-  const countriesCount = aggregates?.countries.length ?? 0
-  const provincesCount = aggregates?.provinces.length ?? 0
-  const totalRecords = quizzes.length + countriesCount + provincesCount
+  const activeQuizzes = quizzes.filter((quiz) => !(quiz.is_hidden ?? false));
+  const countriesCount = aggregates?.countries.length ?? 0;
+  const provincesCount = aggregates?.provinces.length ?? 0;
+  const totalRecords = quizzes.length + countriesCount + provincesCount;
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Master Data Dashboard</h1>
-        <p className="mt-1 text-muted-foreground">Manage all master data in the system</p>
+        <h1 className="text-3xl font-bold text-foreground">
+          Master Data Dashboard
+        </h1>
       </div>
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Total Quizzes"
+          title="Quizzes"
           value={quizzes.length}
           change={`${activeQuizzes.length} visible`}
           changeType="neutral"
@@ -36,7 +37,7 @@ export default function MasterDashboardPage() {
         <StatCard title="Countries" value={countriesCount} icon={Globe} />
         <StatCard title="Locations" value={provincesCount} icon={MapPin} />
         <StatCard
-          title="Total Records"
+          title="Records"
           value={totalRecords}
           change="Quizzes + locations"
           changeType="neutral"
@@ -46,7 +47,10 @@ export default function MasterDashboardPage() {
 
       {/* Quick Access Cards */}
       <div>
-        <SectionHeader title="Master Data Modules" description="Quick access to all master data" />
+        <SectionHeader
+          title="Master Data Modules"
+          description="Quick access to all master data"
+        />
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <ActionCard
             title="Quiz Data"
@@ -72,5 +76,5 @@ export default function MasterDashboardPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
