@@ -555,7 +555,10 @@ export default function AdministratorUserPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-foreground">Manage Users</h1>
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Manage Users</h1>
+          <p className="mt-1 text-muted-foreground">{profiles.length} total users</p>
+        </div>
 
         {/* Search and Filters */}
         <div className="flex items-center gap-3">
