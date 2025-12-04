@@ -15,8 +15,10 @@ import {
   AlertCircle,
   Database,
   BookOpen,
-  Globe,
   MapPin,
+  Globe,
+  Map,
+  Building2,
   UserCog,
   Settings,
   User,
@@ -31,11 +33,18 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
-interface NavItem {
+interface NavChild {
   title: string
   href: string
   icon: React.ElementType
   children?: { title: string; href: string; icon: React.ElementType }[]
+}
+
+interface NavItem {
+  title: string
+  href: string
+  icon: React.ElementType
+  children?: NavChild[]
 }
 
 const navigation: NavItem[] = [
@@ -68,8 +77,16 @@ const navigation: NavItem[] = [
     icon: Database,
     children: [
       { title: "Quiz", href: "/master/quiz", icon: BookOpen },
-      { title: "Country", href: "/master/country", icon: Globe },
-      { title: "Province", href: "/master/province", icon: MapPin },
+      { 
+        title: "Address", 
+        href: "/master/address", 
+        icon: MapPin,
+        children: [
+          { title: "Country", href: "/master/address/country", icon: Globe },
+          { title: "State", href: "/master/address/state", icon: Map },
+          { title: "City", href: "/master/address/city", icon: Building2 },
+        ],
+      },
     ],
   },
   {
@@ -104,8 +121,12 @@ export function AppSidebar() {
     return pathname.startsWith(href)
   }
 
-  const isChildActive = (item: NavItem) => {
-    return item.children?.some((child) => pathname === child.href)
+  const isChildActive = (item: NavItem | NavChild): boolean => {
+    return item.children?.some((child) => 
+      pathname === child.href || 
+      pathname.startsWith(child.href + "/") ||
+      (child.children && child.children.some(grandChild => pathname === grandChild.href))
+    ) ?? false
   }
 
   return (
@@ -174,6 +195,57 @@ export function AppSidebar() {
                   </Link>
                   {item.children?.map((child) => {
                     const ChildIcon = child.icon
+                    const hasNestedChildren = child.children && child.children.length > 0
+                    const isNestedOpen = openMenus.includes(child.title) || 
+                      child.children?.some(grandChild => pathname === grandChild.href)
+
+                    if (hasNestedChildren) {
+                      return (
+                        <Collapsible 
+                          key={child.title} 
+                          open={isNestedOpen} 
+                          onOpenChange={() => toggleMenu(child.title)}
+                        >
+                          <CollapsibleTrigger asChild>
+                            <button
+                              className={cn(
+                                "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors",
+                                isNestedOpen || pathname.startsWith(child.href)
+                                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                  : "text-sidebar-foreground hover:bg-secondary hover:text-foreground",
+                              )}
+                            >
+                              <div className="flex items-center gap-3">
+                                <ChildIcon className="h-4 w-4" />
+                                <span>{child.title}</span>
+                              </div>
+                              <ChevronDown className={cn("h-3 w-3 transition-transform", isNestedOpen && "rotate-180")} />
+                            </button>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="mt-1 space-y-1 pl-4">
+                            {child.children?.map((grandChild) => {
+                              const GrandChildIcon = grandChild.icon
+                              return (
+                                <Link
+                                  key={grandChild.href}
+                                  href={grandChild.href}
+                                  className={cn(
+                                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                                    pathname === grandChild.href
+                                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                                      : "text-sidebar-foreground hover:bg-secondary hover:text-foreground",
+                                  )}
+                                >
+                                  <GrandChildIcon className="h-4 w-4" />
+                                  <span>{grandChild.title}</span>
+                                </Link>
+                              )
+                            })}
+                          </CollapsibleContent>
+                        </Collapsible>
+                      )
+                    }
+
                     return (
                       <Link
                         key={child.href}

@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import type { LucideIcon } from "lucide-react"
+import Link from "next/link"
 
 interface StatCardProps {
   title: string
@@ -10,11 +11,21 @@ interface StatCardProps {
   changeType?: "increase" | "decrease" | "neutral"
   icon: LucideIcon
   description?: string
+  href?: string
 }
 
-export function StatCard({ title, value, change, changeType = "neutral", icon: Icon, description }: StatCardProps) {
+export function StatCard({ title, value, change, changeType = "neutral", icon: Icon, description, href }: StatCardProps) {
+  const Wrapper = href ? Link : "div"
+  const wrapperProps = href ? { href } : {}
+
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-border bg-card p-6 transition-all duration-300 hover:border-primary hover:shadow-xl hover:shadow-primary/20">
+    <Wrapper
+      {...wrapperProps}
+      className={cn(
+        "group relative overflow-hidden rounded-xl border border-border bg-card p-6 transition-all duration-300 hover:border-primary hover:shadow-xl hover:shadow-primary/20",
+        href && "cursor-pointer block"
+      )}
+    >
       <div className="absolute inset-0 bg-gradient-to-br from-secondary/80 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
       <div className="relative flex items-start justify-between">
@@ -43,6 +54,6 @@ export function StatCard({ title, value, change, changeType = "neutral", icon: I
           <Icon className="h-5 w-5 text-primary transition-colors group-hover:text-primary-foreground" />
         </div>
       </div>
-    </div>
+    </Wrapper>
   )
 }
