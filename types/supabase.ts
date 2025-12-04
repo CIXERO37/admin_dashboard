@@ -42,17 +42,24 @@ export interface Report {
   status: string | null
   priority?: string | null
   created_at: string | null
+  updated_at?: string | null
   title: string | null
   description: string | null
+  admin_notes?: string | null
+  evidence_url?: string | null
+  resolved_at?: string | null
+  resolved_by?: string | null
   reporter?: {
     id: string
     username: string | null
     email: string | null
     fullname: string | null
+    avatar_url?: string | null
   } | null
   reported_user?: {
     id: string
     username: string | null
+    fullname?: string | null
   } | null
   quiz?: {
     id: string

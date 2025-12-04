@@ -9,7 +9,8 @@ import {
   Search,
   SlidersHorizontal,
 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { DataTable, StatusBadge } from "@/components/dashboard/data-table";
 import { Button } from "@/components/ui/button";
@@ -53,7 +54,8 @@ const roleColors: Record<string, string> = {
 
 const ITEMS_PER_PAGE = 15;
 
-export default function AdministratorUserPage() {
+function AdministratorUserPageContent() {
+  const searchParams = useSearchParams();
   const {
     data: profiles,
     loading,
@@ -69,6 +71,18 @@ export default function AdministratorUserPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  // Read query params and set filter on mount
+  useEffect(() => {
+    const role = searchParams.get("role");
+    const status = searchParams.get("status");
+    if (role && ["user", "admin"].includes(role)) {
+      setRoleFilter(role);
+    }
+    if (status && ["active", "blocked"].includes(status)) {
+      setStatusFilter(status);
+    }
+  }, [searchParams]);
 
   // Confirmation dialog state
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -407,8 +421,7 @@ export default function AdministratorUserPage() {
         // const lat = row.latitude as number | null;
         // const long = row.longitude as number | null;
 
-        if (!address)
-          return <span className="text-muted-foreground">—</span>;
+        if (!address) return <span className="text-muted-foreground">—</span>;
 
         return (
           <div className="flex flex-col gap-0.5">
@@ -557,7 +570,9 @@ export default function AdministratorUserPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Manage Users</h1>
-          <p className="mt-1 text-muted-foreground">{profiles.length} total users</p>
+          <p className="mt-1 text-muted-foreground">
+            {profiles.length} total users
+          </p>
         </div>
 
         {/* Search and Filters */}
@@ -580,7 +595,13 @@ export default function AdministratorUserPage() {
           </div>
 
           {/* Role Filter */}
-          <Select value={roleFilter} onValueChange={(value) => { setRoleFilter(value); setCurrentPage(1); }}>
+          <Select
+            value={roleFilter}
+            onValueChange={(value) => {
+              setRoleFilter(value);
+              setCurrentPage(1);
+            }}
+          >
             <SelectTrigger className="w-32">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4" />
@@ -595,7 +616,13 @@ export default function AdministratorUserPage() {
           </Select>
 
           {/* Status Filter */}
-          <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value); setCurrentPage(1); }}>
+          <Select
+            value={statusFilter}
+            onValueChange={(value) => {
+              setStatusFilter(value);
+              setCurrentPage(1);
+            }}
+          >
             <SelectTrigger className="w-36">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4" />
@@ -669,13 +696,15 @@ export default function AdministratorUserPage() {
       {/* Edit User Dialog */}
       <Dialog
         open={editDialog.open}
-        onOpenChange={(open) => setEditDialog((prev) => ({ ...prev, open, showConfirm: false }))}
+        onOpenChange={(open) =>
+          setEditDialog((prev) => ({ ...prev, open, showConfirm: false }))
+        }
       >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit User</DialogTitle>
           </DialogHeader>
-          
+
           {!editDialog.showConfirm ? (
             <>
               <div className="grid grid-cols-2 gap-4 py-4">
@@ -712,7 +741,10 @@ export default function AdministratorUserPage() {
                     type="email"
                     value={editDialog.email}
                     onChange={(e) =>
-                      setEditDialog((prev) => ({ ...prev, email: e.target.value }))
+                      setEditDialog((prev) => ({
+                        ...prev,
+                        email: e.target.value,
+                      }))
                     }
                   />
                 </div>
@@ -722,7 +754,10 @@ export default function AdministratorUserPage() {
                     id="phone"
                     value={editDialog.phone}
                     onChange={(e) =>
-                      setEditDialog((prev) => ({ ...prev, phone: e.target.value }))
+                      setEditDialog((prev) => ({
+                        ...prev,
+                        phone: e.target.value,
+                      }))
                     }
                   />
                 </div>
@@ -761,7 +796,9 @@ export default function AdministratorUserPage() {
                     }
                   >
                     <SelectTrigger>
-                      <span>{editDialog.role === "user" ? "User" : "Admin"}</span>
+                      <span>
+                        {editDialog.role === "user" ? "User" : "Admin"}
+                      </span>
                     </SelectTrigger>
                     <SelectContent>
                       {editDialog.role === "user" ? (
@@ -781,7 +818,9 @@ export default function AdministratorUserPage() {
                     }
                   >
                     <SelectTrigger>
-                      <span>{editDialog.status === "active" ? "Active" : "Blocked"}</span>
+                      <span>
+                        {editDialog.status === "active" ? "Active" : "Blocked"}
+                      </span>
                     </SelectTrigger>
                     <SelectContent>
                       {editDialog.status === "active" ? (
@@ -900,4 +939,12 @@ function getInitials(name: string) {
   const parts = name.split(" ");
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+export default function AdministratorUserPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
+      <AdministratorUserPageContent />
+    </Suspense>
+  );
 }

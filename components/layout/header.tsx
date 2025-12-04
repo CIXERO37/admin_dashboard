@@ -1,6 +1,7 @@
 "use client";
 
-import { Bell, User } from "lucide-react";
+import { useState } from "react";
+import { Bell, User, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,10 +11,48 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { logout } from "@/app/login/actions";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import Link from "next/link";
 
 export function Header() {
+  const { user, loading } = useCurrentUser();
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  const getInitials = (name: string | null, email: string | null) => {
+    if (name) {
+      return name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    if (email) {
+      return email.slice(0, 2).toUpperCase();
+    }
+    return "AD";
+  };
+
+  const displayName = user?.fullname || user?.username || user?.email?.split("@")[0] || "Admin";
+  const displayEmail = user?.email || "-";
   return (
     <header className="flex h-16 items-center justify-end border-b border-border bg-card px-6">
       <div className="flex items-center gap-4">
@@ -66,19 +105,32 @@ export function Header() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center gap-2 px-2">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  AD
-                </AvatarFallback>
-              </Avatar>
-              <div className="hidden flex-col items-start text-left md:flex">
-                <span className="text-sm font-medium text-foreground">
-                  Admin User
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  admin@saas.com
-                </span>
-              </div>
+              {loading ? (
+                <>
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                  <div className="hidden md:flex flex-col gap-1">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-3 w-28" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Avatar className="h-8 w-8">
+                    {user?.avatar_url && <AvatarImage src={user.avatar_url} alt={displayName} />}
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      {getInitials(user?.fullname ?? null, user?.email ?? null)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="hidden flex-col items-start text-left md:flex">
+                    <span className="text-sm font-medium text-foreground">
+                      {displayName}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {displayEmail}
+                    </span>
+                  </div>
+                </>
+              )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -86,22 +138,48 @@ export function Header() {
             className="w-56 bg-popover border-border"
           >
             <DropdownMenuLabel className="text-foreground">
-              My Account
+              Akun Saya
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-border" />
-            <DropdownMenuItem className="text-foreground">
-              <User className="mr-2 h-4 w-4" />
-              Profile
+            <DropdownMenuItem asChild className="text-foreground cursor-pointer">
+              <Link href="/settings/profile">
+                <User className="mr-2 h-4 w-4" />
+                Profil
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-foreground">
-              Settings
+            <DropdownMenuItem asChild className="text-foreground cursor-pointer">
+              <Link href="/settings">
+                <Settings className="mr-2 h-4 w-4" />
+                Pengaturan
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-border" />
-            <DropdownMenuItem className="text-destructive">
-              Log out
+            <DropdownMenuItem
+              className="text-destructive cursor-pointer"
+              onClick={() => setShowLogoutDialog(true)}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Keluar
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Keluar dari akun?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Anda akan keluar dari dashboard admin.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Batal</AlertDialogCancel>
+              <AlertDialogAction onClick={handleLogout}>
+                Keluar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </header>
   );

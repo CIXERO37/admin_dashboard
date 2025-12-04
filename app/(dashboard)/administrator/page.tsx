@@ -21,10 +21,10 @@ export default function AdministratorDashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="User" value={loading ? 0 : userCount} icon={Users} />
-        <StatCard title="Admin" value={loading ? 0 : adminCount} icon={Shield} />
-        <StatCard title="Active" value={loading ? 0 : activeCount} icon={UserCheck} />
-        <StatCard title="Blocked" value={loading ? 0 : blockedCount} icon={UserX} />
+        <StatCard title="User" value={loading ? 0 : userCount} icon={Users} href="/administrator/user?role=user" />
+        <StatCard title="Admin" value={loading ? 0 : adminCount} icon={Shield} href="/administrator/user?role=admin" />
+        <StatCard title="Active" value={loading ? 0 : activeCount} icon={UserCheck} href="/administrator/user?status=active" />
+        <StatCard title="Blocked" value={loading ? 0 : blockedCount} icon={UserX} href="/administrator/user?status=blocked" />
       </div>
 
       {/* Quick Access */}
