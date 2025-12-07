@@ -1,19 +1,13 @@
 export interface Profile {
   id: string
-  username: string | null
-  email: string | null
-  fullname: string | null
-  avatar_url: string | null
-  country: string | null
-  address: string | null
-  latitude: number | null
-  longitude: number | null
-  role: string | null
-  last_active: string | null
-  is_blocked: boolean | null
-  phone: string | null
-  organization: string | null
-  birthdate: string | null
+  username?: string | null
+  email?: string | null
+  fullname?: string | null
+  avatar_url?: string | null
+  role?: string | null
+  last_active?: string | null
+  is_blocked?: boolean | null
+  [key: string]: unknown
 }
 
 export interface Quiz {

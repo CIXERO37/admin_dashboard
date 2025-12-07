@@ -1,0 +1,245 @@
+"use client"
+
+import { Search } from "lucide-react"
+import { useState, useTransition } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+
+import { DataTable } from "@/components/dashboard/data-table"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Combobox } from "@/components/ui/combobox"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { type City, fetchCityById } from "./actions"
+
+interface CityTableProps {
+  initialData: City[]
+  totalPages: number
+  currentPage: number
+  countries: string[]
+  states: string[]
+  searchQuery: string
+  countryFilter: string
+  stateFilter: string
+}
+
+export function CityTable({
+  initialData,
+  totalPages,
+  currentPage,
+  countries,
+  states,
+  searchQuery,
+  countryFilter,
+  stateFilter,
+}: CityTableProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [isPending, startTransition] = useTransition()
+
+  const [searchInput, setSearchInput] = useState(searchQuery)
+  const [selectedCity, setSelectedCity] = useState<City | null>(null)
+  const [loadingCity, setLoadingCity] = useState(false)
+
+  const countryOptions = [
+    { value: "all", label: "All Countries" },
+    ...countries.map((code) => ({ value: code, label: code })),
+  ]
+
+  const stateOptions = [
+    { value: "all", label: "All States" },
+    ...states.map((code) => ({ value: code, label: code })),
+  ]
+
+  const updateUrl = (params: Record<string, string | number>) => {
+    const newParams = new URLSearchParams(searchParams.toString())
+    
+    Object.entries(params).forEach(([key, value]) => {
+      if (value && value !== "all" && value !== "") {
+        newParams.set(key, String(value))
+      } else {
+        newParams.delete(key)
+      }
+    })
+
+    startTransition(() => {
+      router.push(`?${newParams.toString()}`)
+    })
+  }
+
+  const handleSearch = () => {
+    updateUrl({ search: searchInput, page: 1 })
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch()
+    }
+  }
+
+  const handleCountryChange = (value: string) => {
+    updateUrl({ country: value, state: "all", page: 1 })
+  }
+
+  const handleStateChange = (value: string) => {
+    updateUrl({ state: value, page: 1 })
+  }
+
+  const handlePageChange = (page: number) => {
+    updateUrl({ page, search: searchQuery, country: countryFilter, state: stateFilter })
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  const handleNameClick = async (id: number) => {
+    setLoadingCity(true)
+    const city = await fetchCityById(id)
+    setSelectedCity(city)
+    setLoadingCity(false)
+  }
+
+  const columns = [
+    {
+      key: "id",
+      label: "ID",
+      render: (value: unknown) => (
+        <span className="font-mono text-sm text-muted-foreground">
+          {value as number}
+        </span>
+      ),
+    },
+    {
+      key: "name",
+      label: "Name",
+      render: (value: unknown, row: Record<string, unknown>) => (
+        <button
+          onClick={() => handleNameClick(row.id as number)}
+          className="font-medium text-primary hover:underline text-left cursor-pointer"
+          disabled={loadingCity}
+        >
+          {value as string}
+        </button>
+      ),
+    },
+    {
+      key: "native",
+      label: "Native Name",
+      render: (value: unknown) => (
+        <span className="text-muted-foreground">{(value as string) || "—"}</span>
+      ),
+    },
+    {
+      key: "state_code",
+      label: "State",
+      render: (value: unknown) => (
+        <span className="font-mono text-sm">{(value as string) || "—"}</span>
+      ),
+    },
+    {
+      key: "country_code",
+      label: "Country",
+      render: (value: unknown) => (
+        <span className="font-mono text-sm font-medium">
+          {(value as string) || "—"}
+        </span>
+      ),
+    },
+  ]
+
+  const tableData = initialData.map((city) => ({
+    id: city.id,
+    name: city.name,
+    native: city.native,
+    state_code: city.state_code,
+    country_code: city.country_code,
+  }))
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Cities</h1>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="relative flex gap-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search city..."
+                className="pl-10 w-64 bg-background border-border"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+              />
+            </div>
+            <Button size="icon" onClick={handleSearch} disabled={isPending}>
+              <Search className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <Combobox
+            options={countryOptions}
+            value={countryFilter}
+            onValueChange={handleCountryChange}
+            placeholder="Country"
+            searchPlaceholder="Search country..."
+            emptyText="No country found."
+          />
+
+          <Combobox
+            options={stateOptions}
+            value={stateFilter}
+            onValueChange={handleStateChange}
+            placeholder="State"
+            searchPlaceholder="Search state..."
+            emptyText="No state found."
+          />
+        </div>
+      </div>
+
+      <div className={isPending ? "opacity-60 pointer-events-none" : ""}>
+        <DataTable
+          columns={columns}
+          data={tableData as Record<string, unknown>[]}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </div>
+
+      <Dialog open={!!selectedCity} onOpenChange={() => setSelectedCity(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl">{selectedCity?.name}</DialogTitle>
+          </DialogHeader>
+          {selectedCity && (
+            <div className="grid grid-cols-2 gap-4 py-4">
+              <DetailItem label="Native Name" value={selectedCity.native} />
+              <DetailItem label="State" value={selectedCity.state_code} />
+              <DetailItem label="Country" value={selectedCity.country_code} />
+              <DetailItem 
+                label="Coordinates" 
+                value={selectedCity.latitude && selectedCity.longitude 
+                  ? `${selectedCity.latitude}, ${selectedCity.longitude}` 
+                  : null} 
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
+
+function DetailItem({ label, value }: { label: string; value: string | null | undefined }) {
+  return (
+    <div>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="font-medium">{value || "—"}</p>
+    </div>
+  )
+}
