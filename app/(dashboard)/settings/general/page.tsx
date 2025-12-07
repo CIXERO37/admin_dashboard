@@ -28,7 +28,7 @@ export default function SettingsGeneralPage() {
                 <Label htmlFor="appName" className="text-foreground">
                   Application Name
                 </Label>
-                <Input id="appName" defaultValue="Gameforsmart Admin" className="bg-background border-border" />
+                <Input id="appName" defaultValue="Gameforsmart" className="bg-background border-border" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="timezone" className="text-foreground">

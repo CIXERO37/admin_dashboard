@@ -3,6 +3,7 @@
 import type React from "react"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import {
@@ -25,11 +26,10 @@ import {
   Sliders,
   Shield,
   ChevronDown,
-  Command,
   PanelLeftClose,
   PanelLeft,
 } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
@@ -111,10 +111,7 @@ export function AppSidebar() {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
   const [openMenus, setOpenMenus] = useState<string[]>([])
-
-  const toggleMenu = (title: string) => {
-    setOpenMenus((prev) => (prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title]))
-  }
+  const [mounted, setMounted] = useState(false)
 
   const isActive = (href: string) => {
     if (href === "/dashboard") return pathname === "/dashboard"
@@ -129,6 +126,40 @@ export function AppSidebar() {
     ) ?? false
   }
 
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+    
+    const activeMenus: string[] = []
+    
+    navigation.forEach((item) => {
+      if (item.children) {
+        const childActive = item.children.some((child) => 
+          pathname === child.href || 
+          pathname.startsWith(child.href + "/") ||
+          (child.children && child.children.some(grandChild => pathname === grandChild.href))
+        )
+        if (childActive) {
+          activeMenus.push(item.title)
+          item.children.forEach((child) => {
+            if (child.children?.some(grandChild => pathname === grandChild.href || pathname.startsWith(grandChild.href + "/"))) {
+              activeMenus.push(child.title)
+            }
+          })
+        }
+      }
+    })
+    
+    setOpenMenus(activeMenus)
+  }, [pathname, mounted])
+
+  const toggleMenu = (title: string) => {
+    setOpenMenus((prev) => (prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title]))
+  }
+
   return (
     <aside
       className={cn(
@@ -140,16 +171,12 @@ export function AppSidebar() {
       <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
         {!collapsed && (
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Command className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="font-semibold text-sidebar-foreground">Gameforsmart Admin</span>
+            <Image src="/icons/icon-32x32.png" alt="Gameforsmart" width={32} height={32} />
+            <span className="font-semibold text-sidebar-foreground">Gameforsmart</span>
           </Link>
         )}
         {collapsed && (
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary mx-auto">
-            <Command className="h-4 w-4 text-primary-foreground" />
-          </div>
+          <Image src="/icons/icon-32x32.png" alt="Gameforsmart" width={32} height={32} className="mx-auto" />
         )}
       </div>
 
@@ -159,9 +186,31 @@ export function AppSidebar() {
           const Icon = item.icon
           const active = isActive(item.href)
           const hasChildren = item.children && item.children.length > 0
-          const isOpen = openMenus.includes(item.title) || isChildActive(item)
+          const isOpen = mounted ? openMenus.includes(item.title) : false
 
           if (hasChildren && !collapsed) {
+            // Render static button before mount to avoid hydration mismatch
+            if (!mounted) {
+              return (
+                <div key={item.title}>
+                  <button
+                    className={cn(
+                      "flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                      active || isChildActive(item)
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                        : "text-sidebar-foreground hover:bg-secondary hover:text-foreground",
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </div>
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+                </div>
+              )
+            }
+
             return (
               <Collapsible key={item.title} open={isOpen} onOpenChange={() => toggleMenu(item.title)}>
                 <CollapsibleTrigger asChild>
@@ -196,8 +245,7 @@ export function AppSidebar() {
                   {item.children?.map((child) => {
                     const ChildIcon = child.icon
                     const hasNestedChildren = child.children && child.children.length > 0
-                    const isNestedOpen = openMenus.includes(child.title) || 
-                      child.children?.some(grandChild => pathname === grandChild.href)
+                    const isNestedOpen = mounted ? openMenus.includes(child.title) : false
 
                     if (hasNestedChildren) {
                       return (

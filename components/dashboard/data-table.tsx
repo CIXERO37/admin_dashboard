@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import { useState } from "react";
 
 import {
   Table,
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { Search } from "lucide-react";
 
 interface Column {
   key: string;
@@ -38,6 +40,18 @@ export function DataTable({
   onPageChange,
 }: DataTableProps) {
   const showPagination = totalPages > 1 && onPageChange;
+  const [editingEllipsis, setEditingEllipsis] = useState<string | null>(null);
+  const [jumpPage, setJumpPage] = useState("");
+
+  const handleJumpToPage = (e: React.FormEvent) => {
+    e.preventDefault();
+    const pageNum = parseInt(jumpPage, 10);
+    if (pageNum >= 1 && pageNum <= totalPages && onPageChange) {
+      onPageChange(pageNum);
+    }
+    setEditingEllipsis(null);
+    setJumpPage("");
+  };
 
   return (
     <div
@@ -145,13 +159,42 @@ export function DataTable({
 
                 return pages.map((page, index) => {
                   if (page === "...") {
+                    const ellipsisKey = `ellipsis-${index}`;
+                    
+                    if (editingEllipsis === ellipsisKey) {
+                      return (
+                        <form
+                          key={ellipsisKey}
+                          onSubmit={handleJumpToPage}
+                          className="relative"
+                        >
+                          <Search className="absolute left-1.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+                          <input
+                            type="number"
+                            min={1}
+                            max={totalPages}
+                            value={jumpPage}
+                            onChange={(e) => setJumpPage(e.target.value)}
+                            onBlur={() => {
+                              setEditingEllipsis(null);
+                              setJumpPage("");
+                            }}
+                            autoFocus
+                            className="w-14 h-9 pl-6 pr-1 text-sm text-center font-medium rounded-lg border border-primary bg-card text-foreground focus:outline-none focus:ring-1 focus:ring-primary [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                        </form>
+                      );
+                    }
+
                     return (
-                      <span
-                        key={`ellipsis-${index}`}
-                        className="w-9 h-9 flex items-center justify-center text-sm text-muted-foreground"
+                      <button
+                        key={ellipsisKey}
+                        onClick={() => setEditingEllipsis(ellipsisKey)}
+                        className="w-9 h-9 flex items-center justify-center text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/80 rounded-lg border border-transparent hover:border-border transition-colors cursor-pointer"
+                        title="Click to jump to page"
                       >
                         ...
-                      </span>
+                      </button>
                     );
                   }
 

@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   title: "Gameforsmart Dashboard",
   description: "Modern Admin Panel for SaaS Management",
   generator: "v0.app",
+  icons: {
+    icon: "/icons/icon-32x32.png",
+    apple: "/icons/icon-192x192.png",
+  },
 }
 
 export default function RootLayout({
