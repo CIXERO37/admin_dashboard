@@ -28,7 +28,7 @@ interface UserGrowthData {
 export function useDashboardStats() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [profiles, setProfiles] = useState<{ role: string | null; is_blocked: boolean | null; last_active: string | null; fullname: string | null; username: string | null; email: string | null }[]>([])
+  const [profiles, setProfiles] = useState<Record<string, unknown>[]>([])
   const [quizzes, setQuizzes] = useState<{ id: string; created_at: string | null; title: string | null }[]>([])
   const [reports, setReports] = useState<{ id: string; status: string | null; created_at: string | null; title: string | null; reporter?: { fullname: string | null; username: string | null } | null }[]>([])
 
@@ -44,7 +44,7 @@ export function useDashboardStats() {
         const [profilesRes, quizzesRes, reportsRes] = await Promise.all([
           supabase
             .from("profiles")
-            .select("role, is_blocked, last_active, fullname, username, email")
+            .select("*")
             .abortSignal(controller.signal),
           supabase
             .from("quizzes")
@@ -86,9 +86,12 @@ export function useDashboardStats() {
 
   const stats = useMemo<DashboardStats>(() => {
     const totalUsers = profiles.length
-    const totalAdmins = profiles.filter((p) => p.role === "admin" || p.role === "Admin").length
+    const totalAdmins = profiles.filter((p) => {
+      const role = p.role as string | null
+      return role === "admin" || role === "Admin"
+    }).length
     const activeUsers = profiles.filter((p) => !p.is_blocked).length
-    const blockedUsers = profiles.filter((p) => p.is_blocked).length
+    const blockedUsers = profiles.filter((p) => p.is_blocked === true).length
     const totalQuizzes = quizzes.length
     const pendingReports = reports.filter((r) => r.status === "pending" || r.status === "Pending").length
 
@@ -134,14 +137,14 @@ export function useDashboardStats() {
     // Get recent users
     profiles
       .filter((p) => p.last_active)
-      .sort((a, b) => new Date(b.last_active || 0).getTime() - new Date(a.last_active || 0).getTime())
+      .sort((a, b) => new Date((b.last_active as string) || 0).getTime() - new Date((a.last_active as string) || 0).getTime())
       .slice(0, 2)
       .forEach((profile, index) => {
         activities.push({
           id: `user-${index}`,
           action: "User active",
-          user: profile.fullname || profile.username || profile.email || "Unknown",
-          time: formatTimeAgo(profile.last_active),
+          user: (profile.fullname as string) || (profile.username as string) || (profile.email as string) || "Unknown",
+          time: formatTimeAgo(profile.last_active as string | null),
           type: "user",
         })
       })
@@ -161,7 +164,7 @@ export function useDashboardStats() {
 
       const usersInMonth = profiles.filter((p) => {
         if (!p.last_active) return false
-        const activeDate = new Date(p.last_active)
+        const activeDate = new Date(p.last_active as string)
         const activeMonthKey = `${activeDate.getFullYear()}-${String(activeDate.getMonth() + 1).padStart(2, "0")}`
         return activeMonthKey === monthKey
       }).length
