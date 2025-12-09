@@ -12,6 +12,7 @@ import { useState, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 
 import { DataTable, StatusBadge } from "@/components/dashboard/data-table"
+import { getAvatarUrl } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -343,7 +344,7 @@ export function UserTable({
   const tableData = initialData.map((profile) => ({
     id: profile.id,
     account: profile.id,
-    avatar: profile.avatar_url ?? undefined,
+    avatar: getAvatarUrl(profile.avatar_url),
     fullname: profile.fullname,
     username: profile.username ?? "—",
     email: profile.email,

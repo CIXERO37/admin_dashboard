@@ -12,6 +12,7 @@ import { useState, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 
 import { DataTable } from "@/components/dashboard/data-table"
+import { getAvatarUrl } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -188,7 +189,7 @@ export function QuizTable({
         return (
           <div className="flex items-center gap-2">
             <Avatar className="h-8 w-8 flex-shrink-0">
-              <AvatarImage src={creator.avatar_url ?? undefined} />
+              <AvatarImage src={getAvatarUrl(creator.avatar_url)} />
               <AvatarFallback>{creator.fullname?.[0] ?? "?"}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col min-w-0">

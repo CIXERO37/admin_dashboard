@@ -26,6 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { logout } from "@/app/login/actions";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { getAvatarUrl } from "@/lib/utils";
 import Link from "next/link";
 
 export function Header() {
@@ -116,7 +117,7 @@ export function Header() {
               ) : (
                 <>
                   <Avatar className="h-8 w-8">
-                    {user?.avatar_url && <AvatarImage src={user.avatar_url} alt={displayName} />}
+                    <AvatarImage src={getAvatarUrl(user?.avatar_url)} alt={displayName} />
                     <AvatarFallback className="bg-primary text-primary-foreground">
                       {getInitials(user?.fullname ?? null, user?.email ?? null)}
                     </AvatarFallback>
