@@ -37,7 +37,7 @@ interface NavChild {
   title: string
   href: string
   icon: React.ElementType
-  children?: { title: string; href: string; icon: React.ElementType }[]
+  children?: NavChild[]
 }
 
 interface NavItem {
@@ -93,7 +93,10 @@ const navigation: NavItem[] = [
     title: "Administrator",
     href: "/administrator",
     icon: UserCog,
-    children: [{ title: "User", href: "/administrator/user", icon: User }],
+    children: [
+      { title: "User", href: "/administrator/user", icon: User },
+      { title: "Group", href: "/administrator/group", icon: Users },
+    ],
   },
   {
     title: "Settings",
