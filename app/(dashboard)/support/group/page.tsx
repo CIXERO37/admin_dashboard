@@ -17,7 +17,7 @@ export default async function GroupPage({ searchParams }: PageProps) {
 
   const { data, totalPages } = await fetchGroups({
     page,
-    limit: 12,
+    limit: 8,
     search,
     status,
   })

@@ -11,8 +11,9 @@ import {
 } from "lucide-react"
 import { useState, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import Link from "next/link"
 
-import { getAvatarUrl } from "@/lib/utils"
+import { cn, getAvatarUrl } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
@@ -77,11 +78,10 @@ function getLocation(group: Group): string {
 
 interface GroupCardProps {
   group: Group & { member_count: number }
-  onViewDetail: (group: Group & { member_count: number }) => void
   onDelete: (id: string, name: string) => void
 }
 
-function GroupCard({ group, onViewDetail, onDelete }: GroupCardProps) {
+function GroupCard({ group, onDelete }: GroupCardProps) {
   const name = group.name || "Unknown Group"
   const avatarUrl = group.avatar_url
   const coverUrl = getAvatarUrl(group.cover_url)
@@ -129,9 +129,11 @@ function GroupCard({ group, onViewDetail, onDelete }: GroupCardProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onViewDetail(group)} className="cursor-pointer">
-                <Eye className="h-4 w-4 mr-2" />
-                Detail
+              <DropdownMenuItem asChild className="cursor-pointer">
+                <Link href={`/support/group/${group.id}`}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Detail
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => onDelete(group.id, name)} className="cursor-pointer text-destructive focus:text-destructive">
@@ -167,10 +169,7 @@ function GroupCard({ group, onViewDetail, onDelete }: GroupCardProps) {
               {creatorInitials}
             </AvatarFallback>
           </Avatar>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-foreground truncate">{creatorName}</p>
-            <p className="text-xs text-muted-foreground truncate">{creatorEmail}</p>
-          </div>
+          <p className="text-sm font-medium text-foreground truncate">{creatorName}</p>
         </div>
       </div>
 
@@ -191,10 +190,12 @@ function GroupCard({ group, onViewDetail, onDelete }: GroupCardProps) {
         <Button 
           className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium" 
           size="sm"
-          onClick={() => onViewDetail(group)}
+          asChild
         >
-          <Eye className="h-4 w-4" />
-          Detail
+          <Link href={`/support/group/${group.id}`}>
+            <Eye className="h-4 w-4" />
+            Detail
+          </Link>
         </Button>
       </div>
     </div>
@@ -214,14 +215,6 @@ export function GroupTable({
   const [searchInput, setSearchInput] = useState(searchQuery)
   const { toast } = useToast()
 
-  const [viewDialog, setViewDialog] = useState<{
-    open: boolean
-    group: (Group & { member_count: number }) | null
-  }>({
-    open: false,
-    group: null,
-  })
-
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean
     id: string
@@ -233,10 +226,6 @@ export function GroupTable({
     groupName: "",
     confirmText: "",
   })
-
-  const openViewDialog = (group: Group & { member_count: number }) => {
-    setViewDialog({ open: true, group })
-  }
 
   const openDeleteDialog = (id: string, groupName: string) => {
     setDeleteDialog({ open: true, id, groupName, confirmText: "" })
@@ -300,20 +289,21 @@ export function GroupTable({
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="relative flex gap-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search group..."
-                className="pl-10 w-64 bg-background border-border"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-              />
-            </div>
-            <Button size="icon" onClick={handleSearch} disabled={isPending}>
-              <Search className="h-4 w-4" />
-            </Button>
+          <div className="relative">
+            <Input
+              placeholder="Search group..."
+              className="pr-10 w-64 bg-background border-border"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <button
+              onClick={handleSearch}
+              disabled={isPending}
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 flex items-center justify-center rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+            >
+              <Search className="h-3.5 w-3.5" />
+            </button>
           </div>
 
           <Select value={statusFilter} onValueChange={(value) => updateUrl({ status: value, page: 1 })}>
@@ -340,7 +330,6 @@ export function GroupTable({
               <GroupCard 
                 key={group.id} 
                 group={group} 
-                onViewDetail={openViewDialog}
                 onDelete={openDeleteDialog}
               />
             ))}
@@ -359,163 +348,93 @@ export function GroupTable({
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage <= 1 || isPending}
-          >
-            Previous
-          </Button>
-          <div className="flex items-center gap-1">
-            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-              let page = i + 1
-              if (totalPages > 5) {
-                if (currentPage > 3) page = currentPage - 2 + i
-                if (currentPage > totalPages - 2) page = totalPages - 4 + i
-              }
-              return (
-                <Button
-                  key={page}
-                  variant={page === currentPage ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => handlePageChange(page)}
-                  disabled={isPending}
-                  className="w-9 h-9"
-                >
-                  {page}
-                </Button>
-              )
-            })}
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage >= totalPages || isPending}
-          >
-            Next
-          </Button>
+      <div className="flex items-center justify-between rounded-xl border border-border bg-card px-6 py-4">
+        <div className="text-sm text-muted-foreground">
+          Page <span className="font-medium text-foreground">{currentPage}</span> of{" "}
+          <span className="font-medium text-foreground">{totalPages || 1}</span>
         </div>
-      )}
 
-      {/* View Detail Dialog */}
-      <Dialog open={viewDialog.open} onOpenChange={(open) => setViewDialog((prev) => ({ ...prev, open }))}>
-        <DialogContent className="max-w-md p-0 overflow-hidden">
-          <DialogTitle className="sr-only">Group Detail</DialogTitle>
-          {viewDialog.group && (() => {
-            const group = viewDialog.group
-            const coverUrl = getAvatarUrl(group.cover_url)
-            const status = getGroupStatus(group)
-            return (
-              <>
-                {/* Cover Image Header */}
-                <div 
-                  className="relative h-32 bg-gradient-to-br from-primary/30 via-primary/20 to-primary/10"
-                  style={coverUrl ? {
-                    backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4)), url(${coverUrl})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                  } : undefined}
-                >
-                  {/* Status Badge */}
-                  <div className="absolute top-3 left-3">
-                    <Badge
-                      className={`text-xs font-semibold ${
-                        status.variant === "secondary"
-                          ? "bg-green-500 text-white border-green-500"
-                          : "bg-black/60 text-white border-white/30"
-                      }`}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1 || isPending}
+              className={cn(
+                "px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors",
+                currentPage === 1 || isPending
+                  ? "border-border bg-secondary/50 text-muted-foreground cursor-not-allowed"
+                  : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer"
+              )}
+            >
+              Previous
+            </button>
+
+            <div className="flex items-center gap-1">
+              {(() => {
+                const pages: (number | string)[] = []
+
+                if (totalPages <= 7) {
+                  for (let i = 1; i <= totalPages; i++) {
+                    pages.push(i)
+                  }
+                } else {
+                  pages.push(1)
+
+                  if (currentPage <= 3) {
+                    pages.push(2, 3, 4, "...", totalPages)
+                  } else if (currentPage >= totalPages - 2) {
+                    pages.push("...", totalPages - 3, totalPages - 2, totalPages - 1, totalPages)
+                  } else {
+                    pages.push("...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages)
+                  }
+                }
+
+                return pages.map((page, index) => {
+                  if (page === "...") {
+                    return (
+                      <span
+                        key={`ellipsis-${index}`}
+                        className="w-9 h-9 flex items-center justify-center text-sm text-muted-foreground"
+                      >
+                        ...
+                      </span>
+                    )
+                  }
+
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page as number)}
+                      disabled={isPending}
+                      className={cn(
+                        "w-9 h-9 text-sm font-medium rounded-lg border transition-colors cursor-pointer",
+                        currentPage === page
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-card text-foreground hover:bg-secondary/80"
+                      )}
                     >
-                      {status.label}
-                    </Badge>
-                  </div>
-                  
-                  {/* Avatar - positioned at bottom overlapping */}
-                  <div className="absolute -bottom-10 left-4">
-                    <Avatar className="h-20 w-20 border-4 border-background shadow-lg">
-                      <AvatarImage src={getAvatarUrl(group.avatar_url)} alt={group.name} />
-                      <AvatarFallback className="text-xl font-bold bg-primary text-primary-foreground">
-                        {group.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
-                </div>
+                      {page}
+                    </button>
+                  )
+                })
+              })()}
+            </div>
 
-                {/* Content */}
-                <div className="pt-12 px-4 pb-4">
-                  {/* Group Name & Location */}
-                  <div className="mb-4">
-                    <h2 className="text-xl font-bold text-foreground">{group.name}</h2>
-                    <p className="text-sm text-muted-foreground">{getLocation(group)}</p>
-                  </div>
-
-                  {/* Description */}
-                  {group.description && (
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-3">{group.description}</p>
-                  )}
-
-                  {/* Stats Row */}
-                  <div className="flex items-center gap-4 mb-4 pb-4 border-b">
-                    <div className="flex items-center gap-2">
-                      <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Users className="h-4 w-4 text-primary" />
-                      </div>
-                      <div>
-                        <p className="text-lg font-semibold">{group.member_count}</p>
-                        <p className="text-xs text-muted-foreground">Members</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Calendar className="h-4 w-4 text-primary" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold">{formatDate(group.created_at)}</p>
-                        <p className="text-xs text-muted-foreground">Created</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Invite Code */}
-                  <div className="mb-4 p-3 bg-muted/50 rounded-lg">
-                    <p className="text-xs text-muted-foreground mb-1">Invite Code</p>
-                    <code className="text-sm font-mono font-semibold text-foreground">{group.invite_code}</code>
-                  </div>
-
-                  {/* Creator */}
-                  <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                    <Avatar className="h-10 w-10 border border-border">
-                      <AvatarImage src={getAvatarUrl(group.creator?.avatar_url)} />
-                      <AvatarFallback className="text-sm">
-                        {(group.creator?.fullname || "?").slice(0, 1)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{group.creator?.fullname || "Unknown"}</p>
-                      <p className="text-xs text-muted-foreground truncate">{group.creator?.email || "-"}</p>
-                    </div>
-                    <Badge variant="outline" className="text-xs">Creator</Badge>
-                  </div>
-                </div>
-
-                {/* Footer */}
-                <div className="px-4 pb-4">
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => setViewDialog((prev) => ({ ...prev, open: false }))}
-                  >
-                    Close
-                  </Button>
-                </div>
-              </>
-            )
-          })()}
-        </DialogContent>
-      </Dialog>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages || isPending}
+              className={cn(
+                "px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors",
+                currentPage === totalPages || isPending
+                  ? "border-border bg-secondary/50 text-muted-foreground cursor-not-allowed"
+                  : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer"
+              )}
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Delete Dialog */}
       <Dialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog((prev) => ({ ...prev, open, confirmText: "" }))}>
