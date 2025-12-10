@@ -29,6 +29,7 @@ interface DataTableProps {
   currentPage?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
+  onRowClick?: (row: Record<string, unknown>) => void;
 }
 
 export function DataTable({
@@ -38,6 +39,7 @@ export function DataTable({
   currentPage = 1,
   totalPages = 1,
   onPageChange,
+  onRowClick,
 }: DataTableProps) {
   const showPagination = totalPages > 1 && onPageChange;
   const [editingEllipsis, setEditingEllipsis] = useState<string | null>(null);
@@ -87,7 +89,11 @@ export function DataTable({
             data.map((row, rowIndex) => (
               <TableRow
                 key={rowIndex}
-                className="border-border transition-colors hover:bg-secondary/60"
+                className={cn(
+                  "border-border transition-colors hover:bg-secondary/60",
+                  onRowClick && "cursor-pointer"
+                )}
+                onClick={() => onRowClick?.(row)}
               >
                 {columns.map((column) => (
                   <TableCell key={column.key} className="text-foreground">
