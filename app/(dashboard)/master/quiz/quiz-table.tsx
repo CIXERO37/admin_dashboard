@@ -4,8 +4,6 @@ import {
   Search,
   SlidersHorizontal,
   ChevronDown,
-  MoreVertical,
-  Trash2,
 } from "lucide-react"
 import { format } from "date-fns"
 import { useState, useTransition } from "react"
@@ -40,11 +38,16 @@ import {
 } from "@/components/ui/dialog"
 import { useToast } from "@/components/ui/use-toast"
 import { Label } from "@/components/ui/label"
-import { type Quiz, updateQuizVisibility, deleteQuizAction } from "./actions"
+import { type Quiz, updateQuizVisibility, blockQuizAction } from "./actions"
 
 const visibilityColors: Record<string, string> = {
   Publik: "bg-[var(--success)]/20 text-[var(--success)] border-[var(--success)]/30",
   Private: "bg-[var(--warning)]/20 text-[var(--warning)] border-[var(--warning)]/30",
+}
+
+const statusColors: Record<string, string> = {
+  Active: "bg-blue-500/20 text-blue-500 border-blue-500/30",
+  Block: "bg-red-500/20 text-red-500 border-red-500/30",
 }
 
 interface QuizTableProps {
@@ -87,7 +90,7 @@ export function QuizTable({
     quizTitle: "",
   })
 
-  const [deleteDialog, setDeleteDialog] = useState<{
+  const [blockDialog, setBlockDialog] = useState<{
     open: boolean
     id: string
     quizTitle: string
@@ -153,21 +156,21 @@ export function QuizTable({
     setConfirmDialog((prev) => ({ ...prev, open: false }))
   }
 
-  const openDeleteDialog = (id: string, quizTitle: string) => {
-    setDeleteDialog({ open: true, id, quizTitle, confirmText: "" })
+  const openBlockDialog = (id: string, quizTitle: string) => {
+    setBlockDialog({ open: true, id, quizTitle, confirmText: "" })
   }
 
-  const handleDeleteQuiz = async () => {
-    if (deleteDialog.confirmText !== "Delete") return
+  const handleBlockQuiz = async () => {
+    if (blockDialog.confirmText !== "Block") return
 
-    const { error } = await deleteQuizAction(deleteDialog.id)
+    const { error } = await blockQuizAction(blockDialog.id)
     if (error) {
-      toast({ title: "Error", description: "Gagal menghapus quiz", variant: "destructive" })
+      toast({ title: "Error", description: "Gagal memblokir quiz", variant: "destructive" })
     } else {
-      toast({ title: "Berhasil", description: "Quiz berhasil dihapus" })
+      toast({ title: "Berhasil", description: "Quiz berhasil diblokir" })
       router.refresh()
     }
-    setDeleteDialog((prev) => ({ ...prev, open: false, confirmText: "" }))
+    setBlockDialog((prev) => ({ ...prev, open: false, confirmText: "" }))
   }
 
   const columns = [
@@ -184,7 +187,7 @@ export function QuizTable({
       key: "creator",
       label: "Creator",
       render: (value: unknown) => {
-        const creator = value as { email: string; fullname: string; avatar_url: string } | null
+        const creator = value as { username: string; fullname: string; avatar_url: string } | null
         if (!creator) return <span className="text-muted-foreground">-</span>
         return (
           <div className="flex items-center gap-2">
@@ -196,8 +199,8 @@ export function QuizTable({
               <span className="text-sm font-medium truncate max-w-[120px]" title={creator.fullname}>
                 {creator.fullname}
               </span>
-              <span className="text-xs text-muted-foreground truncate max-w-[120px]" title={creator.email}>
-                {creator.email}
+              <span className="text-xs text-muted-foreground truncate max-w-[120px]" title={creator.username}>
+                @{creator.username}
               </span>
             </div>
           </div>
@@ -252,23 +255,28 @@ export function QuizTable({
     },
     { key: "createdAt", label: "Created" },
     {
-      key: "action",
-      label: "Action",
-      render: (_: unknown, row: Record<string, unknown>) => {
-        const quizTitle = row.title as string
+      key: "status",
+      label: "Status",
+      render: (value: unknown, row: Record<string, unknown>) => {
+        const status = value as string
         const id = row.id as string
+        const quizTitle = row.title as string
         return (
           <DropdownMenu>
             <DropdownMenuTrigger className="focus:outline-none">
-              <div className="cursor-pointer hover:opacity-80 p-1 rounded hover:bg-muted">
-                <MoreVertical className="h-4 w-4 text-muted-foreground" />
+              <div className="cursor-pointer hover:opacity-80 flex items-center">
+                <Badge variant="outline" className={statusColors[status] ?? "bg-secondary text-secondary-foreground"}>
+                  {status}
+                </Badge>
+                <ChevronDown className="ml-1.5 h-3 w-3 text-muted-foreground/50" />
               </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => openDeleteDialog(id, quizTitle)} className="cursor-pointer text-destructive focus:text-destructive">
-                <Trash2 className="h-4 w-4 mr-2" />
-                Hapus Quiz
-              </DropdownMenuItem>
+            <DropdownMenuContent align="start">
+              {status === "Active" && (
+                <DropdownMenuItem onClick={() => openBlockDialog(id, quizTitle)} className="cursor-pointer text-red-500 focus:text-red-500">
+                  Block
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         )
@@ -285,6 +293,7 @@ export function QuizTable({
     language: quiz.language ?? "ID",
     difficulty: quiz.is_public ? "Publik" : "Private",
     createdAt: quiz.created_at ? format(new Date(quiz.created_at), "dd MMM yyyy") : "-",
+    status: quiz.status === "block" ? "Block" : "Active",
   }))
 
   return (
@@ -341,9 +350,11 @@ export function QuizTable({
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Visibility</SelectItem>
+              <SelectItem value="all">All</SelectItem>
               <SelectItem value="publik">Publik</SelectItem>
               <SelectItem value="private">Private</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="block">Block</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -356,6 +367,7 @@ export function QuizTable({
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={handlePageChange}
+          onRowClick={(row) => router.push(`/master/quiz/${row.id}`)}
         />
       </div>
 
@@ -375,28 +387,28 @@ export function QuizTable({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog((prev) => ({ ...prev, open, confirmText: "" }))}>
+      <Dialog open={blockDialog.open} onOpenChange={(open) => setBlockDialog((prev) => ({ ...prev, open, confirmText: "" }))}>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle className="text-destructive">Hapus Quiz</DialogTitle>
+            <DialogTitle className="text-destructive">Block Quiz</DialogTitle>
             <DialogDescription>
-              Anda akan menghapus quiz <strong>{deleteDialog.quizTitle}</strong>. Tindakan ini tidak dapat dibatalkan.
+              Anda akan memblokir quiz <strong>{blockDialog.quizTitle}</strong>. Status quiz akan berubah menjadi block.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-4">
-            <Label htmlFor="confirmDelete">
-              Ketik <strong className="text-destructive">Delete</strong> untuk mengkonfirmasi
+            <Label htmlFor="confirmBlock">
+              Ketik <strong className="text-destructive">Block</strong> untuk mengkonfirmasi
             </Label>
             <Input
-              id="confirmDelete"
-              value={deleteDialog.confirmText}
-              onChange={(e) => setDeleteDialog((prev) => ({ ...prev, confirmText: e.target.value }))}
-              placeholder="Ketik 'Delete' di sini"
+              id="confirmBlock"
+              value={blockDialog.confirmText}
+              onChange={(e) => setBlockDialog((prev) => ({ ...prev, confirmText: e.target.value }))}
+              placeholder="Ketik 'Block' di sini"
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialog((prev) => ({ ...prev, open: false, confirmText: "" }))}>Batal</Button>
-            <Button variant="destructive" onClick={handleDeleteQuiz} disabled={deleteDialog.confirmText !== "Delete"}>Hapus Quiz</Button>
+            <Button variant="outline" onClick={() => setBlockDialog((prev) => ({ ...prev, open: false, confirmText: "" }))}>Batal</Button>
+            <Button variant="destructive" onClick={handleBlockQuiz} disabled={blockDialog.confirmText !== "Block"}>Block Quiz</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
