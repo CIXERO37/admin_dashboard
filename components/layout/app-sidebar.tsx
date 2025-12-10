@@ -60,6 +60,7 @@ const navigation: NavItem[] = [
     children: [
       { title: "Report", href: "/support/report", icon: FileText },
       { title: "Quiz", href: "/support/quiz", icon: HelpCircle },
+      { title: "Group", href: "/support/group", icon: Users },
     ],
   },
   {
@@ -95,7 +96,6 @@ const navigation: NavItem[] = [
     icon: UserCog,
     children: [
       { title: "User", href: "/administrator/user", icon: User },
-      { title: "Group", href: "/administrator/group", icon: Users },
     ],
   },
   {
@@ -173,9 +173,8 @@ export function AppSidebar() {
       {/* Header */}
       <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
         {!collapsed && (
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <Image src="/icons/icon-32x32.png" alt="Gameforsmart" width={32} height={32} />
-            <span className="font-semibold text-sidebar-foreground">Gameforsmart</span>
+          <Link href="/dashboard" className="flex items-center">
+            <Image src="/icons/gameforsmartlogo.webp" alt="Gameforsmart" width={180} height={40} className="object-contain" />
           </Link>
         )}
         {collapsed && (
