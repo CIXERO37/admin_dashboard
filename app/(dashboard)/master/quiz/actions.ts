@@ -6,13 +6,16 @@ import { revalidatePath } from "next/cache"
 export interface Quiz {
   id: string
   title: string
+  description: string | null
   category: string | null
   questions: unknown[] | null
   is_hidden: boolean | null
   is_public: boolean | null
   created_at: string | null
   language: string | null
+  status: string | null
   creator?: {
+    username: string | null
     email: string | null
     fullname: string | null
     avatar_url: string | null
@@ -46,7 +49,7 @@ export async function fetchQuizzes({
 
   let query = supabase
     .from("quizzes")
-    .select("id, title, category, questions, is_hidden, is_public, created_at, language, creator:profiles!creator_id(email, fullname, avatar_url)", { count: "exact" })
+    .select("id, title, category, questions, is_hidden, is_public, created_at, language, status, creator:profiles!creator_id(email, username, fullname, avatar_url)", { count: "exact" })
 
   if (search) {
     query = query.or(`title.ilike.%${search}%,category.ilike.%${search}%`)
@@ -57,7 +60,13 @@ export async function fetchQuizzes({
   }
 
   if (visibility && visibility !== "all") {
-    query = query.eq("is_public", visibility === "publik")
+    if (visibility === "publik" || visibility === "private") {
+      query = query.eq("is_public", visibility === "publik")
+    } else if (visibility === "active") {
+      query = query.or("status.is.null,status.neq.block")
+    } else if (visibility === "block") {
+      query = query.eq("status", "block")
+    }
   }
 
   const { data, count, error } = await query
@@ -101,19 +110,36 @@ export async function updateQuizVisibility(id: string, isPublic: boolean) {
   return { error: null }
 }
 
-export async function deleteQuizAction(id: string) {
+export async function blockQuizAction(id: string) {
   const supabase = await getSupabaseServerClient()
 
   const { error } = await supabase
     .from("quizzes")
-    .delete()
+    .update({ status: "block" })
     .eq("id", id)
 
   if (error) {
-    console.error("Error deleting quiz:", error)
+    console.error("Error blocking quiz:", error)
     return { error: error.message }
   }
 
   revalidatePath("/master/quiz")
   return { error: null }
+}
+
+export async function fetchQuizById(id: string): Promise<{ data: Quiz | null; error: string | null }> {
+  const supabase = await getSupabaseServerClient()
+
+  const { data, error } = await supabase
+    .from("quizzes")
+    .select("id, title, description, category, questions, is_hidden, is_public, created_at, language, status, creator:profiles!creator_id(email, username, fullname, avatar_url)")
+    .eq("id", id)
+    .single()
+
+  if (error) {
+    console.error("Error fetching quiz:", error)
+    return { data: null, error: error.message }
+  }
+
+  return { data, error: null }
 }
