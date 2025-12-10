@@ -360,20 +360,21 @@ export function UserTable({
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="relative flex gap-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Cari pengguna..."
-                className="pl-10 w-64 bg-background border-border"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-              />
-            </div>
-            <Button size="icon" onClick={handleSearch} disabled={isPending}>
-              <Search className="h-4 w-4" />
-            </Button>
+          <div className="relative">
+            <Input
+              placeholder="Cari pengguna..."
+              className="pr-10 w-64 bg-background border-border"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <button
+              onClick={handleSearch}
+              disabled={isPending}
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 flex items-center justify-center rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+            >
+              <Search className="h-3.5 w-3.5" />
+            </button>
           </div>
 
           <Select value={roleFilter} onValueChange={(value) => updateUrl({ role: value, page: 1 })}>
