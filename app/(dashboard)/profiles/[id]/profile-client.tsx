@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Maximize2, X } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { ArrowLeft, Maximize2, X } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Dialog,
@@ -9,6 +10,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { getAvatarUrl } from "@/lib/utils"
+
+export function BackButton() {
+  const router = useRouter()
+
+  return (
+    <button
+      onClick={() => router.back()}
+      className="inline-flex p-2 rounded-lg border border-border bg-card hover:bg-secondary/60 transition-colors cursor-pointer"
+    >
+      <ArrowLeft className="h-5 w-5 text-muted-foreground" />
+    </button>
+  )
+}
 
 interface AvatarDialogProps {
   avatarUrl?: string | null

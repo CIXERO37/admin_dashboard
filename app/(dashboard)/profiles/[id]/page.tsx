@@ -1,11 +1,9 @@
 import { notFound } from "next/navigation"
 import { format } from "date-fns"
-import { ArrowLeft } from "lucide-react"
-import Link from "next/link"
 
 import { fetchProfileById } from "../actions"
 import { Badge } from "@/components/ui/badge"
-import { AvatarDialog, MapDialog } from "./profile-client"
+import { AvatarDialog, MapDialog, BackButton } from "./profile-client"
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -34,12 +32,7 @@ export default async function ProfileDetailPage({ params }: PageProps) {
 
   return (
     <div className="space-y-2 -mt-4">
-      <Link
-        href="/master/quiz"
-        className="inline-flex p-2 rounded-lg border border-border bg-card hover:bg-secondary/60 transition-colors"
-      >
-        <ArrowLeft className="h-5 w-5 text-muted-foreground" />
-      </Link>
+      <BackButton />
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="px-6 pt-4 pb-6 space-y-6">
           <div className="flex items-center gap-4">
