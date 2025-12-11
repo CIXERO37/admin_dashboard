@@ -8,6 +8,7 @@ import {
 import { format } from "date-fns"
 import { useState, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import Link from "next/link"
 
 import { DataTable } from "@/components/dashboard/data-table"
 import { getAvatarUrl } from "@/lib/utils"
@@ -186,23 +187,23 @@ export function QuizTable({
     {
       key: "creator",
       label: "Creator",
-      render: (value: unknown) => {
-        const creator = value as { username: string; fullname: string; avatar_url: string } | null
+      render: (value: unknown, row: Record<string, unknown>) => {
+        const creator = value as { id: string; username: string; fullname: string; avatar_url: string } | null
         if (!creator) return <span className="text-muted-foreground">-</span>
         return (
           <div className="flex items-center gap-2">
-            <Avatar className="h-8 w-8 flex-shrink-0">
-              <AvatarImage src={getAvatarUrl(creator.avatar_url)} />
-              <AvatarFallback>{creator.fullname?.[0] ?? "?"}</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col min-w-0">
+            <Link 
+              href={`/profiles/${creator.id}`}
+              className="flex flex-col min-w-0 hover:underline"
+              onClick={(e) => e.stopPropagation()}
+            >
               <span className="text-sm font-medium truncate max-w-[120px]" title={creator.fullname}>
                 {creator.fullname}
               </span>
               <span className="text-xs text-muted-foreground truncate max-w-[120px]" title={creator.username}>
                 @{creator.username}
               </span>
-            </div>
+            </Link>
           </div>
         )
       },
