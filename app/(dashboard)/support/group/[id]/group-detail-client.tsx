@@ -181,7 +181,7 @@ export function GroupDetailClient({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
+        <Button variant="ghost" size="icon" asChild className="cursor-pointer">
           <Link href="/support/group">
             <ArrowLeft className="h-5 w-5" />
           </Link>
@@ -253,7 +253,10 @@ export function GroupDetailClient({
 
             <div className="flex-1 p-4 bg-muted/50 rounded-lg">
               <p className="text-xs text-muted-foreground mb-1">Created by</p>
-              <div className="flex items-center gap-3">
+              <Link 
+                href={`/profiles/${group.creator_id}`}
+                className="flex items-center gap-3 hover:bg-muted rounded-lg p-1 -m-1 transition-colors"
+              >
                 <Avatar className="h-10 w-10 border border-border">
                   <AvatarImage src={getAvatarUrl(group.creator?.avatar_url)} />
                   <AvatarFallback className="text-sm">
@@ -261,9 +264,9 @@ export function GroupDetailClient({
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-medium">{group.creator?.fullname || "Unknown"}</p>
+                  <p className="font-medium hover:text-primary transition-colors">{group.creator?.fullname || "Unknown"}</p>
                 </div>
-              </div>
+              </Link>
             </div>
           </div>
         </div>
@@ -272,8 +275,8 @@ export function GroupDetailClient({
       {/* Tabs */}
       <Tabs value={currentTab} onValueChange={handleTabChange}>
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="members">Members ({totalCount})</TabsTrigger>
+          <TabsTrigger value="overview" className="cursor-pointer">Overview</TabsTrigger>
+          <TabsTrigger value="members" className="cursor-pointer">Members ({totalCount})</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -342,17 +345,17 @@ export function GroupDetailClient({
             </div>
 
             <Select value={roleFilter} onValueChange={(value) => updateUrl({ role: value, page: 1 })}>
-              <SelectTrigger className="w-36">
+              <SelectTrigger className="w-36 cursor-pointer">
                 <div className="flex items-center gap-2">
                   <SlidersHorizontal className="h-4 w-4" />
                   <SelectValue placeholder="Role" />
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Roles</SelectItem>
-                <SelectItem value="owner">Owner</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="member">Member</SelectItem>
+                <SelectItem value="all" className="cursor-pointer">All Roles</SelectItem>
+                <SelectItem value="owner" className="cursor-pointer">Owner</SelectItem>
+                <SelectItem value="admin" className="cursor-pointer">Admin</SelectItem>
+                <SelectItem value="member" className="cursor-pointer">Member</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -367,19 +370,22 @@ export function GroupDetailClient({
                   
                   return (
                     <div key={member.user_id || index} className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
-                      <div className="flex items-center gap-3">
+                      <Link 
+                        href={`/profiles/${member.user_id}`}
+                        className="flex items-center gap-3 hover:bg-muted rounded-lg p-1 -m-1 transition-colors"
+                      >
                         <Avatar className="h-10 w-10 border border-border">
                           <AvatarImage src={getAvatarUrl(member.avatar_url)} alt={name} />
                           <AvatarFallback className="text-sm">{initials}</AvatarFallback>
                         </Avatar>
                         <div>
                           <div className="flex items-center gap-2">
-                            <p className="font-medium">{name}</p>
+                            <p className="font-medium hover:text-primary transition-colors">{member.fullname || "Unknown"}</p>
                             {member.role === "owner" && <Crown className="h-4 w-4 text-yellow-500" />}
                           </div>
                           <p className="text-sm text-muted-foreground">@{member.username || "-"}</p>
                         </div>
-                      </div>
+                      </Link>
 
                       <div className="flex items-center gap-3">
                         <Badge variant="outline" className={getRoleBadgeStyle(member.role)}>
@@ -511,10 +517,10 @@ export function GroupDetailClient({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRemoveMemberDialog({ open: false, memberId: "", memberName: "" })}>
+            <Button variant="outline" className="cursor-pointer" onClick={() => setRemoveMemberDialog({ open: false, memberId: "", memberName: "" })}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleRemoveMember}>
+            <Button variant="destructive" className="cursor-pointer" onClick={handleRemoveMember}>
               Remove
             </Button>
           </DialogFooter>

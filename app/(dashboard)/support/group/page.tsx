@@ -1,4 +1,4 @@
-import { fetchGroups } from "./actions"
+import { fetchGroups, fetchCountries } from "./actions"
 import { GroupTable } from "./group-table"
 
 interface PageProps {
@@ -15,12 +15,16 @@ export default async function GroupPage({ searchParams }: PageProps) {
   const search = params.search || ""
   const status = params.status || "all"
 
-  const { data, totalPages } = await fetchGroups({
-    page,
-    limit: 8,
-    search,
-    status,
-  })
+  // Fetch groups and countries in parallel for faster loading
+  const [{ data, totalPages }, countries] = await Promise.all([
+    fetchGroups({
+      page,
+      limit: 8,
+      search,
+      status,
+    }),
+    fetchCountries(),
+  ])
 
   return (
     <GroupTable
@@ -29,6 +33,7 @@ export default async function GroupPage({ searchParams }: PageProps) {
       currentPage={page}
       searchQuery={search}
       statusFilter={status}
+      countries={countries}
     />
   )
 }
