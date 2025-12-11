@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ChevronDown } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -59,15 +59,15 @@ export function Combobox({
           <span className="truncate">
             {selectedOption ? selectedOption.label : placeholder}
           </span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-52 p-0" align="start">
         <Command>
           <CommandInput placeholder={searchPlaceholder} />
-          <CommandList style={{ direction: "rtl" }}>
-            <CommandEmpty style={{ direction: "ltr" }}>{emptyText}</CommandEmpty>
-            <CommandGroup style={{ direction: "ltr" }}>
+          <CommandList>
+            <CommandEmpty>{emptyText}</CommandEmpty>
+            <CommandGroup>
               {options.map((option) => (
                 <CommandItem
                   key={option.value}

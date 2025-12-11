@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Search,
@@ -8,24 +8,26 @@ import {
   Eye,
   Trash2,
   SlidersHorizontal,
-} from "lucide-react"
-import { useState, useTransition } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import Link from "next/link"
+  Filter,
+  RotateCcw,
+} from "lucide-react";
+import { useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
-import { cn, getAvatarUrl } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
+import { cn, getAvatarUrl } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -33,76 +35,102 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { useToast } from "@/components/ui/use-toast"
-import { type Group, deleteGroupAction } from "./actions"
+} from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
+import { Combobox } from "@/components/ui/combobox";
+import {
+  type Group,
+  type Country,
+  type State,
+  type City,
+  deleteGroupAction,
+} from "./actions";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 interface GroupTableProps {
-  initialData: Group[]
-  totalPages: number
-  currentPage: number
-  searchQuery: string
-  statusFilter?: string
+  initialData: Group[];
+  totalPages: number;
+  currentPage: number;
+  searchQuery: string;
+  statusFilter?: string;
+  countries: Country[];
 }
 
 function formatDate(dateString?: string | null): string {
-  if (!dateString) return "-"
-  const date = new Date(dateString)
+  if (!dateString) return "-";
+  const date = new Date(dateString);
   return date.toLocaleDateString("id-ID", {
     day: "numeric",
     month: "short",
     year: "numeric",
-  })
+  });
 }
 
-function getGroupStatus(group: Group): { label: string; variant: "default" | "secondary" | "outline" } {
-  const settings = group.settings as { status?: string } | null
-  
+function getGroupStatus(group: Group): {
+  label: string;
+  variant: "default" | "secondary" | "outline";
+} {
+  const settings = group.settings as { status?: string } | null;
+
   if (settings?.status === "private") {
-    return { label: "PRIVATE", variant: "outline" }
+    return { label: "PRIVATE", variant: "outline" };
   }
-  return { label: "PUBLIC", variant: "secondary" }
+  return { label: "PUBLIC", variant: "secondary" };
 }
 
 function getLocation(group: Group): string {
-  const settings = group.settings as { location?: string } | null
-  return settings?.location || "Indonesia"
+  const settings = group.settings as { location?: string } | null;
+  return settings?.location || "Indonesia";
 }
 
 interface GroupCardProps {
-  group: Group & { member_count: number }
-  onDelete: (id: string, name: string) => void
+  group: Group & { member_count: number };
+  onDelete: (id: string, name: string) => void;
 }
 
 function GroupCard({ group, onDelete }: GroupCardProps) {
-  const name = group.name || "Unknown Group"
-  const avatarUrl = group.avatar_url
-  const coverUrl = getAvatarUrl(group.cover_url)
-  const status = getGroupStatus(group)
-  const location = getLocation(group)
-  const initials = name.split(" ").map((word) => word[0]).join("").slice(0, 3).toUpperCase()
-  const creator = group.creator
-  const creatorName = creator?.fullname || "Unknown"
-  const creatorEmail = creator?.email || "-"
-  const creatorInitials = creatorName.split(" ").map((word) => word[0]).join("").slice(0, 2).toUpperCase()
+  const name = group.name || "Unknown Group";
+  const avatarUrl = group.avatar_url;
+  const coverUrl = getAvatarUrl(group.cover_url);
+  const status = getGroupStatus(group);
+  const location = getLocation(group);
+  const initials = name
+    .split(" ")
+    .map((word) => word[0])
+    .join("")
+    .slice(0, 3)
+    .toUpperCase();
+  const creator = group.creator;
+  const creatorName = creator?.fullname || "Unknown";
+  const creatorEmail = creator?.email || "-";
+  const creatorInitials = creatorName
+    .split(" ")
+    .map((word) => word[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl hover:border-primary/50">
       {/* Header with cover image or gradient fallback */}
-      <div 
+      <div
         className="relative p-4 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent"
-        style={coverUrl ? {
-          backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url(${coverUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        } : undefined}
+        style={
+          coverUrl
+            ? {
+                backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url(${coverUrl})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }
+            : undefined
+        }
       >
         {/* Status Badge Row */}
         <div className="flex items-center justify-between mb-3">
@@ -123,7 +151,9 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className={`h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity ${coverUrl ? "text-white hover:bg-white/20" : ""}`}
+                className={`h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity ${
+                  coverUrl ? "text-white hover:bg-white/20" : ""
+                }`}
               >
                 <MoreVertical className="h-4 w-4" />
               </Button>
@@ -136,7 +166,10 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onDelete(group.id, name)} className="cursor-pointer text-destructive focus:text-destructive">
+              <DropdownMenuItem
+                onClick={() => onDelete(group.id, name)}
+                className="cursor-pointer text-destructive focus:text-destructive"
+              >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete Group
               </DropdownMenuItem>
@@ -153,23 +186,49 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <h3 className={`font-bold text-base truncate leading-tight ${coverUrl ? "text-white" : "text-foreground"}`}>{name}</h3>
-            <p className={`text-xs truncate mt-0.5 ${coverUrl ? "text-white/80" : "text-muted-foreground"}`}>{location}</p>
+            <h3
+              className={`font-bold text-base truncate leading-tight ${
+                coverUrl ? "text-white" : "text-foreground"
+              }`}
+              title={name}
+            >
+              {name}
+            </h3>
+            <p
+              className={`text-xs truncate mt-0.5 ${
+                coverUrl ? "text-white/80" : "text-muted-foreground"
+              }`}
+              title={location}
+            >
+              {location}
+            </p>
           </div>
         </div>
       </div>
 
       {/* Creator Info */}
       <div className="flex-1 p-4 pt-3">
-        <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Created by</p>
+        <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">
+          Created by
+        </p>
         <div className="flex items-center gap-2">
           <Avatar className="h-8 w-8 border border-border">
-            <AvatarImage src={getAvatarUrl(creator?.avatar_url)} alt={creatorName} />
+            <AvatarImage
+              src={getAvatarUrl(creator?.avatar_url)}
+              alt={creatorName}
+            />
             <AvatarFallback className="bg-muted text-muted-foreground text-xs font-medium">
               {creatorInitials}
             </AvatarFallback>
           </Avatar>
-          <p className="text-sm font-medium text-foreground truncate">{creatorName}</p>
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-foreground truncate" title={creatorName}>
+              {creatorName}
+            </p>
+            <p className="text-xs text-muted-foreground truncate" title={`@${creator?.username || "-"}`}>
+              @{creator?.username || "-"}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -187,8 +246,8 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
         </div>
 
         {/* Detail Button */}
-        <Button 
-          className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium" 
+        <Button
+          className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
           size="sm"
           asChild
         >
@@ -199,7 +258,7 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
         </Button>
       </div>
     </div>
-  )
+  );
 }
 
 export function GroupTable({
@@ -208,77 +267,192 @@ export function GroupTable({
   currentPage,
   searchQuery,
   statusFilter = "all",
+  countries,
 }: GroupTableProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [isPending, startTransition] = useTransition()
-  const [searchInput, setSearchInput] = useState(searchQuery)
-  const { toast } = useToast()
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+  const [searchInput, setSearchInput] = useState(searchQuery);
+  const { toast } = useToast();
 
   const [deleteDialog, setDeleteDialog] = useState<{
-    open: boolean
-    id: string
-    groupName: string
-    confirmText: string
+    open: boolean;
+    id: string;
+    groupName: string;
+    confirmText: string;
   }>({
     open: false,
     id: "",
     groupName: "",
     confirmText: "",
-  })
+  });
+
+  // Filter dialog state
+  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+  const [filterValues, setFilterValues] = useState({
+    country: searchParams.get("country") || "",
+    state: searchParams.get("state") || "",
+    city: searchParams.get("city") || "",
+    status: statusFilter,
+  });
+
+  // Location data state
+  const [states, setStates] = useState<State[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
+  const [loadingStates, setLoadingStates] = useState(false);
+  const [loadingCities, setLoadingCities] = useState(false);
+
+  // Convert countries to combobox options
+  const countryOptions = countries.map((c) => ({
+    value: String(c.id),
+    label: c.name,
+  }));
+
+  const stateOptions = states.map((s) => ({
+    value: String(s.id),
+    label: s.name,
+  }));
+
+  const cityOptions = cities.map((c) => ({
+    value: String(c.id),
+    label: c.name,
+  }));
+
+  // Handle country change - fetch states directly from client
+  const handleCountryChange = async (countryId: string) => {
+    setFilterValues((prev) => ({
+      ...prev,
+      country: countryId,
+      state: "",
+      city: "",
+    }));
+    setStates([]);
+    setCities([]);
+
+    if (countryId) {
+      setLoadingStates(true);
+      const supabase = getSupabaseBrowserClient();
+      const { data } = await supabase
+        .from("states")
+        .select("id, name, country_id")
+        .eq("country_id", Number(countryId))
+        .order("name");
+      setStates(data ?? []);
+      setLoadingStates(false);
+    }
+  };
+
+  // Handle state change - fetch cities directly from client
+  const handleStateChange = async (stateId: string) => {
+    setFilterValues((prev) => ({
+      ...prev,
+      state: stateId,
+      city: "",
+    }));
+    setCities([]);
+
+    if (stateId) {
+      setLoadingCities(true);
+      const supabase = getSupabaseBrowserClient();
+      const { data } = await supabase
+        .from("cities")
+        .select("id, name, state_id")
+        .eq("state_id", Number(stateId))
+        .order("name");
+      setCities(data ?? []);
+      setLoadingCities(false);
+    }
+  };
 
   const openDeleteDialog = (id: string, groupName: string) => {
-    setDeleteDialog({ open: true, id, groupName, confirmText: "" })
-  }
+    setDeleteDialog({ open: true, id, groupName, confirmText: "" });
+  };
+
+  const handleResetFilter = () => {
+    setFilterValues({
+      country: "",
+      state: "",
+      city: "",
+      status: "all",
+    });
+    setStates([]);
+    setCities([]);
+  };
+
+  const handleApplyFilter = () => {
+    updateUrl({
+      country: filterValues.country,
+      state: filterValues.state,
+      city: filterValues.city,
+      status: filterValues.status,
+      page: 1,
+    });
+    setFilterDialogOpen(false);
+  };
+
+  const handleCancelFilter = () => {
+    // Reset to current URL params
+    setFilterValues({
+      country: searchParams.get("country") || "",
+      state: searchParams.get("state") || "",
+      city: searchParams.get("city") || "",
+      status: statusFilter,
+    });
+    setFilterDialogOpen(false);
+  };
 
   const handleDeleteGroup = async () => {
-    if (deleteDialog.confirmText !== "Delete") return
+    if (deleteDialog.confirmText !== "Delete") return;
 
-    const { error } = await deleteGroupAction(deleteDialog.id)
+    const { error } = await deleteGroupAction(deleteDialog.id);
     if (error) {
-      toast({ title: "Error", description: "Failed to delete group", variant: "destructive" })
+      toast({
+        title: "Error",
+        description: "Failed to delete group",
+        variant: "destructive",
+      });
     } else {
-      toast({ title: "Success", description: "Group deleted successfully" })
-      router.refresh()
+      toast({ title: "Success", description: "Group deleted successfully" });
+      router.refresh();
     }
-    setDeleteDialog((prev) => ({ ...prev, open: false, confirmText: "" }))
-  }
+    setDeleteDialog((prev) => ({ ...prev, open: false, confirmText: "" }));
+  };
 
   const updateUrl = (params: Record<string, string | number>) => {
-    const newParams = new URLSearchParams(searchParams.toString())
+    const newParams = new URLSearchParams(searchParams.toString());
 
     Object.entries(params).forEach(([key, value]) => {
       if (value && value !== "" && value !== "all") {
-        newParams.set(key, String(value))
+        newParams.set(key, String(value));
       } else {
-        newParams.delete(key)
+        newParams.delete(key);
       }
-    })
+    });
 
     startTransition(() => {
-      router.push(`?${newParams.toString()}`)
-    })
-  }
+      router.push(`?${newParams.toString()}`);
+    });
+  };
 
   const handleSearch = () => {
-    updateUrl({ search: searchInput, page: 1 })
-  }
+    updateUrl({ search: searchInput, page: 1 });
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      handleSearch()
+      handleSearch();
     }
-  }
+  };
 
   const handlePageChange = (page: number) => {
-    updateUrl({ page, search: searchQuery, status: statusFilter })
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
+    updateUrl({ page, search: searchQuery, status: statusFilter });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const groupsWithCount = initialData.map((group) => ({
     ...group,
     member_count: group.members?.length ?? 0,
-  }))
+  }));
 
   return (
     <div className="space-y-6">
@@ -306,19 +480,14 @@ export function GroupTable({
             </button>
           </div>
 
-          <Select value={statusFilter} onValueChange={(value) => updateUrl({ status: value, page: 1 })}>
-            <SelectTrigger className="w-32">
-              <div className="flex items-center gap-2">
-                <SlidersHorizontal className="h-4 w-4" />
-                <SelectValue placeholder="Status" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="public">Public</SelectItem>
-              <SelectItem value="private">Private</SelectItem>
-            </SelectContent>
-          </Select>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-10 w-10 bg-black border-black hover:bg-black/80"
+            onClick={() => setFilterDialogOpen(true)}
+          >
+            <Filter className="h-4 w-4 text-white" />
+          </Button>
         </div>
       </div>
 
@@ -327,9 +496,9 @@ export function GroupTable({
         {groupsWithCount.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {groupsWithCount.map((group) => (
-              <GroupCard 
-                key={group.id} 
-                group={group} 
+              <GroupCard
+                key={group.id}
+                group={group}
                 onDelete={openDeleteDialog}
               />
             ))}
@@ -339,9 +508,13 @@ export function GroupTable({
             <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
               <Users className="h-6 w-6 text-muted-foreground" />
             </div>
-            <h3 className="text-base font-medium text-foreground mb-1">No groups found</h3>
+            <h3 className="text-base font-medium text-foreground mb-1">
+              No groups found
+            </h3>
             <p className="text-sm text-muted-foreground">
-              {searchQuery ? "No groups match your search" : "No groups available yet"}
+              {searchQuery
+                ? "No groups match your search"
+                : "No groups available yet"}
             </p>
           </div>
         )}
@@ -350,7 +523,8 @@ export function GroupTable({
       {/* Pagination */}
       <div className="flex items-center justify-between rounded-xl border border-border bg-card px-6 py-4">
         <div className="text-sm text-muted-foreground">
-          Page <span className="font-medium text-foreground">{currentPage}</span> of{" "}
+          Page{" "}
+          <span className="font-medium text-foreground">{currentPage}</span> of{" "}
           <span className="font-medium text-foreground">{totalPages || 1}</span>
         </div>
 
@@ -371,21 +545,34 @@ export function GroupTable({
 
             <div className="flex items-center gap-1">
               {(() => {
-                const pages: (number | string)[] = []
+                const pages: (number | string)[] = [];
 
                 if (totalPages <= 7) {
                   for (let i = 1; i <= totalPages; i++) {
-                    pages.push(i)
+                    pages.push(i);
                   }
                 } else {
-                  pages.push(1)
+                  pages.push(1);
 
                   if (currentPage <= 3) {
-                    pages.push(2, 3, 4, "...", totalPages)
+                    pages.push(2, 3, 4, "...", totalPages);
                   } else if (currentPage >= totalPages - 2) {
-                    pages.push("...", totalPages - 3, totalPages - 2, totalPages - 1, totalPages)
+                    pages.push(
+                      "...",
+                      totalPages - 3,
+                      totalPages - 2,
+                      totalPages - 1,
+                      totalPages
+                    );
                   } else {
-                    pages.push("...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages)
+                    pages.push(
+                      "...",
+                      currentPage - 1,
+                      currentPage,
+                      currentPage + 1,
+                      "...",
+                      totalPages
+                    );
                   }
                 }
 
@@ -398,7 +585,7 @@ export function GroupTable({
                       >
                         ...
                       </span>
-                    )
+                    );
                   }
 
                   return (
@@ -415,8 +602,8 @@ export function GroupTable({
                     >
                       {page}
                     </button>
-                  )
-                })
+                  );
+                });
               })()}
             </div>
 
@@ -437,35 +624,159 @@ export function GroupTable({
       </div>
 
       {/* Delete Dialog */}
-      <Dialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog((prev) => ({ ...prev, open, confirmText: "" }))}>
+      <Dialog
+        open={deleteDialog.open}
+        onOpenChange={(open) =>
+          setDeleteDialog((prev) => ({ ...prev, open, confirmText: "" }))
+        }
+      >
         <DialogContent showCloseButton={false}>
           <DialogHeader>
             <DialogTitle className="text-destructive">Delete Group</DialogTitle>
             <DialogDescription>
-              You are about to delete group <strong>{deleteDialog.groupName}</strong>. This action cannot be undone.
+              You are about to delete group{" "}
+              <strong>{deleteDialog.groupName}</strong>. This action cannot be
+              undone.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-4">
             <Label htmlFor="confirmDelete">
-              Type <strong className="text-destructive">Delete</strong> to confirm
+              Type <strong className="text-destructive">Delete</strong> to
+              confirm
             </Label>
             <Input
               id="confirmDelete"
               value={deleteDialog.confirmText}
-              onChange={(e) => setDeleteDialog((prev) => ({ ...prev, confirmText: e.target.value }))}
+              onChange={(e) =>
+                setDeleteDialog((prev) => ({
+                  ...prev,
+                  confirmText: e.target.value,
+                }))
+              }
               placeholder="Type 'Delete' here"
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialog((prev) => ({ ...prev, open: false, confirmText: "" }))}>
+            <Button
+              variant="outline"
+              onClick={() =>
+                setDeleteDialog((prev) => ({
+                  ...prev,
+                  open: false,
+                  confirmText: "",
+                }))
+              }
+            >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDeleteGroup} disabled={deleteDialog.confirmText !== "Delete"}>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteGroup}
+              disabled={deleteDialog.confirmText !== "Delete"}
+            >
               Delete
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Filter Dialog */}
+      <Dialog open={filterDialogOpen} onOpenChange={setFilterDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5 text-primary" />
+              Filter
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {/* Country */}
+            <div className="grid gap-2">
+              <Label htmlFor="country">Country</Label>
+              <Combobox
+                options={countryOptions}
+                value={filterValues.country}
+                onValueChange={handleCountryChange}
+                placeholder="Select Country"
+                searchPlaceholder="Search country..."
+                emptyText="No country found."
+                className="w-full"
+              />
+            </div>
+
+            {/* State */}
+            <div className="grid gap-2">
+              <Label htmlFor="state">State</Label>
+              <Combobox
+                options={stateOptions}
+                value={filterValues.state}
+                onValueChange={handleStateChange}
+                placeholder={loadingStates ? "Loading..." : "Select State"}
+                searchPlaceholder="Search state..."
+                emptyText={filterValues.country ? "No state found." : "Select country first"}
+                className="w-full"
+              />
+            </div>
+
+            {/* City */}
+            <div className="grid gap-2">
+              <Label htmlFor="city">City</Label>
+              <Combobox
+                options={cityOptions}
+                value={filterValues.city}
+                onValueChange={(value) =>
+                  setFilterValues((prev) => ({ ...prev, city: value }))
+                }
+                placeholder={loadingCities ? "Loading..." : "Select City"}
+                searchPlaceholder="Search city..."
+                emptyText={filterValues.state ? "No city found." : "Select state first"}
+                className="w-full"
+              />
+            </div>
+
+            {/* Status */}
+            <div className="grid gap-2">
+              <Label htmlFor="status">Status</Label>
+              <Select
+                value={filterValues.status}
+                onValueChange={(value) =>
+                  setFilterValues((prev) => ({ ...prev, status: value }))
+                }
+              >
+                <SelectTrigger id="status" className="w-full">
+                  <SelectValue placeholder="Select Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="public">Public</SelectItem>
+                  <SelectItem value="private">Private</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter className="flex-row gap-2 sm:justify-between">
+            <Button
+              variant="ghost"
+              onClick={handleResetFilter}
+              className="gap-2"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Reset
+            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleCancelFilter}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleApplyFilter}
+                className="bg-primary hover:bg-primary/90"
+              >
+                Apply
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
-  )
+  );
 }
