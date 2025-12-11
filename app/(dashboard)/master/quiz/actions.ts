@@ -15,6 +15,7 @@ export interface Quiz {
   language: string | null
   status: string | null
   creator?: {
+    id: string | null
     username: string | null
     email: string | null
     fullname: string | null
@@ -49,7 +50,7 @@ export async function fetchQuizzes({
 
   let query = supabase
     .from("quizzes")
-    .select("id, title, category, questions, is_hidden, is_public, created_at, language, status, creator:profiles!creator_id(email, username, fullname, avatar_url)", { count: "exact" })
+    .select("id, title, category, questions, is_hidden, is_public, created_at, language, status, creator:profiles!creator_id(id, email, username, fullname, avatar_url)", { count: "exact" })
 
   if (search) {
     query = query.or(`title.ilike.%${search}%,category.ilike.%${search}%`)
@@ -132,7 +133,7 @@ export async function fetchQuizById(id: string): Promise<{ data: Quiz | null; er
 
   const { data, error } = await supabase
     .from("quizzes")
-    .select("id, title, description, category, questions, is_hidden, is_public, created_at, language, status, creator:profiles!creator_id(email, username, fullname, avatar_url)")
+    .select("id, title, description, category, questions, is_hidden, is_public, created_at, language, status, creator:profiles!creator_id(id, email, username, fullname, avatar_url)")
     .eq("id", id)
     .single()
 
