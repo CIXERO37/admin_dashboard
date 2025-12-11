@@ -211,7 +211,10 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
         <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">
           Created by
         </p>
-        <div className="flex items-center gap-2">
+        <Link 
+          href={`/profiles/${group.creator_id}`}
+          className="flex items-center gap-2 hover:bg-muted/50 rounded-lg p-1 -m-1 transition-colors"
+        >
           <Avatar className="h-8 w-8 border border-border">
             <AvatarImage
               src={getAvatarUrl(creator?.avatar_url)}
@@ -222,14 +225,14 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="text-sm font-medium text-foreground truncate" title={creatorName}>
+            <p className="text-sm font-medium text-foreground truncate hover:text-primary transition-colors" title={creatorName}>
               {creatorName}
             </p>
             <p className="text-xs text-muted-foreground truncate" title={`@${creator?.username || "-"}`}>
               @{creator?.username || "-"}
             </p>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Footer */}
