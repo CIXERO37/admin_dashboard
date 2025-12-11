@@ -18,6 +18,7 @@ export interface Group {
     fullname: string | null
     email: string | null
     avatar_url: string | null
+    username: string | null
   } | null
 }
 
@@ -45,7 +46,7 @@ export async function fetchGroups({
 
   let query = supabase
     .from("groups")
-    .select("*, creator:profiles!groups_creator_id_fkey(fullname, email, avatar_url)", { count: "exact" })
+    .select("*, creator:profiles!groups_creator_id_fkey(fullname, email, avatar_url, username)", { count: "exact" })
 
   if (search) {
     query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`)
@@ -122,7 +123,7 @@ export async function fetchGroupById(id: string): Promise<{ data: GroupDetail | 
 
   const { data: group, error: groupError } = await supabase
     .from("groups")
-    .select("*, creator:profiles!groups_creator_id_fkey(fullname, email, avatar_url)")
+    .select("*, creator:profiles!groups_creator_id_fkey(fullname, email, avatar_url, username)")
     .eq("id", id)
     .single()
 
@@ -328,4 +329,77 @@ export async function updateMemberRole(groupId: string, userId: string, role: st
   }
 
   return { error: null }
+}
+
+// Location types
+export interface Country {
+  id: number
+  name: string
+  iso2: string
+  emoji: string | null
+}
+
+export interface State {
+  id: number
+  name: string
+  country_id: number
+}
+
+export interface City {
+  id: number
+  name: string
+  state_id: number
+}
+
+// Fetch all countries (cached - only 250 rows)
+export async function fetchCountries(): Promise<Country[]> {
+  const supabase = await getSupabaseServerClient()
+
+  const { data, error } = await supabase
+    .from("countries")
+    .select("id, name, iso2, emoji")
+    .order("name", { ascending: true })
+
+  if (error) {
+    console.error("Error fetching countries:", error)
+    return []
+  }
+
+  return data ?? []
+}
+
+// Fetch states by country_id
+export async function fetchStatesByCountry(countryId: number): Promise<State[]> {
+  const supabase = await getSupabaseServerClient()
+
+  const { data, error } = await supabase
+    .from("states")
+    .select("id, name, country_id")
+    .eq("country_id", countryId)
+    .order("name", { ascending: true })
+
+  if (error) {
+    console.error("Error fetching states:", error)
+    return []
+  }
+
+  return data ?? []
+}
+
+// Fetch cities by state_id
+export async function fetchCitiesByState(stateId: number): Promise<City[]> {
+  const supabase = await getSupabaseServerClient()
+
+  const { data, error } = await supabase
+    .from("cities")
+    .select("id, name, state_id")
+    .eq("state_id", stateId)
+    .order("name", { ascending: true })
+
+  if (error) {
+    console.error("Error fetching cities:", error)
+    return []
+  }
+
+  return data ?? []
 }
