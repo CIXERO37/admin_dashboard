@@ -3,7 +3,7 @@ import { format } from "date-fns"
 
 import { fetchProfileById } from "../actions"
 import { Badge } from "@/components/ui/badge"
-import { AvatarDialog, MapDialog, ProfileBreadcrumb } from "./profile-client"
+import { AvatarDialog, ProfileBreadcrumb } from "./profile-client"
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -87,64 +87,19 @@ export default async function ProfileDetailPage({ params }: PageProps) {
                 <p className="text-foreground font-medium">{profile.phone}</p>
               </div>
             )}
-            {profile.address && (
+            {(profile.country || profile.state || profile.city) && (
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Address</p>
-                <p className="text-foreground font-medium">{profile.address}</p>
+                <p className="text-foreground font-medium">
+                  {[profile.city?.name?.replace(/^Kabupaten\s+/i, "Kab. "), profile.state?.name, profile.country?.name].filter(Boolean).join(", ") || "-"}
+                </p>
               </div>
             )}
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Role</p>
-              <Badge variant="outline" className={roleColors[role] ?? "bg-secondary text-secondary-foreground"}>
-                {role.charAt(0).toUpperCase() + role.slice(1)}
-              </Badge>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Status</p>
-              <Badge variant="outline" className={statusColors[status] ?? "bg-secondary text-secondary-foreground"}>
-                {status}
-              </Badge>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Last Active</p>
-              <p className="text-foreground font-medium">
-                {profile.last_active ? format(new Date(profile.last_active), "dd MMM yyyy, HH:mm") : "-"}
-              </p>
-            </div>
           </div>
         </div>
       </div>
 
-      {(profile.city?.latitude || profile.state?.latitude || profile.country?.latitude) && (() => {
-        const lat = profile.city?.latitude ?? profile.state?.latitude ?? profile.country?.latitude ?? 0
-        const lng = profile.city?.longitude ?? profile.state?.longitude ?? profile.country?.longitude ?? 0
-        const locationName = [profile.city?.name, profile.state?.name, profile.country?.name].filter(Boolean).join(", ")
-        
-        return (
-          <div className="rounded-xl border border-border bg-card overflow-hidden">
-            <div className="p-4 border-b border-border flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-foreground">Location</h3>
-              <MapDialog latitude={lat} longitude={lng} locationName={locationName} />
-            </div>
-            <div className="h-[400px] relative">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[calc(50%+40px)] z-10 pointer-events-none">
-                <div className="bg-card/95 backdrop-blur-sm rounded-lg px-4 py-2 border border-border shadow-lg">
-                  <p className="text-sm font-medium text-foreground whitespace-nowrap">{locationName}</p>
-                </div>
-              </div>
-              <iframe
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                loading="lazy"
-                allowFullScreen
-                referrerPolicy="no-referrer-when-downgrade"
-                src={`https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.5}%2C${lat - 0.5}%2C${lng + 0.5}%2C${lat + 0.5}&layer=mapnik&marker=${lat}%2C${lng}`}
-              />
-            </div>
-          </div>
-        )
-      })()}
+
     </div>
   )
 }
