@@ -3,7 +3,7 @@ import { format } from "date-fns"
 
 import { fetchProfileById } from "../actions"
 import { Badge } from "@/components/ui/badge"
-import { AvatarDialog, MapDialog, BackButton } from "./profile-client"
+import { AvatarDialog, MapDialog, ProfileBreadcrumb } from "./profile-client"
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -31,8 +31,13 @@ export default async function ProfileDetailPage({ params }: PageProps) {
   const role = profile.role ?? "user"
 
   return (
-    <div className="space-y-2 -mt-4">
-      <BackButton />
+    <div className="space-y-4">
+      {/* Header with Breadcrumb */}
+      <div className="space-y-2">
+        <ProfileBreadcrumb name={profile.fullname || profile.username || "Unknown"} />
+        <h1 className="text-3xl font-bold text-foreground">Profile Detail</h1>
+      </div>
+
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="px-6 pt-4 pb-6 space-y-6">
           <div className="flex items-center gap-4">

@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { format } from "date-fns"
 import {
-  ArrowLeft,
   CheckCircle,
   XCircle,
   User,
@@ -17,6 +16,14 @@ import {
 } from "lucide-react"
 
 import { cn, getAvatarUrl } from "@/lib/utils"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -111,39 +118,47 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link
-            href="/support/quiz"
-            className="p-2 rounded-lg border border-border bg-card hover:bg-secondary/60 transition-colors cursor-pointer"
-          >
-            <ArrowLeft className="h-5 w-5 text-muted-foreground" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Review Quiz</h1>
-            <p className="text-sm text-muted-foreground">
-              Review the quiz content before approving
-            </p>
+      {/* Header with Breadcrumb */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/support/quiz">Quiz Approval</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="max-w-[200px] truncate">{quiz.title}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              className="gap-2 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-400 cursor-pointer transition-all duration-200 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950 dark:hover:text-red-300"
+              onClick={() => setRejectDialog(true)}
+            >
+              <XCircle className="h-4 w-4" />
+              Reject
+            </Button>
+            <Button
+              className="gap-2 bg-emerald-500 hover:bg-emerald-600 shadow-sm hover:shadow-md cursor-pointer transition-all duration-200"
+              onClick={() => setApproveDialog(true)}
+            >
+              <CheckCircle className="h-4 w-4" />
+              Approve
+            </Button>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            className="gap-2 text-red-500 border-red-500/30 hover:bg-red-500/10 cursor-pointer"
-            onClick={() => setRejectDialog(true)}
-          >
-            <XCircle className="h-4 w-4" />
-            Reject
-          </Button>
-          <Button
-            className="gap-2 bg-green-600 hover:bg-green-700 cursor-pointer"
-            onClick={() => setApproveDialog(true)}
-          >
-            <CheckCircle className="h-4 w-4" />
-            Approve
-          </Button>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Review Quiz</h1>
+          <p className="text-sm text-muted-foreground">
+            Review the quiz content before approving
+          </p>
         </div>
       </div>
 
@@ -187,16 +202,19 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
                 Creator
               </div>
               {quiz.creator ? (
-                <div className="flex items-center gap-3">
+                <Link 
+                  href={`/profiles/${quiz.creator.id}`}
+                  className="flex items-center gap-3"
+                >
                   <Avatar className="h-10 w-10">
                     <AvatarImage src={getAvatarUrl(quiz.creator.avatar_url)} />
                     <AvatarFallback>{quiz.creator.fullname?.[0] ?? "?"}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-medium text-sm">{quiz.creator.fullname}</p>
+                    <p className="font-medium text-sm hover:text-primary transition-colors">{quiz.creator.fullname}</p>
                     <p className="text-xs text-muted-foreground">@{quiz.creator.username}</p>
                   </div>
-                </div>
+                </Link>
               ) : (
                 <p className="text-foreground">Unknown</p>
               )}

@@ -96,6 +96,7 @@ interface GroupCardProps {
 }
 
 function GroupCard({ group, onDelete }: GroupCardProps) {
+  const router = useRouter();
   const name = group.name || "Unknown Group";
   const avatarUrl = group.avatar_url;
   const coverUrl = getAvatarUrl(group.cover_url);
@@ -117,8 +118,15 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
     .slice(0, 2)
     .toUpperCase();
 
+  const handleCardClick = () => {
+    router.push(`/support/group/${group.id}`);
+  };
+
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl hover:border-primary/50">
+    <div 
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl hover:border-primary/50 cursor-pointer"
+      onClick={handleCardClick}
+    >
       {/* Header with cover image or gradient fallback */}
       <div
         className="relative p-4 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent"
@@ -147,7 +155,7 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
 
           {/* More Options */}
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
               <Button
                 variant="ghost"
                 size="icon"
@@ -167,7 +175,10 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                onClick={() => onDelete(group.id, name)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(group.id, name);
+                }}
                 className="cursor-pointer text-destructive focus:text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
@@ -214,6 +225,7 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
         <Link 
           href={`/profiles/${group.creator_id}`}
           className="flex items-center gap-2 hover:bg-muted/50 rounded-lg p-1 -m-1 transition-colors"
+          onClick={(e) => e.stopPropagation()}
         >
           <Avatar className="h-8 w-8 border border-border">
             <AvatarImage
@@ -253,6 +265,7 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
           className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
           size="sm"
           asChild
+          onClick={(e) => e.stopPropagation()}
         >
           <Link href={`/support/group/${group.id}`}>
             <Eye className="h-4 w-4" />
