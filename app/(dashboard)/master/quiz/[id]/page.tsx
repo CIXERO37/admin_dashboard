@@ -1,12 +1,11 @@
 import { notFound } from "next/navigation"
 import { format } from "date-fns"
-import { ArrowLeft } from "lucide-react"
-import Link from "next/link"
 
 import { fetchQuizById } from "../actions"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getAvatarUrl } from "@/lib/utils"
+import { QuizBreadcrumb } from "./quiz-client"
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -35,20 +34,17 @@ export default async function QuizDetailPage({ params }: PageProps) {
   const questions = Array.isArray(quiz.questions) ? quiz.questions : []
 
   return (
-    <div className="space-y-2 -mt-4 ">
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <QuizBreadcrumb title={quiz.title} />
+        <h1 className="text-3xl font-bold text-foreground">Detail kuis</h1>
+      </div>
+
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="p-6 space-y-6">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <div className="flex items-center gap-3">
-                <Link
-                  href="/master/quiz"
-                  className="p-2 rounded-lg border border-border bg-card hover:bg-secondary/60 transition-colors"
-                >
-                  <ArrowLeft className="h-5 w-5 text-muted-foreground" />
-                </Link>
-                <h2 className="text-2xl font-semibold text-foreground">{quiz.title}</h2>
-              </div>
+              <h2 className="text-2xl font-semibold text-foreground">{quiz.title}</h2>
               {quiz.description && (
                 <p className="text-sm text-muted-foreground">{quiz.description}</p>
               )}
