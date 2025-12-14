@@ -1,6 +1,6 @@
 "use client"
 
-import { Search, FileQuestion, Calendar, Eye } from "lucide-react"
+import { Search, FileQuestion, Calendar, Check, X } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { useState, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
-import { type QuizApproval } from "./actions"
+import { useToast } from "@/components/ui/use-toast"
+import { type QuizApproval, approveQuizAction, rejectQuizAction } from "./actions"
 
 interface QuizApprovalTableProps {
   initialData: QuizApproval[]
@@ -21,7 +22,14 @@ interface QuizApprovalTableProps {
   searchQuery: string
 }
 
-function QuizCard({ quiz }: { quiz: QuizApproval }) {
+interface QuizCardProps {
+  quiz: QuizApproval
+  onApprove: (id: string) => void
+  onReject: (id: string) => void
+}
+
+function QuizCard({ quiz, onApprove, onReject }: QuizCardProps) {
+  const router = useRouter()
   const questionsCount = Array.isArray(quiz.questions) ? quiz.questions.length : 0
   const coverUrl = quiz.cover_image || quiz.image_url
   const creatorInitials = (quiz.creator?.fullname || "?")
@@ -31,8 +39,15 @@ function QuizCard({ quiz }: { quiz: QuizApproval }) {
     .slice(0, 2)
     .toUpperCase()
 
+  const handleCardClick = () => {
+    router.push(`/support/quiz/${quiz.id}`)
+  }
+
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl hover:border-primary/50">
+    <div 
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl hover:border-primary/50 cursor-pointer"
+      onClick={handleCardClick}
+    >
       {/* Cover Image */}
       <div
         className="relative h-32 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent"
@@ -79,7 +94,11 @@ function QuizCard({ quiz }: { quiz: QuizApproval }) {
         </h3>
 
         {/* Creator Info */}
-        <div className="flex items-center gap-2">
+        <Link 
+          href={`/profiles/${quiz.creator?.id}`}
+          className="flex items-center gap-2"
+          onClick={(e) => e.stopPropagation()}
+        >
           <Avatar className="h-8 w-8 border border-border">
             <AvatarImage src={getAvatarUrl(quiz.creator?.avatar_url)} alt={quiz.creator?.fullname || ""} />
             <AvatarFallback className="bg-muted text-muted-foreground text-xs font-medium">
@@ -87,14 +106,14 @@ function QuizCard({ quiz }: { quiz: QuizApproval }) {
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="text-sm font-medium text-foreground truncate" title={quiz.creator?.fullname || "Unknown"}>
+            <p className="text-sm font-medium text-foreground truncate hover:text-primary transition-colors" title={quiz.creator?.fullname || "Unknown"}>
               {quiz.creator?.fullname || "Unknown"}
             </p>
             <p className="text-xs text-muted-foreground truncate" title={`@${quiz.creator?.username || "-"}`}>
               @{quiz.creator?.username || "-"}
             </p>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Footer */}
@@ -111,17 +130,32 @@ function QuizCard({ quiz }: { quiz: QuizApproval }) {
           <span className="uppercase text-[10px] font-medium">{quiz.language || "ID"}</span>
         </div>
 
-        {/* Review Button */}
-        <Button
-          className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium cursor-pointer"
-          size="sm"
-          asChild
-        >
-          <Link href={`/support/quiz/${quiz.id}`}>
-            <Eye className="h-4 w-4" />
-            Review Quiz
-          </Link>
-        </Button>
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          <Button
+            className="flex-1 gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-medium cursor-pointer shadow-sm hover:shadow-md transition-all duration-200"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation()
+              onApprove(quiz.id)
+            }}
+          >
+            <Check className="h-4 w-4" />
+            Approve
+          </Button>
+          <Button
+            variant="outline"
+            className="flex-1 gap-1.5 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-400 font-medium cursor-pointer transition-all duration-200 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950 dark:hover:text-red-300"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation()
+              onReject(quiz.id)
+            }}
+          >
+            <X className="h-4 w-4" />
+            Reject
+          </Button>
+        </div>
       </div>
     </div>
   )
@@ -138,6 +172,27 @@ export function QuizApprovalTable({
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
   const [searchInput, setSearchInput] = useState(searchQuery)
+  const { toast } = useToast()
+
+  const handleApprove = async (id: string) => {
+    const { error } = await approveQuizAction(id)
+    if (error) {
+      toast({ title: "Error", description: "Failed to approve quiz", variant: "destructive" })
+    } else {
+      toast({ title: "Success", description: "Quiz approved successfully" })
+      router.refresh()
+    }
+  }
+
+  const handleReject = async (id: string) => {
+    const { error } = await rejectQuizAction(id)
+    if (error) {
+      toast({ title: "Error", description: "Failed to reject quiz", variant: "destructive" })
+    } else {
+      toast({ title: "Success", description: "Quiz rejected successfully" })
+      router.refresh()
+    }
+  }
 
   const updateUrl = (params: Record<string, string | number>) => {
     const newParams = new URLSearchParams(searchParams.toString())
@@ -203,7 +258,12 @@ export function QuizApprovalTable({
         {initialData.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {initialData.map((quiz) => (
-              <QuizCard key={quiz.id} quiz={quiz} />
+              <QuizCard 
+                key={quiz.id} 
+                quiz={quiz} 
+                onApprove={handleApprove}
+                onReject={handleReject}
+              />
             ))}
           </div>
         ) : (
