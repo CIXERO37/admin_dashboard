@@ -10,6 +10,7 @@ import {
 } from "lucide-react"
 import { useState, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import Link from "next/link"
 
 import { DataTable, StatusBadge } from "@/components/dashboard/data-table"
 import { getAvatarUrl } from "@/lib/utils"
@@ -238,20 +239,21 @@ export function UserTable({
       key: "account",
       label: "Account",
       render: (_: unknown, row: Record<string, unknown>) => {
+        const id = row.id as string
         const name = (row.fullname as string) || (row.username as string) || "Unknown user"
         const email = (row.email as string) || "No email"
         const avatar = row.avatar as string | undefined
         return (
-          <div className="flex items-center gap-3">
+          <Link href={`/profiles/${id}`} className="flex items-center gap-3 cursor-pointer">
             <Avatar className="h-9 w-9">
               <AvatarImage src={avatar} alt={name} />
               <AvatarFallback>{getInitials(name)}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-medium leading-tight">{name}</p>
+              <p className="font-medium leading-tight hover:text-primary transition-colors">{name}</p>
               <p className="text-xs text-muted-foreground">{email}</p>
             </div>
-          </div>
+          </Link>
         )
       },
     },
