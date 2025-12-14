@@ -9,18 +9,40 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { getAvatarUrl } from "@/lib/utils"
 
-export function BackButton() {
+interface ProfileBreadcrumbProps {
+  name: string
+}
+
+export function ProfileBreadcrumb({ name }: ProfileBreadcrumbProps) {
   const router = useRouter()
 
   return (
-    <button
-      onClick={() => router.back()}
-      className="inline-flex p-2 rounded-lg border border-border bg-card hover:bg-secondary/60 transition-colors cursor-pointer"
-    >
-      <ArrowLeft className="h-5 w-5 text-muted-foreground" />
-    </button>
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <button
+            onClick={() => router.back()}
+            className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors cursor-pointer"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Back
+          </button>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>{name}</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
   )
 }
 

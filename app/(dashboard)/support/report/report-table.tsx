@@ -14,6 +14,7 @@ import {
 import { useState, useTransition } from "react";
 import { format } from "date-fns";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 import { DataTable, StatusBadge } from "@/components/dashboard/data-table";
 import { getAvatarUrl } from "@/lib/utils";
@@ -227,16 +228,16 @@ export function ReportTable({
         const name = reporter.fullname || reporter.username || "Unknown";
         const email = reporter.email || "No email";
         return (
-          <div className="flex items-center gap-3">
+          <Link href={`/profiles/${reporter.id}`} className="flex items-center gap-3 cursor-pointer">
             <Avatar className="h-9 w-9">
               <AvatarImage src={getAvatarUrl(reporter.avatar_url)} alt={name} />
               <AvatarFallback>{getInitials(name)}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-medium leading-tight">{name}</p>
+              <p className="font-medium leading-tight hover:text-primary transition-colors">{name}</p>
               <p className="text-xs text-muted-foreground">{email}</p>
             </div>
-          </div>
+          </Link>
         );
       },
     },
@@ -267,12 +268,12 @@ export function ReportTable({
         const contentId = row.reported_content_id as string;
         if (contentType === "user" && reportedUser) {
           return (
-            <div className="flex items-center gap-2">
+            <Link href={`/profiles/${reportedUser.id}`} className="flex items-center gap-2 cursor-pointer">
               <User className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">
+              <span className="text-sm hover:text-primary transition-colors">
                 {reportedUser.fullname || reportedUser.username || "Unknown"}
               </span>
-            </div>
+            </Link>
           );
         }
         if (contentType === "quiz" && contentId) {
