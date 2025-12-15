@@ -123,7 +123,7 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
   };
 
   return (
-    <div 
+    <div
       className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl hover:border-primary/50 cursor-pointer"
       onClick={handleCardClick}
     >
@@ -182,7 +182,7 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
                 className="cursor-pointer text-destructive focus:text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Delete Group
+                Move to Trash
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -222,7 +222,7 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
         <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">
           Created by
         </p>
-        <Link 
+        <Link
           href={`/profiles/${group.creator_id}`}
           className="flex items-center gap-2 hover:bg-muted/50 rounded-lg p-1 -m-1 transition-colors"
           onClick={(e) => e.stopPropagation()}
@@ -237,10 +237,16 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="text-sm font-medium text-foreground truncate hover:text-primary transition-colors" title={creatorName}>
+            <p
+              className="text-sm font-medium text-foreground truncate hover:text-primary transition-colors"
+              title={creatorName}
+            >
               {creatorName}
             </p>
-            <p className="text-xs text-muted-foreground truncate" title={`@${creator?.username || "-"}`}>
+            <p
+              className="text-xs text-muted-foreground truncate"
+              title={`@${creator?.username || "-"}`}
+            >
               @{creator?.username || "-"}
             </p>
           </div>
@@ -418,17 +424,20 @@ export function GroupTable({
   };
 
   const handleDeleteGroup = async () => {
-    if (deleteDialog.confirmText !== "Delete") return;
+    if (deleteDialog.confirmText !== "Move to Trash") return;
 
     const { error } = await deleteGroupAction(deleteDialog.id);
     if (error) {
       toast({
         title: "Error",
-        description: "Failed to delete group",
+        description: "Failed to move group to trash",
         variant: "destructive",
       });
     } else {
-      toast({ title: "Success", description: "Group deleted successfully" });
+      toast({
+        title: "Success",
+        description: "Group moved to trash successfully",
+      });
       router.refresh();
     }
     setDeleteDialog((prev) => ({ ...prev, open: false, confirmText: "" }));
@@ -646,19 +655,19 @@ export function GroupTable({
           setDeleteDialog((prev) => ({ ...prev, open, confirmText: "" }))
         }
       >
-        <DialogContent showCloseButton={false}>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-destructive">Delete Group</DialogTitle>
+            <DialogTitle>Move to Trash</DialogTitle>
             <DialogDescription>
-              You are about to delete group{" "}
-              <strong>{deleteDialog.groupName}</strong>. This action cannot be
-              undone.
+              Are you sure you want to move{" "}
+              <strong>{deleteDialog.groupName}</strong> to the trash bin? You
+              can restore it later.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-4">
             <Label htmlFor="confirmDelete">
-              Type <strong className="text-destructive">Delete</strong> to
-              confirm
+              Type <strong className="text-destructive">Move to Trash</strong>{" "}
+              to confirm
             </Label>
             <Input
               id="confirmDelete"
@@ -669,10 +678,10 @@ export function GroupTable({
                   confirmText: e.target.value,
                 }))
               }
-              placeholder="Type 'Delete' here"
+              placeholder="Type 'Move to Trash' here"
             />
           </div>
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-0">
             <Button
               variant="outline"
               onClick={() =>
@@ -688,9 +697,9 @@ export function GroupTable({
             <Button
               variant="destructive"
               onClick={handleDeleteGroup}
-              disabled={deleteDialog.confirmText !== "Delete"}
+              disabled={deleteDialog.confirmText !== "Move to Trash"}
             >
-              Delete
+              Move to Trash
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -729,7 +738,11 @@ export function GroupTable({
                 onValueChange={handleStateChange}
                 placeholder={loadingStates ? "Loading..." : "Select State"}
                 searchPlaceholder="Search state..."
-                emptyText={filterValues.country ? "No state found." : "Select country first"}
+                emptyText={
+                  filterValues.country
+                    ? "No state found."
+                    : "Select country first"
+                }
                 className="w-full"
               />
             </div>
@@ -745,7 +758,9 @@ export function GroupTable({
                 }
                 placeholder={loadingCities ? "Loading..." : "Select City"}
                 searchPlaceholder="Search city..."
-                emptyText={filterValues.state ? "No city found." : "Select state first"}
+                emptyText={
+                  filterValues.state ? "No city found." : "Select state first"
+                }
                 className="w-full"
               />
             </div>
