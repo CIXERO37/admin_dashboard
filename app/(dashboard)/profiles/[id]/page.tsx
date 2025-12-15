@@ -1,105 +1,221 @@
 import { notFound } from "next/navigation"
-import { format } from "date-fns"
 
-import { fetchProfileById } from "../actions"
+import { fetchProfileById, fetchUserQuizzes, fetchCreatedQuizzes } from "../actions"
 import { Badge } from "@/components/ui/badge"
-import { AvatarDialog, ProfileBreadcrumb } from "./profile-client"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { AvatarDialog, ProfileBreadcrumb, TopQuizzesList } from "./profile-client"
+import { Mail, Phone, MapPin, GraduationCap, Gamepad2, Trophy, BookOpen, FileQuestion } from "lucide-react"
 
 interface PageProps {
   params: Promise<{ id: string }>
 }
 
-const statusColors: Record<string, string> = {
-  Active: "bg-blue-500/20 text-blue-500 border-blue-500/30",
-  Blocked: "bg-red-500/20 text-red-500 border-red-500/30",
-}
+const mockTransactions = [
+  { id: 1, product: "Mock premium pack", status: "pending", date: "12/10/2025", amount: "$39.50" },
+  { id: 2, product: "Enterprise plan subscription", status: "paid", date: "11/15/2025", amount: "$159.90" },
+  { id: 3, product: "Business board pro license", status: "paid", date: "07/13/2025", amount: "$89.00" },
+  { id: 4, product: "Custom integration package", status: "failed", date: "06/13/2025", amount: "$299.90" },
+  { id: 5, product: "Developer toolkit license", status: "paid", date: "08/15/2025", amount: "$129.90" },
+  { id: 6, product: "Support package renewal", status: "pending", date: "07/22/2025", amount: "$19.90" },
+]
 
-const roleColors: Record<string, string> = {
-  admin: "bg-purple-500/20 text-purple-500 border-purple-500/30",
-  user: "bg-gray-500/20 text-gray-500 border-gray-500/30",
+const statusColors: Record<string, string> = {
+  pending: "bg-yellow-500/20 text-yellow-600 border-yellow-500/30",
+  paid: "bg-green-500/20 text-green-600 border-green-500/30",
+  failed: "bg-red-500/20 text-red-600 border-red-500/30",
 }
 
 export default async function ProfileDetailPage({ params }: PageProps) {
   const { id } = await params
-  const { data: profile, error } = await fetchProfileById(id)
+  const [profileResult, quizzesResult, createdQuizzesResult] = await Promise.all([
+    fetchProfileById(id),
+    fetchUserQuizzes(id),
+    fetchCreatedQuizzes(id)
+  ])
+
+  const { data: profile, error } = profileResult
+  const { data: userQuizzes } = quizzesResult
+  const { data: createdQuizzes } = createdQuizzesResult
 
   if (error || !profile) {
     notFound()
   }
 
-  const status = profile.is_blocked ? "Blocked" : "Active"
-  const role = profile.role ?? "user"
+  const profileCompletion = 86
+  const role = profile.role === "admin" ? "Administrator" : "Project Manager"
 
   return (
     <div className="space-y-4">
-      {/* Header with Breadcrumb */}
-      <div className="space-y-2">
-        <ProfileBreadcrumb name={profile.fullname || profile.username || "Unknown"} />
-        <h1 className="text-3xl font-bold text-foreground">Profile Detail</h1>
-      </div>
+      <ProfileBreadcrumb name={profile.fullname || profile.username || "Unknown"} />
 
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <div className="px-6 pt-4 pb-6 space-y-6">
-          <div className="flex items-center gap-4">
-            <AvatarDialog avatarUrl={profile.avatar_url} fullname={profile.fullname} />
-            <div>
-              <h2 className="text-2xl font-semibold text-foreground">{profile.fullname ?? "-"}</h2>
-              <p className="text-sm text-muted-foreground">@{profile.username ?? "-"}</p>
-            </div>
-            <div className="flex items-center gap-6 ml-6 pl-6 border-l border-border">
-              <div className="text-center">
-                <p className="text-xl font-semibold text-foreground">{profile.following_count ?? 0}</p>
-                <p className="text-xs text-muted-foreground">Following</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xl font-semibold text-foreground">{profile.followers_count ?? 0}</p>
-                <p className="text-xs text-muted-foreground">Followers</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xl font-semibold text-foreground">{profile.friends_count ?? 0}</p>
-                <p className="text-xs text-muted-foreground">Friends</p>
-              </div>
-            </div>
-          </div>
+      <div className="flex flex-col lg:flex-row lg:items-start gap-6">
+        {/* Left Sidebar */}
+        <div className="lg:w-80">
+          {/* Profile Card */}
+          <Card>
+            <CardContent className="pt-6 pb-6">
+              <div className="flex flex-col items-center text-center">
+                <AvatarDialog avatarUrl={profile.avatar_url} fullname={profile.fullname} />
+                <h2 className="mt-2 text-xl font-semibold flex items-center gap-2">
+                  {profile.fullname ?? "-"}
+                  {profile.role === "admin" && (
+                    <Badge className="bg-amber-500 text-white text-xs">Pro</Badge>
+                  )}
+                </h2>
+                <p className="text-sm text-muted-foreground">@{profile.username}</p>
 
-          <div className="flex flex-wrap gap-6">
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Email</p>
-              <p className="text-foreground font-medium">{profile.email ?? "-"}</p>
-            </div>
-            {profile.organization && (
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Organization</p>
-                <p className="text-foreground font-medium">{profile.organization}</p>
+                {/* Stats */}
+                <div className="flex justify-center gap-6 mt-2 pt-2 border-t w-full">
+                  <div className="text-center">
+                    <p className="text-xl font-bold">{profile.following_count ?? 0}</p>
+                    <p className="text-xs text-muted-foreground">Follwoingt</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xl font-bold">{profile.followers_count ?? 0}</p>
+                    <p className="text-xs text-muted-foreground">Followers</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xl font-bold">{profile.friends_count ? `${(profile.friends_count / 1000).toFixed(1)}K` : "0"}</p>
+                    <p className="text-xs text-muted-foreground">Friends</p>
+                  </div>
+                </div>
               </div>
-            )}
-            {profile.birthdate && (
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Age</p>
-                <p className="text-foreground font-medium">
-                  {Math.floor((Date.now() - new Date(profile.birthdate).getTime()) / (365.25 * 24 * 60 * 60 * 1000))} tahun
-                </p>
+
+              {/* Contact Info */}
+              <div className="mt-3 space-y-1.5 text-sm">
+                {profile.email && (
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground truncate">{profile.email}</span>
+                  </div>
+                )}
+                {profile.phone && (
+                  <div className="flex items-center gap-3">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">{profile.phone}</span>
+                  </div>
+                )}
+                {(profile.city || profile.state || profile.country) && (
+                  <div className="flex items-center gap-3">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">
+                      {[profile.city?.name, profile.state?.name].filter(Boolean).join(", ") || "-"}
+                    </span>
+                  </div>
+                )}
+                 {profile.organization && (
+                  <div className="flex items-center gap-3">
+                    <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">{profile.organization}</span>
+                  </div>
+                )}
+                
               </div>
-            )}
-            {profile.phone && (
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Phone</p>
-                <p className="text-foreground font-medium">{profile.phone}</p>
-              </div>
-            )}
-            {(profile.country || profile.state || profile.city) && (
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Address</p>
-                <p className="text-foreground font-medium">
-                  {[profile.city?.name?.replace(/^Kabupaten\s+/i, "Kab. "), profile.state?.name, profile.country?.name].filter(Boolean).join(", ") || "-"}
-                </p>
-              </div>
-            )}
-          </div>
+            </CardContent>
+          </Card>
+
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1">
+          {/* Quiz Terbanyak Dimainkan */}
+          <Card>
+            <CardHeader className="flex-row items-center justify-between pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Trophy className="h-4 w-4 text-amber-500" />
+                Quiz Terbanyak Dimainkan
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {userQuizzes.length > 0 ? (
+                <TopQuizzesList quizzes={userQuizzes} />
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <Gamepad2 className="h-12 w-12 text-muted-foreground/50 mb-3" />
+                  <p className="text-muted-foreground">Belum ada quiz yang dimainkan</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
 
+      {/* Transaction History & Connections - Full Width */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Transaction History */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Transaction History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Product</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {mockTransactions.map((tx) => (
+                  <TableRow key={tx.id}>
+                    <TableCell className="text-blue-500 font-medium">{tx.product}</TableCell>
+                    <TableCell>
+                      <Badge className={statusColors[tx.status]}>{tx.status}</Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{tx.date}</TableCell>
+                    <TableCell className="text-right">{tx.amount}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
 
+        {/* Quiz yang Dibuat */}
+        <Card>
+          <CardHeader className="flex-row items-center justify-between pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <BookOpen className="h-4 w-4 text-blue-500" />
+              Quiz yang Dibuat
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {createdQuizzes.length > 0 ? (
+              <div className="space-y-3">
+                {createdQuizzes.map((quiz, index) => (
+                  <div key={quiz.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500/10 text-blue-500 font-bold text-sm">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{quiz.title}</p>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                        {quiz.category && (
+                          <Badge variant="secondary" className="text-xs">
+                            {quiz.category}
+                          </Badge>
+                        )}
+                        <div className="flex items-center gap-1">
+                          <FileQuestion className="h-3 w-3" />
+                          <span>{quiz.question_count} soal</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <BookOpen className="h-12 w-12 text-muted-foreground/50 mb-3" />
+                <p className="text-muted-foreground">Belum ada quiz yang dibuat</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

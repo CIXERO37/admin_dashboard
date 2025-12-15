@@ -124,3 +124,112 @@ export async function fetchProfileById(id: string): Promise<{ data: Profile | nu
     error: null,
   }
 }
+
+export interface UserQuiz {
+  id: string
+  title: string
+  play_count: number
+  avg_score: number
+}
+
+export async function fetchUserQuizzes(userId: string): Promise<{ data: UserQuiz[]; error: string | null }> {
+  const supabase = await getSupabaseServerClient()
+
+  // Fetch all game_sessions to check if user participated
+  const { data: sessions, error: sessionsError } = await supabase
+    .from("game_sessions")
+    .select("quiz_id, participants")
+
+  if (sessionsError) {
+    console.error("Error fetching game sessions:", sessionsError)
+    return { data: [], error: sessionsError.message }
+  }
+
+  // Filter sessions where user participated, count per quiz, and track scores
+  const quizStats: Record<string, { count: number; totalScore: number }> = {}
+  
+  for (const session of sessions ?? []) {
+    const participants = session.participants as Array<{ user_id: string; score?: number }> | null
+    if (participants && Array.isArray(participants)) {
+      const userParticipant = participants.find(p => p.user_id === userId)
+      if (userParticipant) {
+        if (!quizStats[session.quiz_id]) {
+          quizStats[session.quiz_id] = { count: 0, totalScore: 0 }
+        }
+        quizStats[session.quiz_id].count += 1
+        quizStats[session.quiz_id].totalScore += userParticipant.score ?? 0
+      }
+    }
+  }
+
+  // Get quiz IDs sorted by play count (top 10)
+  const sortedQuizIds = Object.entries(quizStats)
+    .sort((a, b) => b[1].count - a[1].count)
+    .slice(0, 10)
+    .map(([quizId]) => quizId)
+
+  if (sortedQuizIds.length === 0) {
+    return { data: [], error: null }
+  }
+
+  // Fetch quiz details
+  const { data: quizzes, error: quizzesError } = await supabase
+    .from("quizzes")
+    .select("id, title")
+    .in("id", sortedQuizIds)
+
+  if (quizzesError) {
+    console.error("Error fetching quizzes:", quizzesError)
+    return { data: [], error: quizzesError.message }
+  }
+
+  // Map quizzes with play count, avg score and sort by play_count
+  const result: UserQuiz[] = (quizzes ?? [])
+    .map(quiz => {
+      const stats = quizStats[quiz.id] || { count: 0, totalScore: 0 }
+      return {
+        id: quiz.id,
+        title: quiz.title,
+        play_count: stats.count,
+        avg_score: stats.count > 0 ? Math.round(stats.totalScore / stats.count) : 0
+      }
+    })
+    .sort((a, b) => b.play_count - a.play_count)
+
+  return { data: result, error: null }
+}
+
+export interface CreatedQuiz {
+  id: string
+  title: string
+  category: string | null
+  question_count: number
+  created_at: string | null
+}
+
+export async function fetchCreatedQuizzes(userId: string): Promise<{ data: CreatedQuiz[]; error: string | null }> {
+  const supabase = await getSupabaseServerClient()
+
+  const { data, error } = await supabase
+    .from("quizzes")
+    .select("id, title, category, questions, created_at")
+    .eq("creator_id", userId)
+    .is("deleted_at", null)
+    .order("created_at", { ascending: false })
+    .limit(10)
+
+  if (error) {
+    console.error("Error fetching created quizzes:", error)
+    return { data: [], error: error.message }
+  }
+
+  const result: CreatedQuiz[] = (data ?? []).map(quiz => ({
+    id: quiz.id,
+    title: quiz.title,
+    category: quiz.category,
+    question_count: Array.isArray(quiz.questions) ? quiz.questions.length : 0,
+    created_at: quiz.created_at
+  }))
+
+  return { data: result, error: null }
+}
