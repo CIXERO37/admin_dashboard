@@ -1,6 +1,6 @@
 "use server"
 
-import { getSupabaseServerClient } from "@/lib/supabase-server"
+import { getSupabaseAdminClient } from "@/lib/supabase-admin"
 import { revalidatePath } from "next/cache"
 
 export interface Quiz {
@@ -45,12 +45,13 @@ export async function fetchQuizzes({
   category = "all",
   visibility = "all",
 }: FetchQuizzesParams): Promise<QuizzesResponse> {
-  const supabase = await getSupabaseServerClient()
+  const supabase = getSupabaseAdminClient()
   const offset = (page - 1) * limit
 
   let query = supabase
     .from("quizzes")
     .select("id, title, category, questions, is_hidden, is_public, created_at, language, status, creator:profiles!creator_id(id, email, username, fullname, avatar_url)", { count: "exact" })
+    .is("deleted_at", null)
 
   if (search) {
     query = query.or(`title.ilike.%${search}%,category.ilike.%${search}%`)
@@ -82,6 +83,7 @@ export async function fetchQuizzes({
   const { data: allCategories } = await supabase
     .from("quizzes")
     .select("category")
+    .is("deleted_at", null)
     .not("category", "is", null)
 
   const uniqueCategories = [...new Set(allCategories?.map((q) => q.category).filter(Boolean) as string[])].sort()
@@ -95,7 +97,7 @@ export async function fetchQuizzes({
 }
 
 export async function updateQuizVisibility(id: string, isPublic: boolean) {
-  const supabase = await getSupabaseServerClient()
+  const supabase = getSupabaseAdminClient()
 
   const { error } = await supabase
     .from("quizzes")
@@ -112,7 +114,7 @@ export async function updateQuizVisibility(id: string, isPublic: boolean) {
 }
 
 export async function blockQuizAction(id: string) {
-  const supabase = await getSupabaseServerClient()
+  const supabase = getSupabaseAdminClient()
 
   const { error } = await supabase
     .from("quizzes")
@@ -129,12 +131,13 @@ export async function blockQuizAction(id: string) {
 }
 
 export async function fetchQuizById(id: string): Promise<{ data: Quiz | null; error: string | null }> {
-  const supabase = await getSupabaseServerClient()
+  const supabase = getSupabaseAdminClient()
 
   const { data, error } = await supabase
     .from("quizzes")
     .select("id, title, description, category, questions, is_hidden, is_public, created_at, language, status, creator:profiles!creator_id(id, email, username, fullname, avatar_url)")
     .eq("id", id)
+    .is("deleted_at", null)
     .single()
 
   if (error) {
@@ -143,4 +146,22 @@ export async function fetchQuizById(id: string): Promise<{ data: Quiz | null; er
   }
 
   return { data, error: null }
+}
+
+export async function deleteQuizAction(id: string) {
+  const supabase = getSupabaseAdminClient()
+
+  const { error } = await supabase
+    .from("quizzes")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id)
+
+  if (error) {
+    console.error("Error deleting quiz:", error)
+    return { error: error.message }
+  }
+
+  revalidatePath("/master/quiz")
+  revalidatePath("/trash-bin")
+  return { error: null }
 }
