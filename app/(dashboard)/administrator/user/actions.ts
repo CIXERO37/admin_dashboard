@@ -1,6 +1,6 @@
 "use server"
 
-import { getSupabaseServerClient } from "@/lib/supabase-server"
+import { getSupabaseAdminClient } from "@/lib/supabase-admin"
 import { revalidatePath } from "next/cache"
 
 export interface Profile {
@@ -35,12 +35,13 @@ export async function fetchProfiles({
   role = "all",
   status = "all",
 }: FetchProfilesParams): Promise<ProfilesResponse> {
-  const supabase = await getSupabaseServerClient()
+  const supabase = getSupabaseAdminClient()
   const offset = (page - 1) * limit
 
   let query = supabase
     .from("profiles")
     .select("*", { count: "exact" })
+    .is("deleted_at", null)
 
   if (search) {
     query = query.or(`username.ilike.%${search}%,email.ilike.%${search}%,fullname.ilike.%${search}%`)
@@ -75,7 +76,7 @@ export async function fetchProfiles({
 }
 
 export async function updateProfileAction(id: string, updates: Partial<Profile>) {
-  const supabase = await getSupabaseServerClient()
+  const supabase = getSupabaseAdminClient()
 
   const { error } = await supabase
     .from("profiles")
@@ -92,11 +93,11 @@ export async function updateProfileAction(id: string, updates: Partial<Profile>)
 }
 
 export async function deleteProfileAction(id: string) {
-  const supabase = await getSupabaseServerClient()
+  const supabase = getSupabaseAdminClient()
 
   const { error } = await supabase
     .from("profiles")
-    .delete()
+    .update({ deleted_at: new Date().toISOString() })
     .eq("id", id)
 
   if (error) {
@@ -105,5 +106,6 @@ export async function deleteProfileAction(id: string) {
   }
 
   revalidatePath("/administrator/user")
+  revalidatePath("/trash-bin")
   return { error: null }
 }

@@ -28,6 +28,7 @@ import {
   ChevronDown,
   PanelLeftClose,
   PanelLeft,
+  Trash2,
 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
@@ -107,6 +108,11 @@ const navigation: NavItem[] = [
       { title: "General", href: "/settings/general", icon: Sliders },
       { title: "Security", href: "/settings/security", icon: Shield },
     ],
+  },
+  {
+    title: "Trash Bin",
+    href: "/trash-bin",
+    icon: Trash2,
   },
 ]
 
