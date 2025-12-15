@@ -184,16 +184,16 @@ export function ReportTable({
   };
 
   const handleDeleteReport = async () => {
-    if (deleteDialog.confirmText !== "Delete") return;
+    if (deleteDialog.confirmText !== "Delete Report") return;
     const { error } = await deleteReportAction(deleteDialog.id);
     if (error) {
       toast({
         title: "Error",
-        description: "Gagal menghapus laporan",
+        description: "Failed to delete report",
         variant: "destructive",
       });
     } else {
-      toast({ title: "Berhasil", description: "Laporan berhasil dihapus" });
+      toast({ title: "Success", description: "Report deleted successfully" });
       router.refresh();
     }
     setDeleteDialog((prev) => ({ ...prev, open: false, confirmText: "" }));
@@ -228,13 +228,18 @@ export function ReportTable({
         const name = reporter.fullname || reporter.username || "Unknown";
         const email = reporter.email || "No email";
         return (
-          <Link href={`/profiles/${reporter.id}`} className="flex items-center gap-3 cursor-pointer">
+          <Link
+            href={`/profiles/${reporter.id}`}
+            className="flex items-center gap-3 cursor-pointer"
+          >
             <Avatar className="h-9 w-9">
               <AvatarImage src={getAvatarUrl(reporter.avatar_url)} alt={name} />
               <AvatarFallback>{getInitials(name)}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-medium leading-tight hover:text-primary transition-colors">{name}</p>
+              <p className="font-medium leading-tight hover:text-primary transition-colors">
+                {name}
+              </p>
               <p className="text-xs text-muted-foreground">{email}</p>
             </div>
           </Link>
@@ -268,7 +273,10 @@ export function ReportTable({
         const contentId = row.reported_content_id as string;
         if (contentType === "user" && reportedUser) {
           return (
-            <Link href={`/profiles/${reportedUser.id}`} className="flex items-center gap-2 cursor-pointer">
+            <Link
+              href={`/profiles/${reportedUser.id}`}
+              className="flex items-center gap-2 cursor-pointer"
+            >
               <User className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm hover:text-primary transition-colors">
                 {reportedUser.fullname || reportedUser.username || "Unknown"}
@@ -606,18 +614,18 @@ export function ReportTable({
         <DialogContent showCloseButton={false}>
           <DialogHeader>
             <DialogTitle className="text-destructive">
-              Hapus Laporan
+              Delete Report
             </DialogTitle>
             <DialogDescription>
-              Anda akan menghapus laporan{" "}
-              <strong>{deleteDialog.reportTitle}</strong>. Tindakan ini tidak
-              dapat dibatalkan.
+              Are you sure you want to delete report{" "}
+              <strong>{deleteDialog.reportTitle}</strong>? This action cannot be
+              undone.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-4">
             <Label htmlFor="confirmDelete">
-              Ketik <strong className="text-destructive">Delete</strong> untuk
-              mengkonfirmasi
+              Type <strong className="text-destructive">Delete Report</strong>{" "}
+              to confirm
             </Label>
             <Input
               id="confirmDelete"
@@ -628,7 +636,7 @@ export function ReportTable({
                   confirmText: e.target.value,
                 }))
               }
-              placeholder="Ketik 'Delete' di sini"
+              placeholder="Type 'Delete Report' here"
             />
           </div>
           <DialogFooter>
@@ -642,14 +650,14 @@ export function ReportTable({
                 }))
               }
             >
-              Batal
+              Cancel
             </Button>
             <Button
               variant="destructive"
               onClick={handleDeleteReport}
-              disabled={deleteDialog.confirmText !== "Delete"}
+              disabled={deleteDialog.confirmText !== "Delete Report"}
             >
-              Hapus
+              Delete Report
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,6 +1,6 @@
 "use server"
 
-import { getSupabaseServerClient } from "@/lib/supabase-server"
+import { getSupabaseAdminClient } from "@/lib/supabase-admin"
 
 export interface Group {
   id: string
@@ -41,12 +41,13 @@ export async function fetchGroups({
   search = "",
   status = "all",
 }: FetchGroupsParams): Promise<GroupsResponse> {
-  const supabase = await getSupabaseServerClient()
+  const supabase = getSupabaseAdminClient()
   const offset = (page - 1) * limit
 
   let query = supabase
     .from("groups")
     .select("*, creator:profiles!groups_creator_id_fkey(fullname, email, avatar_url, username)", { count: "exact" })
+    .is("deleted_at", null)
 
   if (search) {
     query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`)
@@ -73,7 +74,7 @@ export async function fetchGroups({
 }
 
 export async function updateGroupAction(id: string, updates: Partial<Group>) {
-  const supabase = await getSupabaseServerClient()
+  const supabase = getSupabaseAdminClient()
 
   const { error } = await supabase
     .from("groups")
@@ -89,11 +90,11 @@ export async function updateGroupAction(id: string, updates: Partial<Group>) {
 }
 
 export async function deleteGroupAction(id: string) {
-  const supabase = await getSupabaseServerClient()
+  const supabase = getSupabaseAdminClient()
 
   const { error } = await supabase
     .from("groups")
-    .delete()
+    .update({ deleted_at: new Date().toISOString() })
     .eq("id", id)
 
   if (error) {
@@ -119,7 +120,7 @@ export interface GroupDetail extends Group {
 }
 
 export async function fetchGroupById(id: string): Promise<{ data: GroupDetail | null; error: string | null }> {
-  const supabase = await getSupabaseServerClient()
+  const supabase = getSupabaseAdminClient()
 
   const { data: group, error: groupError } = await supabase
     .from("groups")
@@ -191,7 +192,7 @@ export async function fetchGroupMembers({
   search = "",
   role = "all",
 }: FetchMembersParams): Promise<MembersResponse> {
-  const supabase = await getSupabaseServerClient()
+  const supabase = getSupabaseAdminClient()
   const offset = (page - 1) * limit
 
   // Fetch group with members JSONB
@@ -268,7 +269,7 @@ export async function fetchGroupMembers({
 }
 
 export async function removeGroupMember(groupId: string, userId: string) {
-  const supabase = await getSupabaseServerClient()
+  const supabase = getSupabaseAdminClient()
 
   // Fetch current members
   const { data: group, error: fetchError } = await supabase
@@ -299,7 +300,7 @@ export async function removeGroupMember(groupId: string, userId: string) {
 }
 
 export async function updateMemberRole(groupId: string, userId: string, role: string) {
-  const supabase = await getSupabaseServerClient()
+  const supabase = getSupabaseAdminClient()
 
   // Fetch current members
   const { data: group, error: fetchError } = await supabase
@@ -353,7 +354,7 @@ export interface City {
 
 // Fetch all countries (cached - only 250 rows)
 export async function fetchCountries(): Promise<Country[]> {
-  const supabase = await getSupabaseServerClient()
+  const supabase = getSupabaseAdminClient()
 
   const { data, error } = await supabase
     .from("countries")
@@ -370,7 +371,7 @@ export async function fetchCountries(): Promise<Country[]> {
 
 // Fetch states by country_id
 export async function fetchStatesByCountry(countryId: number): Promise<State[]> {
-  const supabase = await getSupabaseServerClient()
+  const supabase = getSupabaseAdminClient()
 
   const { data, error } = await supabase
     .from("states")
@@ -388,7 +389,7 @@ export async function fetchStatesByCountry(countryId: number): Promise<State[]> 
 
 // Fetch cities by state_id
 export async function fetchCitiesByState(stateId: number): Promise<City[]> {
-  const supabase = await getSupabaseServerClient()
+  const supabase = getSupabaseAdminClient()
 
   const { data, error } = await supabase
     .from("cities")
