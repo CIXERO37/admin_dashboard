@@ -15,17 +15,13 @@ interface StatCardProps {
 }
 
 export function StatCard({ title, value, change, changeType = "neutral", icon: Icon, description, href }: StatCardProps) {
-  const Wrapper = href ? Link : "div"
-  const wrapperProps = href ? { href } : {}
+  const cardClassName = cn(
+    "group relative overflow-hidden rounded-xl border border-border bg-card p-6 transition-all duration-300 hover:border-primary hover:shadow-xl hover:shadow-primary/20",
+    href && "cursor-pointer block"
+  )
 
-  return (
-    <Wrapper
-      {...wrapperProps}
-      className={cn(
-        "group relative overflow-hidden rounded-xl border border-border bg-card p-6 transition-all duration-300 hover:border-primary hover:shadow-xl hover:shadow-primary/20",
-        href && "cursor-pointer block"
-      )}
-    >
+  const cardContent = (
+    <>
       <div className="absolute inset-0 bg-gradient-to-br from-secondary/80 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
       <div className="relative flex items-start justify-between">
@@ -54,6 +50,20 @@ export function StatCard({ title, value, change, changeType = "neutral", icon: I
           <Icon className="h-5 w-5 text-primary transition-colors group-hover:text-primary-foreground" />
         </div>
       </div>
-    </Wrapper>
+    </>
+  )
+
+  if (href) {
+    return (
+      <Link href={href} className={cardClassName}>
+        {cardContent}
+      </Link>
+    )
+  }
+
+  return (
+    <div className={cardClassName}>
+      {cardContent}
+    </div>
   )
 }

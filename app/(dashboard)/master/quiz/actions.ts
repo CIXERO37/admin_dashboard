@@ -50,7 +50,7 @@ export async function fetchQuizzes({
 
   let query = supabase
     .from("quizzes")
-    .select("id, title, category, questions, is_hidden, is_public, created_at, language, status, creator:profiles!creator_id(id, email, username, fullname, avatar_url)", { count: "exact" })
+    .select("id, title, description, category, questions, is_hidden, is_public, created_at, language, status, creator:profiles!creator_id(id, email, username, fullname, avatar_url)", { count: "exact" })
     .is("deleted_at", null)
 
   if (search) {
@@ -88,8 +88,13 @@ export async function fetchQuizzes({
 
   const uniqueCategories = [...new Set(allCategories?.map((q) => q.category).filter(Boolean) as string[])].sort()
 
+  const transformedData: Quiz[] = (data ?? []).map((item) => ({
+    ...item,
+    creator: Array.isArray(item.creator) ? item.creator[0] ?? null : item.creator,
+  }))
+
   return {
-    data: data ?? [],
+    data: transformedData,
     totalCount: count ?? 0,
     totalPages: Math.ceil((count ?? 0) / limit),
     categories: uniqueCategories,
@@ -145,7 +150,12 @@ export async function fetchQuizById(id: string): Promise<{ data: Quiz | null; er
     return { data: null, error: error.message }
   }
 
-  return { data, error: null }
+  const transformedData: Quiz = {
+    ...data,
+    creator: Array.isArray(data.creator) ? data.creator[0] ?? null : data.creator,
+  }
+
+  return { data: transformedData, error: null }
 }
 
 export async function deleteQuizAction(id: string) {

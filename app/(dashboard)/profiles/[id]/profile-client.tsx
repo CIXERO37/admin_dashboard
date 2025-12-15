@@ -2,8 +2,10 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Maximize2, X } from "lucide-react"
+import { ArrowLeft, Maximize2, X, Play, ChevronDown, ChevronUp } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -134,5 +136,66 @@ export function MapDialog({ latitude, longitude, locationName }: MapDialogProps)
         </DialogContent>
       </Dialog>
     </>
+  )
+}
+
+interface UserQuiz {
+  id: string
+  title: string
+  play_count: number
+  avg_score: number
+}
+
+interface TopQuizzesListProps {
+  quizzes: UserQuiz[]
+}
+
+export function TopQuizzesList({ quizzes }: TopQuizzesListProps) {
+  const [showAll, setShowAll] = useState(false)
+  const INITIAL_COUNT = 3
+
+  const displayedQuizzes = showAll ? quizzes : quizzes.slice(0, INITIAL_COUNT)
+  const hasMore = quizzes.length > INITIAL_COUNT
+
+  return (
+    <div className="space-y-3">
+      {displayedQuizzes.map((quiz, index) => (
+        <div key={quiz.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50">
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm">
+            {index + 1}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium truncate">{quiz.title}</p>
+            <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+              <span>Rata-rata: {quiz.avg_score}</span>
+              <div className="flex items-center gap-1">
+                <Play className="h-3 w-3" />
+                <span>{quiz.play_count.toLocaleString()}x dimainkan</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+
+      {hasMore && (
+        <Button
+          variant="ghost"
+          className="w-full mt-2 text-muted-foreground hover:text-foreground"
+          onClick={() => setShowAll(!showAll)}
+        >
+          {showAll ? (
+            <>
+              <ChevronUp className="h-4 w-4 mr-2" />
+              Tampilkan Lebih Sedikit
+            </>
+          ) : (
+            <>
+              <ChevronDown className="h-4 w-4 mr-2" />
+              Tampilkan Semua ({quizzes.length})
+            </>
+          )}
+        </Button>
+      )}
+    </div>
   )
 }
