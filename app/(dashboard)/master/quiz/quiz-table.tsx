@@ -209,7 +209,7 @@ export function QuizTable({
         return (
           <div className="flex items-center gap-2">
             <Link
-              href={`/profiles/${creator.id}`}
+              href={`/users/${creator.id}?from=/master/quiz`}
               className="flex flex-col min-w-0 hover:underline"
               onClick={(e) => e.stopPropagation()}
             >
