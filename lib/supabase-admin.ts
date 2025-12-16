@@ -4,9 +4,7 @@ import { createClient } from "@supabase/supabase-js"
 // Use this ONLY for admin operations that need to see/modify all data
 export function getSupabaseAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceRoleKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  
-  // SUPABASE_SERVICE_ROLE_KEY -> ini ganti kang dengan ini NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!url || !serviceRoleKey) {
     throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY")
