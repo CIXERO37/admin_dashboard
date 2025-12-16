@@ -1,50 +1,56 @@
-"use client"
+"use client";
 
-import { Search, FileQuestion, Calendar, Check, X } from "lucide-react"
-import { formatDistanceToNow } from "date-fns"
-import { useState, useTransition } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import Link from "next/link"
+import { Search, FileQuestion, Calendar, Check, X } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
-import { cn, getAvatarUrl } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Input } from "@/components/ui/input"
-import { useToast } from "@/components/ui/use-toast"
-import { type QuizApproval, approveQuizAction, rejectQuizAction } from "./actions"
+import { cn, getAvatarUrl } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  type QuizApproval,
+  approveQuizAction,
+  rejectQuizAction,
+} from "./actions";
 
 interface QuizApprovalTableProps {
-  initialData: QuizApproval[]
-  totalPages: number
-  currentPage: number
-  totalCount: number
-  searchQuery: string
+  initialData: QuizApproval[];
+  totalPages: number;
+  currentPage: number;
+  totalCount: number;
+  searchQuery: string;
 }
 
 interface QuizCardProps {
-  quiz: QuizApproval
-  onApprove: (id: string) => void
-  onReject: (id: string) => void
+  quiz: QuizApproval;
+  onApprove: (id: string) => void;
+  onReject: (id: string) => void;
 }
 
 function QuizCard({ quiz, onApprove, onReject }: QuizCardProps) {
-  const router = useRouter()
-  const questionsCount = Array.isArray(quiz.questions) ? quiz.questions.length : 0
-  const coverUrl = quiz.cover_image || quiz.image_url
+  const router = useRouter();
+  const questionsCount = Array.isArray(quiz.questions)
+    ? quiz.questions.length
+    : 0;
+  const coverUrl = quiz.cover_image || quiz.image_url;
   const creatorInitials = (quiz.creator?.fullname || "?")
     .split(" ")
     .map((w) => w[0])
     .join("")
     .slice(0, 2)
-    .toUpperCase()
+    .toUpperCase();
 
   const handleCardClick = () => {
-    router.push(`/support/quiz/${quiz.id}`)
-  }
+    router.push(`/support/quiz/${quiz.id}`);
+  };
 
   return (
-    <div 
+    <div
       className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl hover:border-primary/50 cursor-pointer"
       onClick={handleCardClick}
     >
@@ -79,7 +85,10 @@ function QuizCard({ quiz, onApprove, onReject }: QuizCardProps) {
 
         {/* Questions Count */}
         <div className="absolute bottom-3 right-3">
-          <Badge variant="secondary" className="gap-1 bg-black/50 text-white border-0">
+          <Badge
+            variant="secondary"
+            className="gap-1 bg-black/50 text-white border-0"
+          >
             <FileQuestion className="h-3 w-3" />
             {questionsCount} Questions
           </Badge>
@@ -89,27 +98,39 @@ function QuizCard({ quiz, onApprove, onReject }: QuizCardProps) {
       {/* Content */}
       <div className="flex-1 p-4 space-y-3">
         {/* Title */}
-        <h3 className="font-bold text-base text-foreground line-clamp-2" title={quiz.title}>
+        <h3
+          className="font-bold text-base text-foreground line-clamp-2"
+          title={quiz.title}
+        >
           {quiz.title}
         </h3>
 
         {/* Creator Info */}
-        <Link 
-          href={`/profiles/${quiz.creator?.id}`}
+        <Link
+          href={`/users/${quiz.creator?.id}?from=/support/quiz`}
           className="flex items-center gap-2"
           onClick={(e) => e.stopPropagation()}
         >
           <Avatar className="h-8 w-8 border border-border">
-            <AvatarImage src={getAvatarUrl(quiz.creator?.avatar_url)} alt={quiz.creator?.fullname || ""} />
+            <AvatarImage
+              src={getAvatarUrl(quiz.creator?.avatar_url)}
+              alt={quiz.creator?.fullname || ""}
+            />
             <AvatarFallback className="bg-muted text-muted-foreground text-xs font-medium">
               {creatorInitials}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="text-sm font-medium text-foreground truncate hover:text-primary transition-colors" title={quiz.creator?.fullname || "Unknown"}>
+            <p
+              className="text-sm font-medium text-foreground truncate hover:text-primary transition-colors"
+              title={quiz.creator?.fullname || "Unknown"}
+            >
               {quiz.creator?.fullname || "Unknown"}
             </p>
-            <p className="text-xs text-muted-foreground truncate" title={`@${quiz.creator?.username || "-"}`}>
+            <p
+              className="text-xs text-muted-foreground truncate"
+              title={`@${quiz.creator?.username || "-"}`}
+            >
               @{quiz.creator?.username || "-"}
             </p>
           </div>
@@ -123,11 +144,15 @@ function QuizCard({ quiz, onApprove, onReject }: QuizCardProps) {
             <Calendar className="h-3.5 w-3.5" />
             <span>
               {quiz.created_at
-                ? formatDistanceToNow(new Date(quiz.created_at), { addSuffix: true })
+                ? formatDistanceToNow(new Date(quiz.created_at), {
+                    addSuffix: true,
+                  })
                 : "-"}
             </span>
           </div>
-          <span className="uppercase text-[10px] font-medium">{quiz.language || "ID"}</span>
+          <span className="uppercase text-[10px] font-medium">
+            {quiz.language || "ID"}
+          </span>
         </div>
 
         {/* Action Buttons */}
@@ -136,8 +161,8 @@ function QuizCard({ quiz, onApprove, onReject }: QuizCardProps) {
             className="flex-1 gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-medium cursor-pointer shadow-sm hover:shadow-md transition-all duration-200"
             size="sm"
             onClick={(e) => {
-              e.stopPropagation()
-              onApprove(quiz.id)
+              e.stopPropagation();
+              onApprove(quiz.id);
             }}
           >
             <Check className="h-4 w-4" />
@@ -148,8 +173,8 @@ function QuizCard({ quiz, onApprove, onReject }: QuizCardProps) {
             className="flex-1 gap-1.5 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-400 font-medium cursor-pointer transition-all duration-200 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950 dark:hover:text-red-300"
             size="sm"
             onClick={(e) => {
-              e.stopPropagation()
-              onReject(quiz.id)
+              e.stopPropagation();
+              onReject(quiz.id);
             }}
           >
             <X className="h-4 w-4" />
@@ -158,7 +183,7 @@ function QuizCard({ quiz, onApprove, onReject }: QuizCardProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export function QuizApprovalTable({
@@ -168,62 +193,70 @@ export function QuizApprovalTable({
   totalCount,
   searchQuery,
 }: QuizApprovalTableProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [isPending, startTransition] = useTransition()
-  const [searchInput, setSearchInput] = useState(searchQuery)
-  const { toast } = useToast()
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+  const [searchInput, setSearchInput] = useState(searchQuery);
+  const { toast } = useToast();
 
   const handleApprove = async (id: string) => {
-    const { error } = await approveQuizAction(id)
+    const { error } = await approveQuizAction(id);
     if (error) {
-      toast({ title: "Error", description: "Failed to approve quiz", variant: "destructive" })
+      toast({
+        title: "Error",
+        description: "Failed to approve quiz",
+        variant: "destructive",
+      });
     } else {
-      toast({ title: "Success", description: "Quiz approved successfully" })
-      router.refresh()
+      toast({ title: "Success", description: "Quiz approved successfully" });
+      router.refresh();
     }
-  }
+  };
 
   const handleReject = async (id: string) => {
-    const { error } = await rejectQuizAction(id)
+    const { error } = await rejectQuizAction(id);
     if (error) {
-      toast({ title: "Error", description: "Failed to reject quiz", variant: "destructive" })
+      toast({
+        title: "Error",
+        description: "Failed to reject quiz",
+        variant: "destructive",
+      });
     } else {
-      toast({ title: "Success", description: "Quiz rejected successfully" })
-      router.refresh()
+      toast({ title: "Success", description: "Quiz rejected successfully" });
+      router.refresh();
     }
-  }
+  };
 
   const updateUrl = (params: Record<string, string | number>) => {
-    const newParams = new URLSearchParams(searchParams.toString())
+    const newParams = new URLSearchParams(searchParams.toString());
 
     Object.entries(params).forEach(([key, value]) => {
       if (value && value !== "") {
-        newParams.set(key, String(value))
+        newParams.set(key, String(value));
       } else {
-        newParams.delete(key)
+        newParams.delete(key);
       }
-    })
+    });
 
     startTransition(() => {
-      router.push(`?${newParams.toString()}`)
-    })
-  }
+      router.push(`?${newParams.toString()}`);
+    });
+  };
 
   const handleSearch = () => {
-    updateUrl({ search: searchInput, page: 1 })
-  }
+    updateUrl({ search: searchInput, page: 1 });
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      handleSearch()
+      handleSearch();
     }
-  }
+  };
 
   const handlePageChange = (page: number) => {
-    updateUrl({ page, search: searchQuery })
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
+    updateUrl({ page, search: searchQuery });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <div className="space-y-6">
@@ -258,9 +291,9 @@ export function QuizApprovalTable({
         {initialData.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {initialData.map((quiz) => (
-              <QuizCard 
-                key={quiz.id} 
-                quiz={quiz} 
+              <QuizCard
+                key={quiz.id}
+                quiz={quiz}
                 onApprove={handleApprove}
                 onReject={handleReject}
               />
@@ -287,8 +320,12 @@ export function QuizApprovalTable({
       {totalPages > 0 && (
         <div className="flex items-center justify-between rounded-xl border border-border bg-card px-6 py-4">
           <div className="text-sm text-muted-foreground">
-            Page <span className="font-medium text-foreground">{currentPage}</span> of{" "}
-            <span className="font-medium text-foreground">{totalPages || 1}</span>
+            Page{" "}
+            <span className="font-medium text-foreground">{currentPage}</span>{" "}
+            of{" "}
+            <span className="font-medium text-foreground">
+              {totalPages || 1}
+            </span>
           </div>
 
           {totalPages > 1 && (
@@ -308,10 +345,10 @@ export function QuizApprovalTable({
 
               <div className="flex items-center gap-1">
                 {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                  let page = i + 1
+                  let page = i + 1;
                   if (totalPages > 5) {
-                    if (currentPage > 3) page = currentPage - 2 + i
-                    if (currentPage > totalPages - 2) page = totalPages - 4 + i
+                    if (currentPage > 3) page = currentPage - 2 + i;
+                    if (currentPage > totalPages - 2) page = totalPages - 4 + i;
                   }
                   return (
                     <button
@@ -327,7 +364,7 @@ export function QuizApprovalTable({
                     >
                       {page}
                     </button>
-                  )
+                  );
                 })}
               </div>
 
@@ -348,5 +385,5 @@ export function QuizApprovalTable({
         </div>
       )}
     </div>
-  )
+  );
 }

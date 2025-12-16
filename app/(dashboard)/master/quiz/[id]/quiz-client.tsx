@@ -1,33 +1,31 @@
-"use client"
-
-import { useRouter } from "next/navigation"
-import { ArrowLeft } from "lucide-react"
+import Link from "next/link";
 import {
   Breadcrumb,
   BreadcrumbItem,
+  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+} from "@/components/ui/breadcrumb";
 
 interface QuizBreadcrumbProps {
-  title: string
+  title: string;
 }
 
 export function QuizBreadcrumb({ title }: QuizBreadcrumbProps) {
-  const router = useRouter()
-
   return (
     <Breadcrumb>
       <BreadcrumbList>
         <BreadcrumbItem>
-          <button
-            onClick={() => router.back()}
-            className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors cursor-pointer"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Back
-          </button>
+          <BreadcrumbLink asChild>
+            <Link href="/master">Master Data</Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link href="/master/quiz">Quiz</Link>
+          </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
@@ -35,5 +33,5 @@ export function QuizBreadcrumb({ title }: QuizBreadcrumbProps) {
         </BreadcrumbItem>
       </BreadcrumbList>
     </Breadcrumb>
-  )
+  );
 }

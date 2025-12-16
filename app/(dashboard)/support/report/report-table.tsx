@@ -229,7 +229,7 @@ export function ReportTable({
         const email = reporter.email || "No email";
         return (
           <Link
-            href={`/profiles/${reporter.id}`}
+            href={`/users/${reporter.id}?from=/support/report`}
             className="flex items-center gap-3 cursor-pointer"
           >
             <Avatar className="h-9 w-9">
@@ -274,7 +274,7 @@ export function ReportTable({
         if (contentType === "user" && reportedUser) {
           return (
             <Link
-              href={`/profiles/${reportedUser.id}`}
+              href={`/users/${reportedUser.id}?from=/support/report`}
               className="flex items-center gap-2 cursor-pointer"
             >
               <User className="h-4 w-4 text-muted-foreground" />

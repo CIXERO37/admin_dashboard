@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { format } from "date-fns"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { format } from "date-fns";
 import {
   CheckCircle,
   XCircle,
@@ -13,9 +13,9 @@ import {
   Globe,
   Tag,
   Mail,
-} from "lucide-react"
+} from "lucide-react";
 
-import { cn, getAvatarUrl } from "@/lib/utils"
+import { cn, getAvatarUrl } from "@/lib/utils";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -23,10 +23,10 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+} from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -34,87 +34,102 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/components/ui/use-toast"
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
 import {
   type QuizApproval,
   fetchQuizApprovalById,
   approveQuizAction,
   rejectQuizAction,
-} from "../actions"
+} from "../actions";
 
 interface PageProps {
-  params: Promise<{ id: string }>
+  params: Promise<{ id: string }>;
 }
 
 export default function QuizApprovalDetailPage({ params }: PageProps) {
-  const router = useRouter()
-  const { toast } = useToast()
-  const [quiz, setQuiz] = useState<QuizApproval | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [quizId, setQuizId] = useState<string>("")
+  const router = useRouter();
+  const { toast } = useToast();
+  const [quiz, setQuiz] = useState<QuizApproval | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [quizId, setQuizId] = useState<string>("");
 
-  const [approveDialog, setApproveDialog] = useState(false)
-  const [rejectDialog, setRejectDialog] = useState(false)
-  const [rejectReason, setRejectReason] = useState("")
-  const [processing, setProcessing] = useState(false)
+  const [approveDialog, setApproveDialog] = useState(false);
+  const [rejectDialog, setRejectDialog] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+  const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
     async function loadQuiz() {
-      const { id } = await params
-      setQuizId(id)
-      const { data, error } = await fetchQuizApprovalById(id)
+      const { id } = await params;
+      setQuizId(id);
+      const { data, error } = await fetchQuizApprovalById(id);
       if (error || !data) {
-        toast({ title: "Error", description: "Quiz not found", variant: "destructive" })
-        router.push("/support/quiz")
-        return
+        toast({
+          title: "Error",
+          description: "Quiz not found",
+          variant: "destructive",
+        });
+        router.push("/support/quiz");
+        return;
       }
-      setQuiz(data)
-      setLoading(false)
+      setQuiz(data);
+      setLoading(false);
     }
-    loadQuiz()
-  }, [params, router, toast])
+    loadQuiz();
+  }, [params, router, toast]);
 
   const handleApprove = async () => {
-    setProcessing(true)
-    const { error } = await approveQuizAction(quizId)
+    setProcessing(true);
+    const { error } = await approveQuizAction(quizId);
     if (error) {
-      toast({ title: "Error", description: "Failed to approve quiz", variant: "destructive" })
+      toast({
+        title: "Error",
+        description: "Failed to approve quiz",
+        variant: "destructive",
+      });
     } else {
-      toast({ title: "Success", description: "Quiz has been approved and published" })
-      router.push("/support/quiz")
+      toast({
+        title: "Success",
+        description: "Quiz has been approved and published",
+      });
+      router.push("/support/quiz");
     }
-    setProcessing(false)
-    setApproveDialog(false)
-  }
+    setProcessing(false);
+    setApproveDialog(false);
+  };
 
   const handleReject = async () => {
-    setProcessing(true)
-    const { error } = await rejectQuizAction(quizId, rejectReason)
+    setProcessing(true);
+    const { error } = await rejectQuizAction(quizId, rejectReason);
     if (error) {
-      toast({ title: "Error", description: "Failed to reject quiz", variant: "destructive" })
+      toast({
+        title: "Error",
+        description: "Failed to reject quiz",
+        variant: "destructive",
+      });
     } else {
-      toast({ title: "Success", description: "Quiz has been rejected" })
-      router.push("/support/quiz")
+      toast({ title: "Success", description: "Quiz has been rejected" });
+      router.push("/support/quiz");
     }
-    setProcessing(false)
-    setRejectDialog(false)
-    setRejectReason("")
-  }
+    setProcessing(false);
+    setRejectDialog(false);
+    setRejectReason("");
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-muted-foreground">Loading...</div>
       </div>
-    )
+    );
   }
 
-  if (!quiz) return null
+  if (!quiz) return null;
 
-  const questions = Array.isArray(quiz.questions) ? quiz.questions : []
+  const questions = Array.isArray(quiz.questions) ? quiz.questions : [];
 
   return (
     <div className="space-y-6">
@@ -125,12 +140,20 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
+                  <Link href="/support">Support</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
                   <Link href="/support/quiz">Quiz Approval</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage className="max-w-[200px] truncate">{quiz.title}</BreadcrumbPage>
+                <BreadcrumbPage className="max-w-[200px] truncate">
+                  {quiz.title}
+                </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -169,18 +192,22 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
           <div
             className="h-48 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent"
             style={{
-              backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.3)), url(${quiz.cover_image || quiz.image_url})`,
+              backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.3)), url(${
+                quiz.cover_image || quiz.image_url
+              })`,
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
           />
         )}
-        
+
         <div className="p-6 space-y-6">
           {/* Title & Status */}
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <h2 className="text-xl font-semibold text-foreground">{quiz.title}</h2>
+              <h2 className="text-xl font-semibold text-foreground">
+                {quiz.title}
+              </h2>
               {quiz.description && (
                 <p className="text-muted-foreground">{quiz.description}</p>
               )}
@@ -202,17 +229,23 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
                 Creator
               </div>
               {quiz.creator ? (
-                <Link 
-                  href={`/profiles/${quiz.creator.id}`}
+                <Link
+                  href={`/users/${quiz.creator.id}?from=/support/quiz`}
                   className="flex items-center gap-3"
                 >
                   <Avatar className="h-10 w-10">
                     <AvatarImage src={getAvatarUrl(quiz.creator.avatar_url)} />
-                    <AvatarFallback>{quiz.creator.fullname?.[0] ?? "?"}</AvatarFallback>
+                    <AvatarFallback>
+                      {quiz.creator.fullname?.[0] ?? "?"}
+                    </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-medium text-sm hover:text-primary transition-colors">{quiz.creator.fullname}</p>
-                    <p className="text-xs text-muted-foreground">@{quiz.creator.username}</p>
+                    <p className="font-medium text-sm hover:text-primary transition-colors">
+                      {quiz.creator.fullname}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      @{quiz.creator.username}
+                    </p>
                   </div>
                 </Link>
               ) : (
@@ -280,17 +313,24 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
           <div className="divide-y divide-border">
             {questions.map((question: unknown, index: number) => {
               const q = question as {
-                question?: string
-                text?: string
-                options?: (string | { id?: string; answer?: string; image?: string })[]
-                answers?: (string | { id?: string; answer?: string; image?: string })[]
-                correct_answer?: number | string
-                correctAnswer?: number | string
-                correct?: number | string
-              }
-              const questionText = q.question || q.text || "-"
-              const options = q.options || q.answers || []
-              const correctAnswerValue = q.correct_answer ?? q.correctAnswer ?? q.correct
+                question?: string;
+                text?: string;
+                options?: (
+                  | string
+                  | { id?: string; answer?: string; image?: string }
+                )[];
+                answers?: (
+                  | string
+                  | { id?: string; answer?: string; image?: string }
+                )[];
+                correct_answer?: number | string;
+                correctAnswer?: number | string;
+                correct?: number | string;
+              };
+              const questionText = q.question || q.text || "-";
+              const options = q.options || q.answers || [];
+              const correctAnswerValue =
+                q.correct_answer ?? q.correctAnswer ?? q.correct;
 
               return (
                 <div key={index} className="p-4 space-y-3">
@@ -304,10 +344,14 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
                     <div className="pl-11 space-y-2">
                       {options.map((option, optIndex: number) => {
                         const optionText =
-                          typeof option === "string" ? option : option?.answer || "-"
-                        const optionId = typeof option === "object" ? option?.id : null
+                          typeof option === "string"
+                            ? option
+                            : option?.answer || "-";
+                        const optionId =
+                          typeof option === "object" ? option?.id : null;
                         const isCorrect =
-                          correctAnswerValue === optIndex || correctAnswerValue === optionId
+                          correctAnswerValue === optIndex ||
+                          correctAnswerValue === optionId;
 
                         return (
                           <div
@@ -329,12 +373,12 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
                               </Badge>
                             )}
                           </div>
-                        )
+                        );
                       })}
                     </div>
                   )}
                 </div>
-              )
+              );
             })}
           </div>
         ) : (
@@ -350,8 +394,8 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
           <DialogHeader>
             <DialogTitle className="text-green-600">Approve Quiz</DialogTitle>
             <DialogDescription>
-              Are you sure you want to approve <strong>{quiz.title}</strong>? This quiz will be
-              published and visible to all users.
+              Are you sure you want to approve <strong>{quiz.title}</strong>?
+              This quiz will be published and visible to all users.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -380,8 +424,8 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
           <DialogHeader>
             <DialogTitle className="text-red-500">Reject Quiz</DialogTitle>
             <DialogDescription>
-              Are you sure you want to reject <strong>{quiz.title}</strong>? The creator will be
-              notified about the rejection.
+              Are you sure you want to reject <strong>{quiz.title}</strong>? The
+              creator will be notified about the rejection.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-4">
@@ -398,8 +442,8 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
             <Button
               variant="outline"
               onClick={() => {
-                setRejectDialog(false)
-                setRejectReason("")
+                setRejectDialog(false);
+                setRejectReason("");
               }}
               disabled={processing}
               className="cursor-pointer"
@@ -418,5 +462,5 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

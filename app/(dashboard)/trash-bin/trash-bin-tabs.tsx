@@ -1,21 +1,25 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { BookOpen, Users, User } from "lucide-react"
-import { TrashQuizTable } from "./trash-quiz-table"
-import { TrashUserTable } from "./trash-user-table"
-import { TrashGroupTable } from "./trash-group-table"
-import type { DeletedQuiz, DeletedUser, DeletedGroup } from "./actions"
+import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BookOpen, Users, User } from "lucide-react";
+import { TrashQuizTable } from "./trash-quiz-table";
+import { TrashUserTable } from "./trash-user-table";
+import { TrashGroupTable } from "./trash-group-table";
+import type { DeletedQuiz, DeletedUser, DeletedGroup } from "./actions";
 
 interface TrashBinTabsProps {
-  initialQuizzes: DeletedQuiz[]
-  initialUsers: DeletedUser[]
-  initialGroups: DeletedGroup[]
+  initialQuizzes: DeletedQuiz[];
+  initialUsers: DeletedUser[];
+  initialGroups: DeletedGroup[];
 }
 
-export function TrashBinTabs({ initialQuizzes, initialUsers, initialGroups }: TrashBinTabsProps) {
-  const [activeTab, setActiveTab] = useState("quiz")
+export function TrashBinTabs({
+  initialQuizzes,
+  initialUsers,
+  initialGroups,
+}: TrashBinTabsProps) {
+  const [activeTab, setActiveTab] = useState("quiz");
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -23,14 +27,23 @@ export function TrashBinTabs({ initialQuizzes, initialUsers, initialGroups }: Tr
         <TabsTrigger value="quiz" className="flex items-center gap-2">
           <BookOpen className="h-4 w-4" />
           <span>Quiz</span>
+          <span className="ml-1 text-xs bg-sidebar-accent/50 text-muted-foreground px-1.5 py-0.5 rounded-full">
+            {initialQuizzes.length}
+          </span>
         </TabsTrigger>
         <TabsTrigger value="user" className="flex items-center gap-2">
           <User className="h-4 w-4" />
           <span>User</span>
+          <span className="ml-1 text-xs bg-sidebar-accent/50 text-muted-foreground px-1.5 py-0.5 rounded-full">
+            {initialUsers.length}
+          </span>
         </TabsTrigger>
         <TabsTrigger value="group" className="flex items-center gap-2">
           <Users className="h-4 w-4" />
           <span>Group</span>
+          <span className="ml-1 text-xs bg-sidebar-accent/50 text-muted-foreground px-1.5 py-0.5 rounded-full">
+            {initialGroups.length}
+          </span>
         </TabsTrigger>
       </TabsList>
 
@@ -46,5 +59,5 @@ export function TrashBinTabs({ initialQuizzes, initialUsers, initialGroups }: Tr
         <TrashGroupTable initialData={initialGroups} />
       </TabsContent>
     </Tabs>
-  )
+  );
 }
