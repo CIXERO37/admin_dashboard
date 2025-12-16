@@ -292,7 +292,7 @@ export function UserTable({
         const avatar = row.avatar as string | undefined;
         return (
           <Link
-            href={`/profiles/${id}`}
+            href={`/users/${id}?from=/administrator/user`}
             className="flex items-center gap-3 cursor-pointer"
           >
             <Avatar className="h-9 w-9">
