@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useState, useTransition } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import Link from "next/link"
+import { useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import {
   Users,
   Calendar,
@@ -15,10 +15,10 @@ import {
   UserMinus,
   Crown,
   SlidersHorizontal,
-} from "lucide-react"
-import { format } from "date-fns"
+} from "lucide-react";
+import { format } from "date-fns";
 
-import { cn, getAvatarUrl } from "@/lib/utils"
+import { cn, getAvatarUrl } from "@/lib/utils";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -26,25 +26,25 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -52,48 +52,51 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useToast } from "@/components/ui/use-toast"
+} from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/components/ui/use-toast";
 import {
   type GroupDetail,
   type GroupMember,
   removeGroupMember,
   updateMemberRole,
-} from "../actions"
+} from "../actions";
 
 interface GroupDetailClientProps {
-  group: GroupDetail
-  members: GroupMember[]
-  totalPages: number
-  totalCount: number
-  currentPage: number
-  currentTab: string
-  searchQuery: string
-  roleFilter: string
+  group: GroupDetail;
+  members: GroupMember[];
+  totalPages: number;
+  totalCount: number;
+  currentPage: number;
+  currentTab: string;
+  searchQuery: string;
+  roleFilter: string;
 }
 
-function getGroupStatus(group: GroupDetail): { label: string; variant: "default" | "secondary" | "outline" } {
-  const settings = group.settings as { status?: string } | null
+function getGroupStatus(group: GroupDetail): {
+  label: string;
+  variant: "default" | "secondary" | "outline";
+} {
+  const settings = group.settings as { status?: string } | null;
   if (settings?.status === "private") {
-    return { label: "PRIVATE", variant: "outline" }
+    return { label: "PRIVATE", variant: "outline" };
   }
-  return { label: "PUBLIC", variant: "secondary" }
+  return { label: "PUBLIC", variant: "secondary" };
 }
 
 function getLocation(group: GroupDetail): string {
-  const settings = group.settings as { location?: string } | null
-  return settings?.location || "Indonesia"
+  const settings = group.settings as { location?: string } | null;
+  return settings?.location || "Indonesia";
 }
 
 function getRoleBadgeStyle(role: string) {
   switch (role) {
     case "owner":
-      return "bg-yellow-500/20 text-yellow-600 border-yellow-500/30"
+      return "bg-yellow-500/20 text-yellow-600 border-yellow-500/30";
     case "admin":
-      return "bg-blue-500/20 text-blue-600 border-blue-500/30"
+      return "bg-blue-500/20 text-blue-600 border-blue-500/30";
     default:
-      return "bg-secondary text-secondary-foreground border-border"
+      return "bg-secondary text-secondary-foreground border-border";
   }
 }
 
@@ -107,82 +110,93 @@ export function GroupDetailClient({
   searchQuery,
   roleFilter,
 }: GroupDetailClientProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [isPending, startTransition] = useTransition()
-  const { toast } = useToast()
-  
-  const [copied, setCopied] = useState(false)
-  const [searchInput, setSearchInput] = useState(searchQuery)
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
+
+  const [copied, setCopied] = useState(false);
+  const [searchInput, setSearchInput] = useState(searchQuery);
 
   const [removeMemberDialog, setRemoveMemberDialog] = useState<{
-    open: boolean
-    memberId: string
-    memberName: string
-  }>({ open: false, memberId: "", memberName: "" })
+    open: boolean;
+    memberId: string;
+    memberName: string;
+  }>({ open: false, memberId: "", memberName: "" });
 
-  const status = getGroupStatus(group)
-  const location = getLocation(group)
-  const coverUrl = getAvatarUrl(group.cover_url)
+  const status = getGroupStatus(group);
+  const location = getLocation(group);
+  const coverUrl = getAvatarUrl(group.cover_url);
 
   const copyInviteCode = () => {
-    navigator.clipboard.writeText(group.invite_code)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    navigator.clipboard.writeText(group.invite_code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const updateUrl = (params: Record<string, string | number>) => {
-    const newParams = new URLSearchParams(searchParams.toString())
+    const newParams = new URLSearchParams(searchParams.toString());
     Object.entries(params).forEach(([key, value]) => {
       if (value && value !== "" && value !== "all") {
-        newParams.set(key, String(value))
+        newParams.set(key, String(value));
       } else {
-        newParams.delete(key)
+        newParams.delete(key);
       }
-    })
+    });
     startTransition(() => {
-      router.push(`?${newParams.toString()}`)
-    })
-  }
+      router.push(`?${newParams.toString()}`);
+    });
+  };
 
   const handleSearch = () => {
-    updateUrl({ search: searchInput, page: 1 })
-  }
+    updateUrl({ search: searchInput, page: 1 });
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") handleSearch()
-  }
+    if (e.key === "Enter") handleSearch();
+  };
 
   const handlePageChange = (page: number) => {
-    updateUrl({ page, search: searchQuery, role: roleFilter })
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
+    updateUrl({ page, search: searchQuery, role: roleFilter });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const handleTabChange = (tab: string) => {
-    updateUrl({ tab, page: 1, search: "", role: "all" })
-    setSearchInput("")
-  }
+    updateUrl({ tab, page: 1, search: "", role: "all" });
+    setSearchInput("");
+  };
 
   const handleRemoveMember = async () => {
-    const { error } = await removeGroupMember(group.id, removeMemberDialog.memberId)
+    const { error } = await removeGroupMember(
+      group.id,
+      removeMemberDialog.memberId
+    );
     if (error) {
-      toast({ title: "Error", description: "Failed to remove member", variant: "destructive" })
+      toast({
+        title: "Error",
+        description: "Failed to remove member",
+        variant: "destructive",
+      });
     } else {
-      toast({ title: "Success", description: "Member removed successfully" })
-      router.refresh()
+      toast({ title: "Success", description: "Member removed successfully" });
+      router.refresh();
     }
-    setRemoveMemberDialog({ open: false, memberId: "", memberName: "" })
-  }
+    setRemoveMemberDialog({ open: false, memberId: "", memberName: "" });
+  };
 
   const handleRoleChange = async (userId: string, newRole: string) => {
-    const { error } = await updateMemberRole(group.id, userId, newRole)
+    const { error } = await updateMemberRole(group.id, userId, newRole);
     if (error) {
-      toast({ title: "Error", description: "Failed to update role", variant: "destructive" })
+      toast({
+        title: "Error",
+        description: "Failed to update role",
+        variant: "destructive",
+      });
     } else {
-      toast({ title: "Success", description: "Role updated successfully" })
-      router.refresh()
+      toast({ title: "Success", description: "Role updated successfully" });
+      router.refresh();
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -190,6 +204,12 @@ export function GroupDetailClient({
       <div className="space-y-2">
         <Breadcrumb>
           <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/support">Support</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
                 <Link href="/support/group">Group</Link>
@@ -201,19 +221,22 @@ export function GroupDetailClient({
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <h1 className="text-3xl font-bold text-foreground">Group Detail</h1>
       </div>
 
       {/* Group Info Card */}
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         {/* Cover */}
-        <div 
+        <div
           className="h-40 bg-gradient-to-br from-primary/30 via-primary/20 to-primary/10"
-          style={coverUrl ? {
-            backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4)), url(${coverUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          } : undefined}
+          style={
+            coverUrl
+              ? {
+                  backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4)), url(${coverUrl})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }
+              : undefined
+          }
         />
 
         {/* Info */}
@@ -221,9 +244,17 @@ export function GroupDetailClient({
           {/* Avatar */}
           <div className="absolute -top-12 left-6">
             <Avatar className="h-24 w-24 border-4 border-background shadow-lg">
-              <AvatarImage src={getAvatarUrl(group.avatar_url)} alt={group.name} />
+              <AvatarImage
+                src={getAvatarUrl(group.avatar_url)}
+                alt={group.name}
+              />
               <AvatarFallback className="text-2xl font-bold bg-primary text-primary-foreground">
-                {group.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
+                {group.name
+                  .split(" ")
+                  .map((w) => w[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()}
               </AvatarFallback>
             </Avatar>
           </div>
@@ -232,7 +263,9 @@ export function GroupDetailClient({
           <div className="pt-14 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div className="space-y-2">
               <div className="flex items-center gap-3">
-                <h2 className="text-2xl font-bold text-foreground">{group.name}</h2>
+                <h2 className="text-2xl font-bold text-foreground">
+                  {group.name}
+                </h2>
                 <Badge
                   className={`text-xs font-semibold ${
                     status.variant === "secondary"
@@ -244,12 +277,12 @@ export function GroupDetailClient({
                 </Badge>
               </div>
               {group.description && (
-                <p className="text-muted-foreground max-w-xl">{group.description}</p>
+                <p className="text-muted-foreground max-w-xl">
+                  {group.description}
+                </p>
               )}
               <p className="text-sm text-muted-foreground">{location}</p>
             </div>
-
-
           </div>
 
           {/* Invite Code & Creator */}
@@ -257,17 +290,28 @@ export function GroupDetailClient({
             <div className="flex-1 p-4 bg-muted/50 rounded-lg">
               <p className="text-xs text-muted-foreground mb-1">Invite Code</p>
               <div className="flex items-center gap-2">
-                <code className="text-lg font-mono font-semibold text-foreground">{group.invite_code}</code>
-                <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer" onClick={copyInviteCode}>
-                  {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                <code className="text-lg font-mono font-semibold text-foreground">
+                  {group.invite_code}
+                </code>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 cursor-pointer"
+                  onClick={copyInviteCode}
+                >
+                  {copied ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             </div>
 
             <div className="flex-1 p-4 bg-muted/50 rounded-lg">
               <p className="text-xs text-muted-foreground mb-1">Created by</p>
-              <Link 
-                href={`/profiles/${group.creator_id}`}
+              <Link
+                href={`/users/${group.creator_id}?from=/support/group`}
                 className="flex items-center gap-3 hover:bg-muted rounded-lg p-1 -m-1 transition-colors"
               >
                 <Avatar className="h-10 w-10 border border-border">
@@ -277,7 +321,9 @@ export function GroupDetailClient({
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-medium hover:text-primary transition-colors">{group.creator?.fullname || "Unknown"}</p>
+                  <p className="font-medium hover:text-primary transition-colors">
+                    {group.creator?.fullname || "Unknown"}
+                  </p>
                 </div>
               </Link>
             </div>
@@ -288,8 +334,12 @@ export function GroupDetailClient({
       {/* Tabs */}
       <Tabs value={currentTab} onValueChange={handleTabChange}>
         <TabsList>
-          <TabsTrigger value="overview" className="cursor-pointer">Overview</TabsTrigger>
-          <TabsTrigger value="members" className="cursor-pointer">Members ({totalCount})</TabsTrigger>
+          <TabsTrigger value="overview" className="cursor-pointer">
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="members" className="cursor-pointer">
+            Members ({totalCount})
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -315,7 +365,9 @@ export function GroupDetailClient({
               </div>
               <div>
                 <p className="text-sm font-bold">
-                  {group.created_at ? format(new Date(group.created_at), "dd MMMM yyyy") : "-"}
+                  {group.created_at
+                    ? format(new Date(group.created_at), "dd MMMM yyyy")
+                    : "-"}
                 </p>
                 <p className="text-sm text-muted-foreground">Date Created</p>
               </div>
@@ -328,7 +380,9 @@ export function GroupDetailClient({
                 <Shield className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm font-bold capitalize">{status.label.toLowerCase()}</p>
+                <p className="text-sm font-bold capitalize">
+                  {status.label.toLowerCase()}
+                </p>
                 <p className="text-sm text-muted-foreground">Privacy</p>
               </div>
             </div>
@@ -357,7 +411,10 @@ export function GroupDetailClient({
               </button>
             </div>
 
-            <Select value={roleFilter} onValueChange={(value) => updateUrl({ role: value, page: 1 })}>
+            <Select
+              value={roleFilter}
+              onValueChange={(value) => updateUrl({ role: value, page: 1 })}
+            >
               <SelectTrigger className="w-36 cursor-pointer">
                 <div className="flex items-center gap-2">
                   <SlidersHorizontal className="h-4 w-4" />
@@ -365,10 +422,18 @@ export function GroupDetailClient({
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all" className="cursor-pointer">All Roles</SelectItem>
-                <SelectItem value="owner" className="cursor-pointer">Owner</SelectItem>
-                <SelectItem value="admin" className="cursor-pointer">Admin</SelectItem>
-                <SelectItem value="member" className="cursor-pointer">Member</SelectItem>
+                <SelectItem value="all" className="cursor-pointer">
+                  All Roles
+                </SelectItem>
+                <SelectItem value="owner" className="cursor-pointer">
+                  Owner
+                </SelectItem>
+                <SelectItem value="admin" className="cursor-pointer">
+                  Admin
+                </SelectItem>
+                <SelectItem value="member" className="cursor-pointer">
+                  Member
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -378,59 +443,103 @@ export function GroupDetailClient({
             {members.length > 0 ? (
               <div className="divide-y divide-border">
                 {members.map((member, index) => {
-                  const name = member.fullname || member.username || "Unknown"
-                  const initials = name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()
-                  
+                  const name = member.fullname || member.username || "Unknown";
+                  const initials = name
+                    .split(" ")
+                    .map((w) => w[0])
+                    .join("")
+                    .slice(0, 2)
+                    .toUpperCase();
+
                   return (
-                    <div key={member.user_id || index} className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
-                      <Link 
-                        href={`/profiles/${member.user_id}`}
+                    <div
+                      key={member.user_id || index}
+                      className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+                    >
+                      <Link
+                        href={`/users/${member.user_id}?from=/support/group`}
                         className="flex items-center gap-3 hover:bg-muted rounded-lg p-1 -m-1 transition-colors"
                       >
                         <Avatar className="h-10 w-10 border border-border">
-                          <AvatarImage src={getAvatarUrl(member.avatar_url)} alt={name} />
-                          <AvatarFallback className="text-sm">{initials}</AvatarFallback>
+                          <AvatarImage
+                            src={getAvatarUrl(member.avatar_url)}
+                            alt={name}
+                          />
+                          <AvatarFallback className="text-sm">
+                            {initials}
+                          </AvatarFallback>
                         </Avatar>
                         <div>
                           <div className="flex items-center gap-2">
-                            <p className="font-medium hover:text-primary transition-colors">{member.fullname || "Unknown"}</p>
-                            {member.role === "owner" && <Crown className="h-4 w-4 text-yellow-500" />}
+                            <p className="font-medium hover:text-primary transition-colors">
+                              {member.fullname || "Unknown"}
+                            </p>
+                            {member.role === "owner" && (
+                              <Crown className="h-4 w-4 text-yellow-500" />
+                            )}
                           </div>
-                          <p className="text-sm text-muted-foreground">@{member.username || "-"}</p>
+                          <p className="text-sm text-muted-foreground">
+                            @{member.username || "-"}
+                          </p>
                         </div>
                       </Link>
 
                       <div className="flex items-center gap-3">
-                        <Badge variant="outline" className={getRoleBadgeStyle(member.role)}>
+                        <Badge
+                          variant="outline"
+                          className={getRoleBadgeStyle(member.role)}
+                        >
                           {member.role}
                         </Badge>
                         <span className="text-xs text-muted-foreground">
-                          {member.joined_at ? format(new Date(member.joined_at), "dd MMM yyyy") : "-"}
+                          {member.joined_at
+                            ? format(new Date(member.joined_at), "dd MMM yyyy")
+                            : "-"}
                         </span>
 
                         {member.role !== "owner" && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 cursor-pointer"
+                              >
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               {member.role !== "admin" && (
-                                <DropdownMenuItem onClick={() => handleRoleChange(member.user_id, "admin")} className="cursor-pointer">
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleRoleChange(member.user_id, "admin")
+                                  }
+                                  className="cursor-pointer"
+                                >
                                   <Shield className="h-4 w-4 mr-2" />
                                   Make Admin
                                 </DropdownMenuItem>
                               )}
                               {member.role === "admin" && (
-                                <DropdownMenuItem onClick={() => handleRoleChange(member.user_id, "member")} className="cursor-pointer">
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleRoleChange(member.user_id, "member")
+                                  }
+                                  className="cursor-pointer"
+                                >
                                   <UserMinus className="h-4 w-4 mr-2" />
                                   Remove Admin
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
-                                onClick={() => setRemoveMemberDialog({ open: true, memberId: member.user_id, memberName: name })}
+                                onClick={() =>
+                                  setRemoveMemberDialog({
+                                    open: true,
+                                    memberId: member.user_id,
+                                    memberName: name,
+                                  })
+                                }
                                 className="cursor-pointer text-destructive focus:text-destructive"
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
@@ -441,7 +550,7 @@ export function GroupDetailClient({
                         )}
                       </div>
                     </div>
-                  )
+                  );
                 })}
               </div>
             ) : (
@@ -449,7 +558,9 @@ export function GroupDetailClient({
                 <Users className="h-12 w-12 text-muted-foreground mb-3" />
                 <h3 className="font-medium">No members found</h3>
                 <p className="text-sm text-muted-foreground">
-                  {searchQuery ? "Try a different search" : "This group has no members yet"}
+                  {searchQuery
+                    ? "Try a different search"
+                    : "This group has no members yet"}
                 </p>
               </div>
             )}
@@ -458,8 +569,12 @@ export function GroupDetailClient({
           {/* Pagination */}
           <div className="flex items-center justify-between rounded-xl border border-border bg-card px-6 py-4">
             <div className="text-sm text-muted-foreground">
-              Page <span className="font-medium text-foreground">{currentPage}</span> of{" "}
-              <span className="font-medium text-foreground">{totalPages || 1}</span>
+              Page{" "}
+              <span className="font-medium text-foreground">{currentPage}</span>{" "}
+              of{" "}
+              <span className="font-medium text-foreground">
+                {totalPages || 1}
+              </span>
             </div>
 
             {totalPages > 1 && (
@@ -479,10 +594,11 @@ export function GroupDetailClient({
 
                 <div className="flex items-center gap-1">
                   {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                    let page = i + 1
+                    let page = i + 1;
                     if (totalPages > 5) {
-                      if (currentPage > 3) page = currentPage - 2 + i
-                      if (currentPage > totalPages - 2) page = totalPages - 4 + i
+                      if (currentPage > 3) page = currentPage - 2 + i;
+                      if (currentPage > totalPages - 2)
+                        page = totalPages - 4 + i;
                     }
                     return (
                       <button
@@ -498,7 +614,7 @@ export function GroupDetailClient({
                       >
                         {page}
                       </button>
-                    )
+                    );
                   })}
                 </div>
 
@@ -521,24 +637,44 @@ export function GroupDetailClient({
       )}
 
       {/* Remove Member Dialog */}
-      <Dialog open={removeMemberDialog.open} onOpenChange={(open) => setRemoveMemberDialog({ open, memberId: "", memberName: "" })}>
+      <Dialog
+        open={removeMemberDialog.open}
+        onOpenChange={(open) =>
+          setRemoveMemberDialog({ open, memberId: "", memberName: "" })
+        }
+      >
         <DialogContent showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>Remove Member</DialogTitle>
             <DialogDescription>
-              Are you sure you want to remove <strong>{removeMemberDialog.memberName}</strong> from this group?
+              Are you sure you want to remove{" "}
+              <strong>{removeMemberDialog.memberName}</strong> from this group?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" className="cursor-pointer" onClick={() => setRemoveMemberDialog({ open: false, memberId: "", memberName: "" })}>
+            <Button
+              variant="outline"
+              className="cursor-pointer"
+              onClick={() =>
+                setRemoveMemberDialog({
+                  open: false,
+                  memberId: "",
+                  memberName: "",
+                })
+              }
+            >
               Cancel
             </Button>
-            <Button variant="destructive" className="cursor-pointer" onClick={handleRemoveMember}>
+            <Button
+              variant="destructive"
+              className="cursor-pointer"
+              onClick={handleRemoveMember}
+            >
               Remove
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

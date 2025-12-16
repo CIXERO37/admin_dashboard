@@ -223,7 +223,7 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
           Created by
         </p>
         <Link
-          href={`/profiles/${group.creator_id}`}
+          href={`/users/${group.creator_id}?from=/support/group`}
           className="flex items-center gap-2 hover:bg-muted/50 rounded-lg p-1 -m-1 transition-colors"
           onClick={(e) => e.stopPropagation()}
         >
@@ -744,6 +744,7 @@ export function GroupTable({
                     : "Select country first"
                 }
                 className="w-full"
+                disabled={!filterValues.country}
               />
             </div>
 
@@ -762,6 +763,7 @@ export function GroupTable({
                   filterValues.state ? "No city found." : "Select state first"
                 }
                 className="w-full"
+                disabled={!filterValues.state}
               />
             </div>
 

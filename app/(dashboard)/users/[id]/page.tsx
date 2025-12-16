@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 
 import {
@@ -20,6 +21,13 @@ import {
   ProfileBreadcrumb,
   TopQuizzesList,
 } from "./profile-client";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import {
   Mail,
   Phone,
@@ -108,9 +116,27 @@ export default async function ProfileDetailPage({ params }: PageProps) {
 
   return (
     <div className="space-y-4">
-      <ProfileBreadcrumb
-        name={profile.fullname || profile.username || "Unknown"}
-      />
+      <Suspense
+        fallback={
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbPage>Users</BreadcrumbPage>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>
+                  {profile.fullname || profile.username || "Unknown"}
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        }
+      >
+        <ProfileBreadcrumb
+          name={profile.fullname || profile.username || "Unknown"}
+        />
+      </Suspense>
 
       <div className="flex flex-col lg:flex-row lg:items-start gap-6">
         {/* Left Sidebar */}
@@ -203,7 +229,7 @@ export default async function ProfileDetailPage({ params }: PageProps) {
             <CardHeader className="flex-row items-center justify-between pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <Trophy className="h-4 w-4 text-amber-500" />
-                Quiz Terbanyak Dimainkan
+                Most Played Quizzes
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -212,9 +238,7 @@ export default async function ProfileDetailPage({ params }: PageProps) {
               ) : (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <Gamepad2 className="h-12 w-12 text-muted-foreground/50 mb-3" />
-                  <p className="text-muted-foreground">
-                    Belum ada quiz yang dimainkan
-                  </p>
+                  <p className="text-muted-foreground">No quizzes played yet</p>
                 </div>
               )}
             </CardContent>
@@ -266,7 +290,7 @@ export default async function ProfileDetailPage({ params }: PageProps) {
           <CardHeader className="flex-row items-center justify-between pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <BookOpen className="h-4 w-4 text-blue-500" />
-              Quiz yang Dibuat
+              Created Quizzes
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -290,7 +314,7 @@ export default async function ProfileDetailPage({ params }: PageProps) {
                         )}
                         <div className="flex items-center gap-1">
                           <FileQuestion className="h-3 w-3" />
-                          <span>{quiz.question_count} soal</span>
+                          <span>{quiz.question_count} questions</span>
                         </div>
                       </div>
                     </div>
@@ -300,9 +324,7 @@ export default async function ProfileDetailPage({ params }: PageProps) {
             ) : (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <BookOpen className="h-12 w-12 text-muted-foreground/50 mb-3" />
-                <p className="text-muted-foreground">
-                  Belum ada quiz yang dibuat
-                </p>
+                <p className="text-muted-foreground">No quizzes created yet</p>
               </div>
             )}
           </CardContent>
