@@ -38,10 +38,8 @@ const referrerConfig: Record<
     parentHref: "/support",
     parentName: "Support",
   },
-  "/support/group": {
-    name: "Group",
-    parentHref: "/support",
-    parentName: "Support",
+  "/groups": {
+    name: "Groups",
   },
   "/master/quiz": {
     name: "Quiz",

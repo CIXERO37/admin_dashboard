@@ -206,13 +206,7 @@ export function GroupDetailClient({
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/support">Support</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href="/support/group">Group</Link>
+                <Link href="/groups">Groups</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -311,7 +305,7 @@ export function GroupDetailClient({
             <div className="flex-1 p-4 bg-muted/50 rounded-lg">
               <p className="text-xs text-muted-foreground mb-1">Created by</p>
               <Link
-                href={`/users/${group.creator_id}?from=/support/group`}
+                href={`/users/${group.creator_id}?from=/groups`}
                 className="flex items-center gap-3 hover:bg-muted rounded-lg p-1 -m-1 transition-colors"
               >
                 <Avatar className="h-10 w-10 border border-border">
@@ -457,7 +451,7 @@ export function GroupDetailClient({
                       className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
                     >
                       <Link
-                        href={`/users/${member.user_id}?from=/support/group`}
+                        href={`/users/${member.user_id}?from=/groups`}
                         className="flex items-center gap-3 hover:bg-muted rounded-lg p-1 -m-1 transition-colors"
                       >
                         <Avatar className="h-10 w-10 border border-border">

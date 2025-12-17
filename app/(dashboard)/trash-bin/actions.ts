@@ -161,7 +161,7 @@ export async function restoreGroupAction(id: string) {
   }
 
   revalidatePath("/trash-bin")
-  revalidatePath("/support/group")
+  revalidatePath("/groups")
   return { error: null }
 }
 
@@ -271,7 +271,7 @@ export async function softDeleteGroupAction(id: string) {
     return { error: error.message }
   }
 
-  revalidatePath("/support/group")
+  revalidatePath("/groups")
   revalidatePath("/trash-bin")
   return { error: null }
 }
