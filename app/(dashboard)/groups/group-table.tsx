@@ -61,6 +61,7 @@ interface GroupTableProps {
   searchQuery: string;
   statusFilter?: string;
   countries: Country[];
+  categories: string[];
 }
 
 function formatDate(dateString?: string | null): string {
@@ -119,7 +120,7 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
     .toUpperCase();
 
   const handleCardClick = () => {
-    router.push(`/support/group/${group.id}`);
+    router.push(`/groups/${group.id}`);
   };
 
   return (
@@ -142,16 +143,53 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
       >
         {/* Status Badge Row */}
         <div className="flex items-center justify-between mb-3">
-          <Badge
-            variant={status.variant}
-            className={`text-[10px] font-semibold px-2 py-0.5 ${
-              status.variant === "secondary"
-                ? "bg-green-500/90 text-white border-green-500"
-                : "bg-black/50 border-white/30 text-white"
-            }`}
-          >
-            {status.label}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge
+              variant={status.variant}
+              className={`text-[10px] font-semibold px-2 py-0.5 ${
+                status.variant === "secondary"
+                  ? "bg-green-500/90 text-white border-green-500"
+                  : "bg-black/50 border-white/30 text-white"
+              }`}
+            >
+              {status.label}
+            </Badge>
+            {group.category && (
+              <Badge
+                variant="outline"
+                className="text-[10px] font-semibold px-2 py-0.5 bg-black/50 border-white/30 text-white uppercase"
+              >
+                {(() => {
+                  const translations: Record<string, string> = {
+                    kampus: "Campus",
+                    kantor: "Office",
+                    keluarga: "Family",
+                    komunitas: "Community",
+                    "masjid/musholla": "Mosque",
+                    pesantren: "Islamic Boarding School",
+                    sekolah: "School",
+                    "tpa/tpq": "TPA/TPQ",
+                    umum: "General",
+                    lainnya: "Other",
+                    // English keys backup
+                    campus: "Campus",
+                    office: "Office",
+                    family: "Family",
+                    community: "Community",
+                    mosque: "Mosque",
+                    "islamic boarding school": "Islamic Boarding School",
+                    school: "School",
+                    general: "General",
+                    other: "Other",
+                  };
+                  const key = group.category
+                    ? group.category.toLowerCase()
+                    : "";
+                  return translations[key] || group.category;
+                })()}
+              </Badge>
+            )}
+          </div>
 
           {/* More Options */}
           <DropdownMenu>
@@ -168,7 +206,7 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild className="cursor-pointer">
-                <Link href={`/support/group/${group.id}`}>
+                <Link href={`/groups/${group.id}`}>
                   <Eye className="h-4 w-4 mr-2" />
                   Detail
                 </Link>
@@ -223,7 +261,7 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
           Created by
         </p>
         <Link
-          href={`/users/${group.creator_id}?from=/support/group`}
+          href={`/users/${group.creator_id}?from=/groups`}
           className="flex items-center gap-2 hover:bg-muted/50 rounded-lg p-1 -m-1 transition-colors"
           onClick={(e) => e.stopPropagation()}
         >
@@ -273,7 +311,7 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
           asChild
           onClick={(e) => e.stopPropagation()}
         >
-          <Link href={`/support/group/${group.id}`}>
+          <Link href={`/groups/${group.id}`}>
             <Eye className="h-4 w-4" />
             Detail
           </Link>
@@ -290,6 +328,7 @@ export function GroupTable({
   searchQuery,
   statusFilter = "all",
   countries,
+  categories,
 }: GroupTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -316,6 +355,7 @@ export function GroupTable({
     state: searchParams.get("state") || "",
     city: searchParams.get("city") || "",
     status: statusFilter,
+    category: searchParams.get("category") || "",
   });
 
   // Location data state
@@ -338,6 +378,11 @@ export function GroupTable({
   const cityOptions = cities.map((c) => ({
     value: String(c.id),
     label: c.name,
+  }));
+
+  const categoryOptions = categories.map((c) => ({
+    value: c,
+    label: c,
   }));
 
   // Handle country change - fetch states directly from client
@@ -396,6 +441,7 @@ export function GroupTable({
       state: "",
       city: "",
       status: "all",
+      category: "",
     });
     setStates([]);
     setCities([]);
@@ -407,6 +453,7 @@ export function GroupTable({
       state: filterValues.state,
       city: filterValues.city,
       status: filterValues.status,
+      category: filterValues.category,
       page: 1,
     });
     setFilterDialogOpen(false);
@@ -419,6 +466,7 @@ export function GroupTable({
       state: searchParams.get("state") || "",
       city: searchParams.get("city") || "",
       status: statusFilter,
+      category: searchParams.get("category") || "",
     });
     setFilterDialogOpen(false);
   };
@@ -484,7 +532,7 @@ export function GroupTable({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Manage Groups</h1>
+          <h1 className="text-3xl font-bold text-foreground">Groups</h1>
         </div>
 
         <div className="flex items-center gap-3">
@@ -715,6 +763,22 @@ export function GroupTable({
             </DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            {/* Category */}
+            <div className="grid gap-2">
+              <Label htmlFor="category">Category</Label>
+              <Combobox
+                options={categoryOptions}
+                value={filterValues.category}
+                onValueChange={(value) =>
+                  setFilterValues((prev) => ({ ...prev, category: value }))
+                }
+                placeholder="Select Category"
+                searchPlaceholder="Search category..."
+                emptyText="No category found."
+                className="w-full"
+              />
+            </div>
+
             {/* Country */}
             <div className="grid gap-2">
               <Label htmlFor="country">Country</Label>

@@ -11,6 +11,7 @@ export interface Group {
   creator_id: string
   invite_code: string
   slug?: string | null
+  category?: string | null
   members?: Record<string, unknown>[] | null
   settings?: Record<string, unknown> | null
   created_at?: string | null
@@ -33,6 +34,7 @@ interface FetchGroupsParams {
   limit?: number
   search?: string
   status?: string
+  category?: string
 }
 
 export async function fetchGroups({
@@ -40,6 +42,7 @@ export async function fetchGroups({
   limit = 12,
   search = "",
   status = "all",
+  category = "",
 }: FetchGroupsParams): Promise<GroupsResponse> {
   const supabase = getSupabaseAdminClient()
   const offset = (page - 1) * limit
@@ -55,6 +58,27 @@ export async function fetchGroups({
 
   if (status && status !== "all") {
     query = query.eq("settings->>status", status)
+  }
+
+  if (category) {
+    // Map English categories to Indonesian database values for backward compatibility
+    const categoryMapping: Record<string, string[]> = {
+      "Campus": ["Kampus", "Campus"],
+      "Office": ["Kantor", "Office"],
+      "Family": ["Keluarga", "Family"],
+      "Community": ["Komunitas", "Community"],
+      "Mosque": ["Masjid/Musholla", "Masjid", "Musholla", "Mosque"],
+      "Islamic Boarding School": ["Pesantren", "Islamic Boarding School"],
+      "School": ["Sekolah", "School"],
+      "General": ["Umum", "General"],
+      "TPA/TPQ": ["TPA/TPQ"],
+      "Other": ["Lainnya", "Other"]
+    }
+
+    const searchTerms = categoryMapping[category] || [category]
+    // Create OR query for all possible terms: category.ilike.term1,category.ilike.term2
+    const orQuery = searchTerms.map(term => `category.ilike.%${term}%`).join(",")
+    query = query.or(orQuery)
   }
 
   const { data, count, error } = await query
@@ -403,4 +427,20 @@ export async function fetchCitiesByState(stateId: number): Promise<City[]> {
   }
 
   return data ?? []
+}
+
+// Fetch static categories
+export async function fetchGroupCategories(): Promise<string[]> {
+  return [
+    "Campus",
+    "Office",
+    "Family",
+    "Community",
+    "Mosque",
+    "Islamic Boarding School",
+    "School",
+    "TPA/TPQ",
+    "General",
+    "Other",
+  ]
 }
