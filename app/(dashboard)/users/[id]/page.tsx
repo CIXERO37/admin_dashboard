@@ -9,14 +9,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   AvatarDialog,
   ProfileBreadcrumb,
   TopQuizzesList,
@@ -37,62 +29,12 @@ import {
   Trophy,
   BookOpen,
   FileQuestion,
+  CreditCard,
 } from "lucide-react";
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
-
-const mockTransactions = [
-  {
-    id: 1,
-    product: "Mock premium pack",
-    status: "pending",
-    date: "12/10/2025",
-    amount: "$39.50",
-  },
-  {
-    id: 2,
-    product: "Enterprise plan subscription",
-    status: "paid",
-    date: "11/15/2025",
-    amount: "$159.90",
-  },
-  {
-    id: 3,
-    product: "Business board pro license",
-    status: "paid",
-    date: "07/13/2025",
-    amount: "$89.00",
-  },
-  {
-    id: 4,
-    product: "Custom integration package",
-    status: "failed",
-    date: "06/13/2025",
-    amount: "$299.90",
-  },
-  {
-    id: 5,
-    product: "Developer toolkit license",
-    status: "paid",
-    date: "08/15/2025",
-    amount: "$129.90",
-  },
-  {
-    id: 6,
-    product: "Support package renewal",
-    status: "pending",
-    date: "07/22/2025",
-    amount: "$19.90",
-  },
-];
-
-const statusColors: Record<string, string> = {
-  pending: "bg-yellow-500/20 text-yellow-600 border-yellow-500/30",
-  paid: "bg-green-500/20 text-green-600 border-green-500/30",
-  failed: "bg-red-500/20 text-red-600 border-red-500/30",
-};
 
 export default async function ProfileDetailPage({ params }: PageProps) {
   const { id } = await params;
@@ -251,37 +193,16 @@ export default async function ProfileDetailPage({ params }: PageProps) {
         {/* Transaction History */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Transaction History</CardTitle>
+            <CardTitle className="text-base flex items-center gap-2">
+              <CreditCard className="h-4 w-4 text-green-500" />
+              Transaction History
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mockTransactions.map((tx) => (
-                  <TableRow key={tx.id}>
-                    <TableCell className="text-blue-500 font-medium">
-                      {tx.product}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={statusColors[tx.status]}>
-                        {tx.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {tx.date}
-                    </TableCell>
-                    <TableCell className="text-right">{tx.amount}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <CreditCard className="h-12 w-12 text-muted-foreground/50 mb-3" />
+              <p className="text-muted-foreground">No transactions yet</p>
+            </div>
           </CardContent>
         </Card>
 
