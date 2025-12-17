@@ -42,13 +42,12 @@ export default function BillingDashboardPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Billing Dashboard</h1>
-        <p className="mt-1 text-muted-foreground">Overview of subscriptions and payments</p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Total Subscribers"
+          title="Subscribers"
           value={activeSubscribers.length}
           change="+2 this week"
           changeType="increase"
