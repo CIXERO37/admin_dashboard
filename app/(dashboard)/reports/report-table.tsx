@@ -246,7 +246,7 @@ export function ReportTable({
     },
     {
       key: "title",
-      label: "Report",
+      label: "Title",
       render: (value: unknown) => {
         // Remove "Laporan " prefix if exists
         const title = ((value as string) || "Untitled").replace(
@@ -263,8 +263,22 @@ export function ReportTable({
       },
     },
     {
+      key: "description",
+      label: "Description",
+      render: (value: unknown) => {
+        const description = (value as string) || "";
+        return (
+          <div className="max-w-[250px]">
+            <p className="truncate">
+              {description || "No description provided"}
+            </p>
+          </div>
+        );
+      },
+    },
+    {
       key: "reported",
-      label: "Reported",
+      label: "Type",
       render: (_: unknown, row: Record<string, unknown>) => {
         const contentType = row.reported_content_type as string;
         const reportedUser = row.reportedUserData as Report["reported_user"];
@@ -364,14 +378,11 @@ export function ReportTable({
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() =>
-                  setDetailDialog({ open: true, report: fullReport })
-                }
-                className="cursor-pointer"
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                View Details
+              <DropdownMenuItem asChild className="cursor-pointer">
+                <Link href={`/reports/${id}`}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  View Details
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() =>
@@ -413,6 +424,7 @@ export function ReportTable({
     id: report.id,
     reporterData: report.reporter,
     title: report.title,
+    description: report.description,
     report_type: report.report_type,
     reported_content_type: report.reported_content_type,
     reported_content_id: report.reported_content_id,
@@ -475,6 +487,7 @@ export function ReportTable({
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={handlePageChange}
+          onRowClick={(row) => router.push(`/reports/${row.id}`)}
         />
       </div>
 
@@ -487,9 +500,7 @@ export function ReportTable({
           <DialogHeader>
             <DialogTitle>Ubah Status</DialogTitle>
             <DialogDescription>
-              Apakah Anda yakin ingin mengubah status dari{" "}
-              <strong>{confirmDialog.currentStatus}</strong> menjadi{" "}
-              <strong>{confirmDialog.newStatus}</strong>?
+              Apakah Anda yakin ingin mengubah status dari?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -501,7 +512,7 @@ export function ReportTable({
             >
               Batal
             </Button>
-            <Button onClick={handleConfirm}>Ya, Ubah</Button>
+            <Button onClick={handleConfirm}>Ubah</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
