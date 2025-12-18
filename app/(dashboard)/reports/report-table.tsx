@@ -226,10 +226,12 @@ export function ReportTable({
           return <span className="text-muted-foreground">—</span>;
         }
         const name = reporter.fullname || reporter.username || "Unknown";
-        const email = reporter.email || "No email";
+        const username = reporter.username
+          ? `@${reporter.username}`
+          : "No username";
         return (
           <Link
-            href={`/users/${reporter.id}?from=/support/report`}
+            href={`/users/${reporter.id}`}
             className="flex items-center gap-3 cursor-pointer"
           >
             <Avatar className="h-9 w-9">
@@ -240,7 +242,7 @@ export function ReportTable({
               <p className="font-medium leading-tight hover:text-primary transition-colors">
                 {name}
               </p>
-              <p className="text-xs text-muted-foreground">{email}</p>
+              <p className="text-xs text-muted-foreground">{username}</p>
             </div>
           </Link>
         );
@@ -274,7 +276,7 @@ export function ReportTable({
         if (contentType === "user" && reportedUser) {
           return (
             <Link
-              href={`/users/${reportedUser.id}?from=/support/report`}
+              href={`/users/${reportedUser.id}`}
               className="flex items-center gap-2 cursor-pointer"
             >
               <User className="h-4 w-4 text-muted-foreground" />

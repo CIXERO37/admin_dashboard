@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Maximize2, X, Play, ChevronDown, ChevronUp } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,103 +17,25 @@ import {
 } from "@/components/ui/breadcrumb";
 import { getAvatarUrl } from "@/lib/utils";
 
-// Map of referrer paths to display names and parent links
-const referrerConfig: Record<
-  string,
-  { name: string; parentHref?: string; parentName?: string }
-> = {
-  "/administrator/user": {
-    name: "Users",
-    parentHref: "/administrator",
-    parentName: "Administrator",
-  },
-  "/support/report": {
-    name: "Report",
-    parentHref: "/support",
-    parentName: "Support",
-  },
-  "/support/quiz": {
-    name: "Quiz Approval",
-    parentHref: "/support",
-    parentName: "Support",
-  },
-  "/groups": {
-    name: "Groups",
-  },
-  "/master/quiz": {
-    name: "Quiz",
-    parentHref: "/master",
-    parentName: "Master Data",
-  },
-  "/dashboard": { name: "Dashboard" },
-};
-
 interface ProfileBreadcrumbProps {
   name: string;
 }
 
 export function ProfileBreadcrumb({ name }: ProfileBreadcrumbProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const referrer = searchParams.get("from");
-
-  // Get the config for the referrer
-  const config = referrer ? referrerConfig[referrer] : null;
-
-  // Check if referrer is already the Users page
-  const isFromUsersPage = referrer === "/administrator/user";
-
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        {config && (
-          <>
-            {/* Parent link (e.g., Administrator, Support, Master Data) */}
-            {config.parentHref && config.parentName && (
-              <>
-                <BreadcrumbItem>
-                  <BreadcrumbLink asChild>
-                    <Link
-                      href={config.parentHref}
-                      className="hover:text-foreground transition-colors"
-                    >
-                      {config.parentName}
-                    </Link>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-              </>
-            )}
-            {/* Referrer page link (e.g., Group, Report, Quiz) */}
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link
-                  href={referrer!}
-                  className="hover:text-foreground transition-colors"
-                >
-                  {config.name}
-                </Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-          </>
-        )}
-        {/* Always show Users link (except when coming from Users page) */}
-        {!isFromUsersPage && (
-          <>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link
-                  href="/administrator/user"
-                  className="hover:text-foreground transition-colors"
-                >
-                  Users
-                </Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-          </>
-        )}
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link
+              href="/users"
+              className="hover:text-foreground transition-colors"
+            >
+              Users
+            </Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
         <BreadcrumbItem>
           <BreadcrumbPage>{name}</BreadcrumbPage>
         </BreadcrumbItem>

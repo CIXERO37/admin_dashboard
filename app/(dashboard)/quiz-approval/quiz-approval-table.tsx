@@ -46,7 +46,7 @@ function QuizCard({ quiz, onApprove, onReject }: QuizCardProps) {
     .toUpperCase();
 
   const handleCardClick = () => {
-    router.push(`/support/quiz/${quiz.id}`);
+    router.push(`/quiz-approval/${quiz.id}`);
   };
 
   return (
@@ -107,7 +107,7 @@ function QuizCard({ quiz, onApprove, onReject }: QuizCardProps) {
 
         {/* Creator Info */}
         <Link
-          href={`/users/${quiz.creator?.id}?from=/support/quiz`}
+          href={`/users/${quiz.creator?.id}`}
           className="flex items-center gap-2"
           onClick={(e) => e.stopPropagation()}
         >
