@@ -234,10 +234,6 @@ export function ReportTable({
             href={`/users/${reporter.id}`}
             className="flex items-center gap-3 cursor-pointer"
           >
-            <Avatar className="h-9 w-9">
-              <AvatarImage src={getAvatarUrl(reporter.avatar_url)} alt={name} />
-              <AvatarFallback>{getInitials(name)}</AvatarFallback>
-            </Avatar>
             <div>
               <p className="font-medium leading-tight hover:text-primary transition-colors">
                 {name}
