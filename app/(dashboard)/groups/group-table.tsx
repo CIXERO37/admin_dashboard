@@ -261,7 +261,7 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
           Created by
         </p>
         <Link
-          href={`/users/${group.creator_id}?from=/groups`}
+          href={`/users/${group.creator_id}`}
           className="flex items-center gap-2 hover:bg-muted/50 rounded-lg p-1 -m-1 transition-colors"
           onClick={(e) => e.stopPropagation()}
         >

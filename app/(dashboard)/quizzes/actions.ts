@@ -114,7 +114,7 @@ export async function updateQuizVisibility(id: string, isPublic: boolean) {
     return { error: error.message }
   }
 
-  revalidatePath("/master/quiz")
+  revalidatePath("/quizzes")
   return { error: null }
 }
 
@@ -131,7 +131,7 @@ export async function blockQuizAction(id: string) {
     return { error: error.message }
   }
 
-  revalidatePath("/master/quiz")
+  revalidatePath("/quizzes")
   return { error: null }
 }
 
@@ -171,7 +171,7 @@ export async function deleteQuizAction(id: string) {
     return { error: error.message }
   }
 
-  revalidatePath("/master/quiz")
+  revalidatePath("/quizzes")
   revalidatePath("/trash-bin")
   return { error: null }
 }

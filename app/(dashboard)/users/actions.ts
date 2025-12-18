@@ -1,6 +1,8 @@
 "use server"
 
 import { getSupabaseServerClient } from "@/lib/supabase-server"
+import { getSupabaseAdminClient } from "@/lib/supabase-admin"
+import { revalidatePath } from "next/cache"
 
 export interface Profile {
   id: string
@@ -40,14 +42,11 @@ export async function fetchProfileById(id: string): Promise<{ data: Profile | nu
     return { data: null, error: error.message }
   }
 
-  // Check if counts are stored directly in profiles table
   let following_count = data.following_count ?? data.followings_count ?? 0
   let followers_count = data.followers_count ?? data.follower_count ?? 0
   let friends_count = data.friends_count ?? data.friend_count ?? 0
 
-  // If not in profiles, try relationship tables
   if (following_count === 0 && followers_count === 0) {
-    // Try follows table with different column name patterns
     const { count: followingCount, error: followingError } = await supabase
       .from("follows")
       .select("*", { count: "exact", head: true })
@@ -67,7 +66,6 @@ export async function fetchProfileById(id: string): Promise<{ data: Profile | nu
     }
   }
 
-  // Try friendships table if friends_count is still 0
   if (friends_count === 0) {
     const { count: friendsCount, error: friendsError } = await supabase
       .from("friendships")
@@ -135,7 +133,6 @@ export interface UserQuiz {
 export async function fetchUserQuizzes(userId: string): Promise<{ data: UserQuiz[]; error: string | null }> {
   const supabase = await getSupabaseServerClient()
 
-  // Fetch all game_sessions to check if user participated
   const { data: sessions, error: sessionsError } = await supabase
     .from("game_sessions")
     .select("quiz_id, participants")
@@ -145,7 +142,6 @@ export async function fetchUserQuizzes(userId: string): Promise<{ data: UserQuiz
     return { data: [], error: sessionsError.message }
   }
 
-  // Filter sessions where user participated, count per quiz, and track scores
   const quizStats: Record<string, { count: number; totalScore: number }> = {}
   
   for (const session of sessions ?? []) {
@@ -162,7 +158,6 @@ export async function fetchUserQuizzes(userId: string): Promise<{ data: UserQuiz
     }
   }
 
-  // Get quiz IDs sorted by play count (top 10)
   const sortedQuizIds = Object.entries(quizStats)
     .sort((a, b) => b[1].count - a[1].count)
     .slice(0, 10)
@@ -172,7 +167,6 @@ export async function fetchUserQuizzes(userId: string): Promise<{ data: UserQuiz
     return { data: [], error: null }
   }
 
-  // Fetch quiz details
   const { data: quizzes, error: quizzesError } = await supabase
     .from("quizzes")
     .select("id, title")
@@ -183,7 +177,6 @@ export async function fetchUserQuizzes(userId: string): Promise<{ data: UserQuiz
     return { data: [], error: quizzesError.message }
   }
 
-  // Map quizzes with play count, avg score and sort by play_count
   const result: UserQuiz[] = (quizzes ?? [])
     .map(quiz => {
       const stats = quizStats[quiz.id] || { count: 0, totalScore: 0 }
@@ -232,4 +225,100 @@ export async function fetchCreatedQuizzes(userId: string): Promise<{ data: Creat
   }))
 
   return { data: result, error: null }
+}
+
+export interface ProfilesResponse {
+  data: Profile[]
+  totalCount: number
+  totalPages: number
+}
+
+interface FetchProfilesParams {
+  page?: number
+  limit?: number
+  search?: string
+  role?: string
+  status?: string
+}
+
+export async function fetchProfiles({
+  page = 1,
+  limit = 15,
+  search = "",
+  role = "all",
+  status = "all",
+}: FetchProfilesParams): Promise<ProfilesResponse> {
+  const supabase = getSupabaseAdminClient()
+  const offset = (page - 1) * limit
+
+  let query = supabase
+    .from("profiles")
+    .select("*", { count: "exact" })
+    .is("deleted_at", null)
+
+  if (search) {
+    query = query.or(`username.ilike.%${search}%,email.ilike.%${search}%,fullname.ilike.%${search}%`)
+  }
+
+  if (role && role !== "all") {
+    query = query.ilike("role", role)
+  }
+
+  if (status && status !== "all") {
+    if (status === "blocked") {
+      query = query.eq("is_blocked", true)
+    } else if (status === "active") {
+      query = query.or("is_blocked.is.null,is_blocked.eq.false")
+    }
+  }
+
+  const { data, count, error } = await query
+    .order("last_active", { ascending: false, nullsFirst: false })
+    .range(offset, offset + limit - 1)
+
+  if (error) {
+    console.error("Error fetching profiles:", error)
+    return { data: [], totalCount: 0, totalPages: 0 }
+  }
+
+  return {
+    data: data ?? [],
+    totalCount: count ?? 0,
+    totalPages: Math.ceil((count ?? 0) / limit),
+  }
+}
+
+export async function updateProfileAction(id: string, updates: Partial<Profile>) {
+  const supabase = getSupabaseAdminClient()
+
+  const { error } = await supabase
+    .from("profiles")
+    .update(updates)
+    .eq("id", id)
+
+  if (error) {
+    console.error("Error updating profile:", error)
+    return { error: error.message }
+  }
+
+  revalidatePath("/users")
+  return { error: null }
+}
+
+export async function deleteProfileAction(id: string) {
+  const supabase = getSupabaseAdminClient()
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id)
+
+  if (error) {
+    console.error("Error deleting profile:", error)
+    return { error: error.message }
+  }
+
+  revalidatePath("/users")
+  revalidatePath("/trash-bin")
+  return { error: null }
 }

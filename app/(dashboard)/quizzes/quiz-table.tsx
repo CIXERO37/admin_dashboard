@@ -209,7 +209,7 @@ export function QuizTable({
         return (
           <div className="flex items-center gap-2">
             <Link
-              href={`/users/${creator.id}?from=/master/quiz`}
+              href={`/users/${creator.id}`}
               className="flex flex-col min-w-0 hover:underline"
               onClick={(e) => e.stopPropagation()}
             >
@@ -423,7 +423,7 @@ export function QuizTable({
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={handlePageChange}
-          onRowClick={(row) => router.push(`/master/quiz/${row.id}`)}
+          onRowClick={(row) => router.push(`/quizzes/${row.id}`)}
         />
       </div>
 

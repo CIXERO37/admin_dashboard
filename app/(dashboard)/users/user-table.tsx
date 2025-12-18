@@ -288,11 +288,15 @@ export function UserTable({
           (row.fullname as string) ||
           (row.username as string) ||
           "Unknown user";
-        const email = (row.email as string) || "No email";
+
+        const rawUsername = row.username as string;
+        const displayUsername =
+          rawUsername && rawUsername !== "—" ? `@${rawUsername}` : "—";
+
         const avatar = row.avatar as string | undefined;
         return (
           <Link
-            href={`/users/${id}?from=/administrator/user`}
+            href={`/users/${id}`}
             className="flex items-center gap-3 cursor-pointer"
           >
             <Avatar className="h-9 w-9">
@@ -303,13 +307,12 @@ export function UserTable({
               <p className="font-medium leading-tight hover:text-primary transition-colors">
                 {name}
               </p>
-              <p className="text-xs text-muted-foreground">{email}</p>
+              <p className="text-xs text-muted-foreground">{displayUsername}</p>
             </div>
           </Link>
         );
       },
     },
-    { key: "username", label: "Username" },
     {
       key: "role",
       label: "Role",

@@ -148,7 +148,7 @@ export async function updateReportAction(id: string, updates: Record<string, unk
     return { error: error.message }
   }
 
-  revalidatePath("/support/report")
+  revalidatePath("/reports")
   return { error: null }
 }
 
@@ -165,6 +165,6 @@ export async function deleteReportAction(id: string) {
     return { error: error.message }
   }
 
-  revalidatePath("/support/report")
+  revalidatePath("/reports")
   return { error: null }
 }

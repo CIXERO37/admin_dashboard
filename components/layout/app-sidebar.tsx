@@ -63,8 +63,9 @@ const navigation: NavItem[] = [
     href: "/support",
     icon: Headphones,
     children: [
-      { title: "Report", href: "/support/report", icon: FileText },
-      { title: "Quiz", href: "/support/quiz", icon: HelpCircle },
+      { title: "Dashboard", href: "/support/dashboard", icon: LayoutDashboard },
+      { title: "Reports", href: "/reports", icon: FileText },
+      { title: "Quiz Approval", href: "/quiz-approval", icon: HelpCircle },
       { title: "Groups", href: "/groups", icon: Users },
     ],
   },
@@ -73,7 +74,8 @@ const navigation: NavItem[] = [
     href: "/billing",
     icon: CreditCard,
     children: [
-      { title: "Users", href: "/billing/users", icon: Users },
+      { title: "Dashboard", href: "/billing/dashboard", icon: LayoutDashboard },
+      { title: "Subscriptions", href: "/subcriptions", icon: Users },
     ],
   },
   {
@@ -81,15 +83,16 @@ const navigation: NavItem[] = [
     href: "/master",
     icon: Database,
     children: [
-      { title: "Quiz", href: "/master/quiz", icon: BookOpen },
+      { title: "Dashboard", href: "/master/dashboard", icon: LayoutDashboard },
+      { title: "Quizzes", href: "/quizzes", icon: BookOpen },
       {
         title: "Address",
-        href: "/master/address",
+        href: "/address",
         icon: MapPin,
         children: [
-          { title: "Country", href: "/master/address/country", icon: Globe },
-          { title: "State", href: "/master/address/state", icon: Map },
-          { title: "City", href: "/master/address/city", icon: Building2 },
+          { title: "Country", href: "/address/country", icon: Globe },
+          { title: "State", href: "/address/state", icon: Map },
+          { title: "City", href: "/address/city", icon: Building2 },
         ],
       },
     ],
@@ -98,7 +101,14 @@ const navigation: NavItem[] = [
     title: "Administrator",
     href: "/administrator",
     icon: UserCog,
-    children: [{ title: "Users", href: "/administrator/user", icon: User }],
+    children: [
+      {
+        title: "Dashboard",
+        href: "/administrator/dashboard",
+        icon: LayoutDashboard,
+      },
+      { title: "Users", href: "/users", icon: User },
+    ],
   },
   {
     title: "Settings",
@@ -274,18 +284,6 @@ export function AppSidebar() {
                   </button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="mt-1 space-y-1 pl-4">
-                  <Link
-                    href={item.href}
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                      pathname === item.href
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                        : "text-sidebar-foreground hover:bg-secondary hover:text-foreground"
-                    )}
-                  >
-                    <LayoutDashboard className="h-4 w-4" />
-                    <span>Dashboard</span>
-                  </Link>
                   {item.children?.map((child) => {
                     const ChildIcon = child.icon;
                     const hasNestedChildren =
