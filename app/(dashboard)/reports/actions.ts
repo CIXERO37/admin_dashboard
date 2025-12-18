@@ -168,3 +168,141 @@ export async function deleteReportAction(id: string) {
   revalidatePath("/reports")
   return { error: null }
 }
+
+export interface Message {
+  id: string
+  sender_id: string
+  sender_type: "admin" | "user"
+  content: string
+  created_at: string
+}
+
+export interface ReportWithMessages extends Report {
+  messages: Message[] | null
+}
+
+export async function fetchReportById(id: string): Promise<{ data: ReportWithMessages | null; error: string | null }> {
+  const supabase = await getSupabaseServerClient()
+
+  const { data, error } = await supabase
+    .from("reports")
+    .select("*")
+    .eq("id", id)
+    .single()
+
+  if (error) {
+    console.error("Error fetching report:", error)
+    return { data: null, error: error.message }
+  }
+
+  // Fetch profiles for reporter and reported user
+  const profileIds = [data.reporter_id, data.reported_user_id].filter(Boolean) as string[]
+  let profilesMap: Record<string, ReportProfile> = {}
+
+  if (profileIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, username, email, fullname, avatar_url")
+      .in("id", profileIds)
+
+    if (profiles) {
+      profilesMap = profiles.reduce((acc, p) => {
+        acc[p.id] = p
+        return acc
+      }, {} as Record<string, ReportProfile>)
+    }
+  }
+
+  const reportWithProfiles: ReportWithMessages = {
+    ...data,
+    messages: data.messages || [],
+    reporter: data.reporter_id ? profilesMap[data.reporter_id] || null : null,
+    reported_user: data.reported_user_id ? profilesMap[data.reported_user_id] || null : null,
+  }
+
+  return { data: reportWithProfiles, error: null }
+}
+
+export async function sendMessageAction(reportId: string, content: string, senderType: "admin" | "user" = "admin") {
+  const supabase = await getSupabaseServerClient()
+
+  // Fetch current messages
+  const { data: report, error: fetchError } = await supabase
+    .from("reports")
+    .select("messages")
+    .eq("id", reportId)
+    .single()
+
+  if (fetchError) {
+    console.error("Error fetching report messages:", fetchError)
+    return { error: fetchError.message }
+  }
+
+  const currentMessages: Message[] = report?.messages || []
+  const newMessage: Message = {
+    id: crypto.randomUUID(),
+    sender_id: "admin",
+    sender_type: senderType,
+    content,
+    created_at: new Date().toISOString(),
+  }
+
+  const updatedMessages = [...currentMessages, newMessage]
+
+  const { error } = await supabase
+    .from("reports")
+    .update({ messages: updatedMessages, updated_at: new Date().toISOString() })
+    .eq("id", reportId)
+
+  if (error) {
+    console.error("Error sending message:", error)
+    return { error: error.message }
+  }
+
+  revalidatePath(`/reports/${reportId}`)
+  return { error: null, message: newMessage }
+}
+
+export async function deleteMessageAction(reportId: string, messageId: string, senderType: "admin" | "user") {
+  const supabase = await getSupabaseServerClient()
+
+  // Only admin can delete their own messages
+  if (senderType !== "admin") {
+    return { error: "You can only delete your own messages" }
+  }
+
+  // Fetch current messages
+  const { data: report, error: fetchError } = await supabase
+    .from("reports")
+    .select("messages")
+    .eq("id", reportId)
+    .single()
+
+  if (fetchError) {
+    console.error("Error fetching report messages:", fetchError)
+    return { error: fetchError.message }
+  }
+
+  const currentMessages: Message[] = report?.messages || []
+  const messageToDelete = currentMessages.find(m => m.id === messageId)
+
+  // Verify the message belongs to admin
+  if (!messageToDelete || messageToDelete.sender_type !== "admin") {
+    return { error: "You can only delete your own messages" }
+  }
+
+  const updatedMessages = currentMessages.filter(m => m.id !== messageId)
+
+  const { error } = await supabase
+    .from("reports")
+    .update({ messages: updatedMessages, updated_at: new Date().toISOString() })
+    .eq("id", reportId)
+
+  if (error) {
+    console.error("Error deleting message:", error)
+    return { error: error.message }
+  }
+
+  revalidatePath(`/reports/${reportId}`)
+  return { error: null }
+}
