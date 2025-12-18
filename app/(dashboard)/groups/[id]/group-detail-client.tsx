@@ -15,6 +15,7 @@ import {
   UserMinus,
   Crown,
   SlidersHorizontal,
+  MapPin,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -30,6 +31,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -53,7 +55,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import {
   type GroupDetail,
@@ -66,9 +67,7 @@ interface GroupDetailClientProps {
   group: GroupDetail;
   members: GroupMember[];
   totalPages: number;
-  totalCount: number;
   currentPage: number;
-  currentTab: string;
   searchQuery: string;
   roleFilter: string;
 }
@@ -104,9 +103,7 @@ export function GroupDetailClient({
   group,
   members,
   totalPages,
-  totalCount,
   currentPage,
-  currentTab,
   searchQuery,
   roleFilter,
 }: GroupDetailClientProps) {
@@ -126,7 +123,6 @@ export function GroupDetailClient({
 
   const status = getGroupStatus(group);
   const location = getLocation(group);
-  const coverUrl = getAvatarUrl(group.cover_url);
 
   const copyInviteCode = () => {
     navigator.clipboard.writeText(group.invite_code);
@@ -159,11 +155,6 @@ export function GroupDetailClient({
   const handlePageChange = (page: number) => {
     updateUrl({ page, search: searchQuery, role: roleFilter });
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handleTabChange = (tab: string) => {
-    updateUrl({ tab, page: 1, search: "", role: "all" });
-    setSearchInput("");
   };
 
   const handleRemoveMember = async () => {
@@ -199,436 +190,397 @@ export function GroupDetailClient({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header with Breadcrumb */}
-      <div className="space-y-2">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href="/groups">Groups</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>{group.name}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </div>
+    <div className="space-y-4">
+      {/* Breadcrumb */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/groups">Groups</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{group.name}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-      {/* Group Info Card */}
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
-        {/* Cover */}
-        <div
-          className="h-40 bg-gradient-to-br from-primary/30 via-primary/20 to-primary/10"
-          style={
-            coverUrl
-              ? {
-                  backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4)), url(${coverUrl})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }
-              : undefined
-          }
-        />
-
-        {/* Info */}
-        <div className="relative px-6 pb-6">
-          {/* Avatar */}
-          <div className="absolute -top-12 left-6">
-            <Avatar className="h-24 w-24 border-4 border-background shadow-lg">
-              <AvatarImage
-                src={getAvatarUrl(group.avatar_url)}
-                alt={group.name}
-              />
-              <AvatarFallback className="text-2xl font-bold bg-primary text-primary-foreground">
-                {group.name
-                  .split(" ")
-                  .map((w) => w[0])
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-
-          {/* Details */}
-          <div className="pt-14 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <h2 className="text-2xl font-bold text-foreground">
-                  {group.name}
-                </h2>
-                <Badge
-                  className={`text-xs font-semibold ${
-                    status.variant === "secondary"
-                      ? "bg-green-500 text-white border-green-500"
-                      : "bg-muted text-muted-foreground border-border"
-                  }`}
-                >
-                  {status.label}
-                </Badge>
-              </div>
-              {group.description && (
-                <p className="text-muted-foreground max-w-xl">
-                  {group.description}
-                </p>
-              )}
-              <p className="text-sm text-muted-foreground">{location}</p>
-            </div>
-          </div>
-
-          {/* Invite Code & Creator */}
-          <div className="mt-6 flex flex-col md:flex-row gap-4">
-            <div className="flex-1 p-4 bg-muted/50 rounded-lg">
-              <p className="text-xs text-muted-foreground mb-1">Invite Code</p>
-              <div className="flex items-center gap-2">
-                <code className="text-lg font-mono font-semibold text-foreground">
-                  {group.invite_code}
-                </code>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 cursor-pointer"
-                  onClick={copyInviteCode}
-                >
-                  {copied ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex-1 p-4 bg-muted/50 rounded-lg">
-              <p className="text-xs text-muted-foreground mb-1">Created by</p>
-              <Link
-                href={`/users/${group.creator_id}?from=/groups`}
-                className="flex items-center gap-3 hover:bg-muted rounded-lg p-1 -m-1 transition-colors"
-              >
-                <Avatar className="h-10 w-10 border border-border">
-                  <AvatarImage src={getAvatarUrl(group.creator?.avatar_url)} />
-                  <AvatarFallback className="text-sm">
-                    {(group.creator?.fullname || "?").slice(0, 1)}
+      <div className="flex flex-col lg:flex-row lg:items-start gap-6">
+        {/* Left Sidebar */}
+        <div className="lg:w-80">
+          <Card>
+            <CardContent className="py-4">
+              <div className="flex flex-col items-center text-center">
+                <Avatar className="h-20 w-20 border-4 border-background shadow-lg">
+                  <AvatarImage
+                    src={getAvatarUrl(group.avatar_url)}
+                    alt={group.name}
+                  />
+                  <AvatarFallback className="text-xl font-bold bg-primary text-primary-foreground">
+                    {group.name
+                      .split(" ")
+                      .map((w) => w[0])
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div>
-                  <p className="font-medium hover:text-primary transition-colors">
-                    {group.creator?.fullname || "Unknown"}
+                <h2 className="mt-1.5 text-lg font-semibold">{group.name}</h2>
+                {group.description && (
+                  <p className="text-muted-foreground text-sm mt-1">
+                    {group.description}
                   </p>
+                )}
+
+                {/* Stats */}
+                <div className="flex justify-center gap-6 mt-2 pt-2 border-t w-full">
+                  <div className="text-center">
+                    <p className="text-lg font-bold">{group.member_count}</p>
+                    <p className="text-xs text-muted-foreground">Members</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-lg font-bold">
+                      {members.filter((m) => m.role === "admin").length}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Admins</p>
+                  </div>
                 </div>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <Tabs value={currentTab} onValueChange={handleTabChange}>
-        <TabsList>
-          <TabsTrigger value="overview" className="cursor-pointer">
-            Overview
-          </TabsTrigger>
-          <TabsTrigger value="members" className="cursor-pointer">
-            Members ({totalCount})
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-
-      {/* Tab Content */}
-      {currentTab === "overview" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="rounded-xl border border-border bg-card p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Users className="h-5 w-5 text-primary" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">{group.member_count}</p>
-                <p className="text-sm text-muted-foreground">Total Members</p>
-              </div>
-            </div>
-          </div>
 
-          <div className="rounded-xl border border-border bg-card p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Calendar className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-bold">
-                  {group.created_at
-                    ? format(new Date(group.created_at), "dd MMMM yyyy")
-                    : "-"}
-                </p>
-                <p className="text-sm text-muted-foreground">Date Created</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-border bg-card p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Shield className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-bold capitalize">
-                  {status.label.toLowerCase()}
-                </p>
-                <p className="text-sm text-muted-foreground">Privacy</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {currentTab === "members" && (
-        <div className="space-y-4">
-          {/* Search & Filter */}
-          <div className="flex items-center gap-3">
-            <div className="relative flex-1 max-w-sm">
-              <Input
-                placeholder="Search member..."
-                className="pr-10 bg-background border-border"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-              />
-              <button
-                onClick={handleSearch}
-                disabled={isPending}
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 flex items-center justify-center rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors cursor-pointer"
-              >
-                <Search className="h-3.5 w-3.5" />
-              </button>
-            </div>
-
-            <Select
-              value={roleFilter}
-              onValueChange={(value) => updateUrl({ role: value, page: 1 })}
-            >
-              <SelectTrigger className="w-36 cursor-pointer">
-                <div className="flex items-center gap-2">
-                  <SlidersHorizontal className="h-4 w-4" />
-                  <SelectValue placeholder="Role" />
+              {/* Group Info */}
+              <div className="mt-2 space-y-1 text-sm">
+                <div className="flex items-center gap-3">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">{location}</span>
                 </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all" className="cursor-pointer">
-                  All Roles
-                </SelectItem>
-                <SelectItem value="owner" className="cursor-pointer">
-                  Owner
-                </SelectItem>
-                <SelectItem value="admin" className="cursor-pointer">
-                  Admin
-                </SelectItem>
-                <SelectItem value="member" className="cursor-pointer">
-                  Member
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+                <div className="flex items-center gap-3">
+                  <Shield className="h-4 w-4 text-muted-foreground" />
+                  <Badge
+                    className={`text-xs font-semibold ${
+                      status.variant === "secondary"
+                        ? "bg-green-500 text-white border-green-500"
+                        : "bg-muted text-muted-foreground border-border"
+                    }`}
+                  >
+                    {status.label}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">
+                    {group.created_at
+                      ? format(new Date(group.created_at), "dd MMMM yyyy")
+                      : "-"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Copy className="h-4 w-4 text-muted-foreground" />
+                  <code className="font-mono text-muted-foreground">
+                    {group.invite_code}
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 cursor-pointer"
+                    onClick={copyInviteCode}
+                  >
+                    {copied ? (
+                      <Check className="h-3 w-3 text-green-500" />
+                    ) : (
+                      <Copy className="h-3 w-3" />
+                    )}
+                  </Button>
+                </div>
+              </div>
 
-          {/* Members List */}
-          <div className="rounded-xl border border-border bg-card overflow-hidden">
-            {members.length > 0 ? (
-              <div className="divide-y divide-border">
-                {members.map((member, index) => {
-                  const name = member.fullname || member.username || "Unknown";
-                  const initials = name
-                    .split(" ")
-                    .map((w) => w[0])
-                    .join("")
-                    .slice(0, 2)
-                    .toUpperCase();
+              {/* Creator */}
+              <div className="mt-2 pt-2 border-t">
+                <p className="text-xs text-muted-foreground mb-1">Created by</p>
+                <Link
+                  href={`/users/${group.creator_id}`}
+                  className="flex items-center gap-2 hover:bg-muted rounded-lg p-1.5 -mx-1.5 transition-colors"
+                >
+                  <Avatar className="h-8 w-8 border border-border">
+                    <AvatarImage
+                      src={getAvatarUrl(group.creator?.avatar_url)}
+                    />
+                    <AvatarFallback className="text-xs">
+                      {(group.creator?.fullname || "?").slice(0, 1)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="font-medium text-sm hover:text-primary transition-colors">
+                    {group.creator?.fullname || "Unknown"}
+                  </span>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-                  return (
-                    <div
-                      key={member.user_id || index}
-                      className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
-                    >
-                      <Link
-                        href={`/users/${member.user_id}?from=/groups`}
-                        className="flex items-center gap-3 hover:bg-muted rounded-lg p-1 -m-1 transition-colors"
-                      >
-                        <Avatar className="h-10 w-10 border border-border">
-                          <AvatarImage
-                            src={getAvatarUrl(member.avatar_url)}
-                            alt={name}
-                          />
-                          <AvatarFallback className="text-sm">
-                            {initials}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
+        {/* Main Content */}
+        <div className="flex-1">
+          {/* Members Card */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Users className="h-4 w-4 text-primary" />
+                Members
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <Input
+                    placeholder="Search member..."
+                    className="pr-10 bg-background border-border w-48"
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                  />
+                  <button
+                    onClick={handleSearch}
+                    disabled={isPending}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 flex items-center justify-center rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors cursor-pointer"
+                  >
+                    <Search className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+
+                <Select
+                  value={roleFilter}
+                  onValueChange={(value) => updateUrl({ role: value, page: 1 })}
+                >
+                  <SelectTrigger className="w-32 cursor-pointer">
+                    <div className="flex items-center gap-2">
+                      <SlidersHorizontal className="h-4 w-4" />
+                      <SelectValue placeholder="Role" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all" className="cursor-pointer">
+                      All Roles
+                    </SelectItem>
+                    <SelectItem value="owner" className="cursor-pointer">
+                      Owner
+                    </SelectItem>
+                    <SelectItem value="admin" className="cursor-pointer">
+                      Admin
+                    </SelectItem>
+                    <SelectItem value="member" className="cursor-pointer">
+                      Member
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardHeader>
+            <CardContent>
+
+              {/* Members List */}
+              {members.length > 0 ? (
+                <div className="space-y-2 max-h-[343px] overflow-y-auto pr-1">
+                  {members.map(
+                    (member, index) => {
+                      const name =
+                        member.fullname || member.username || "Unknown";
+                      const initials = name
+                        .split(" ")
+                        .map((w) => w[0])
+                        .join("")
+                        .slice(0, 2)
+                        .toUpperCase();
+
+                      return (
+                        <div
+                          key={member.user_id || index}
+                          className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50"
+                        >
+                          <Link
+                            href={`/users/${member.user_id}`}
+                            className="flex items-center gap-3"
+                          >
+                            <Avatar className="h-10 w-10 border border-border">
+                              <AvatarImage
+                                src={getAvatarUrl(member.avatar_url)}
+                                alt={name}
+                              />
+                              <AvatarFallback className="text-sm">
+                                {initials}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium hover:text-primary transition-colors">
+                                  {member.fullname || "Unknown"}
+                                </p>
+                                {member.role === "owner" && (
+                                  <Crown className="h-4 w-4 text-yellow-500" />
+                                )}
+                              </div>
+                              <p className="text-sm text-muted-foreground">
+                                @{member.username || "-"}
+                              </p>
+                            </div>
+                          </Link>
+
                           <div className="flex items-center gap-2">
-                            <p className="font-medium hover:text-primary transition-colors">
-                              {member.fullname || "Unknown"}
-                            </p>
-                            {member.role === "owner" && (
-                              <Crown className="h-4 w-4 text-yellow-500" />
+                            <Badge
+                              variant="outline"
+                              className={getRoleBadgeStyle(member.role)}
+                            >
+                              {member.role}
+                            </Badge>
+
+                            {member.role !== "owner" && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 cursor-pointer"
+                                  >
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  {member.role !== "admin" && (
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleRoleChange(
+                                          member.user_id,
+                                          "admin"
+                                        )
+                                      }
+                                      className="cursor-pointer"
+                                    >
+                                      <Shield className="h-4 w-4 mr-2" />
+                                      Make Admin
+                                    </DropdownMenuItem>
+                                  )}
+                                  {member.role === "admin" && (
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleRoleChange(
+                                          member.user_id,
+                                          "member"
+                                        )
+                                      }
+                                      className="cursor-pointer"
+                                    >
+                                      <UserMinus className="h-4 w-4 mr-2" />
+                                      Remove Admin
+                                    </DropdownMenuItem>
+                                  )}
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      setRemoveMemberDialog({
+                                        open: true,
+                                        memberId: member.user_id,
+                                        memberName: name,
+                                      })
+                                    }
+                                    className="cursor-pointer text-destructive focus:text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Remove from Group
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             )}
                           </div>
-                          <p className="text-sm text-muted-foreground">
-                            @{member.username || "-"}
-                          </p>
                         </div>
-                      </Link>
-
-                      <div className="flex items-center gap-3">
-                        <Badge
-                          variant="outline"
-                          className={getRoleBadgeStyle(member.role)}
-                        >
-                          {member.role}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {member.joined_at
-                            ? format(new Date(member.joined_at), "dd MMM yyyy")
-                            : "-"}
-                        </span>
-
-                        {member.role !== "owner" && (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 cursor-pointer"
-                              >
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              {member.role !== "admin" && (
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    handleRoleChange(member.user_id, "admin")
-                                  }
-                                  className="cursor-pointer"
-                                >
-                                  <Shield className="h-4 w-4 mr-2" />
-                                  Make Admin
-                                </DropdownMenuItem>
-                              )}
-                              {member.role === "admin" && (
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    handleRoleChange(member.user_id, "member")
-                                  }
-                                  className="cursor-pointer"
-                                >
-                                  <UserMinus className="h-4 w-4 mr-2" />
-                                  Remove Admin
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  setRemoveMemberDialog({
-                                    open: true,
-                                    memberId: member.user_id,
-                                    memberName: name,
-                                  })
-                                }
-                                className="cursor-pointer text-destructive focus:text-destructive"
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Remove from Group
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Users className="h-12 w-12 text-muted-foreground mb-3" />
-                <h3 className="font-medium">No members found</h3>
-                <p className="text-sm text-muted-foreground">
-                  {searchQuery
-                    ? "Try a different search"
-                    : "This group has no members yet"}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Pagination */}
-          <div className="flex items-center justify-between rounded-xl border border-border bg-card px-6 py-4">
-            <div className="text-sm text-muted-foreground">
-              Page{" "}
-              <span className="font-medium text-foreground">{currentPage}</span>{" "}
-              of{" "}
-              <span className="font-medium text-foreground">
-                {totalPages || 1}
-              </span>
-            </div>
-
-            {totalPages > 1 && (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1 || isPending}
-                  className={cn(
-                    "px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors",
-                    currentPage === 1 || isPending
-                      ? "border-border bg-secondary/50 text-muted-foreground cursor-not-allowed"
-                      : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer"
-                  )}
-                >
-                  Previous
-                </button>
-
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                    let page = i + 1;
-                    if (totalPages > 5) {
-                      if (currentPage > 3) page = currentPage - 2 + i;
-                      if (currentPage > totalPages - 2)
-                        page = totalPages - 4 + i;
+                      );
                     }
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => handlePageChange(page)}
-                        disabled={isPending}
-                        className={cn(
-                          "w-9 h-9 text-sm font-medium rounded-lg border transition-colors cursor-pointer",
-                          currentPage === page
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "border-border bg-card text-foreground hover:bg-secondary/80"
-                        )}
-                      >
-                        {page}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages || isPending}
-                  className={cn(
-                    "px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors",
-                    currentPage === totalPages || isPending
-                      ? "border-border bg-secondary/50 text-muted-foreground cursor-not-allowed"
-                      : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer"
                   )}
-                >
-                  Next
-                </button>
-              </div>
-            )}
-          </div>
+
+                  
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <Users className="h-12 w-12 text-muted-foreground/50 mb-3" />
+                  <p className="text-muted-foreground">
+                    {searchQuery
+                      ? "No members found"
+                      : "This group has no members yet"}
+                  </p>
+                </div>
+              )}
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                  <div className="text-sm text-muted-foreground">
+                    Page{" "}
+                    <span className="font-medium text-foreground">
+                      {currentPage}
+                    </span>{" "}
+                    of{" "}
+                    <span className="font-medium text-foreground">
+                      {totalPages}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1 || isPending}
+                      className={cn(
+                        "px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors",
+                        currentPage === 1 || isPending
+                          ? "border-border bg-secondary/50 text-muted-foreground cursor-not-allowed"
+                          : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer"
+                      )}
+                    >
+                      Previous
+                    </button>
+
+                    <div className="flex items-center gap-1">
+                      {Array.from(
+                        { length: Math.min(totalPages, 5) },
+                        (_, i) => {
+                          let page = i + 1;
+                          if (totalPages > 5) {
+                            if (currentPage > 3) page = currentPage - 2 + i;
+                            if (currentPage > totalPages - 2)
+                              page = totalPages - 4 + i;
+                          }
+                          return (
+                            <button
+                              key={page}
+                              onClick={() => handlePageChange(page)}
+                              disabled={isPending}
+                              className={cn(
+                                "w-9 h-9 text-sm font-medium rounded-lg border transition-colors cursor-pointer",
+                                currentPage === page
+                                  ? "border-primary bg-primary text-primary-foreground"
+                                  : "border-border bg-card text-foreground hover:bg-secondary/80"
+                              )}
+                            >
+                              {page}
+                            </button>
+                          );
+                        }
+                      )}
+                    </div>
+
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages || isPending}
+                      className={cn(
+                        "px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors",
+                        currentPage === totalPages || isPending
+                          ? "border-border bg-secondary/50 text-muted-foreground cursor-not-allowed"
+                          : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer"
+                      )}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
-      )}
+      </div>
 
       {/* Remove Member Dialog */}
       <Dialog
