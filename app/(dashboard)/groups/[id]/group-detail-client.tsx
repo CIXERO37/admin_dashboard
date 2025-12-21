@@ -209,13 +209,30 @@ export function GroupDetailClient({
       <div className="flex flex-col lg:flex-row lg:items-start gap-6">
         {/* Left Sidebar */}
         <div className="lg:w-80">
-          <Card>
-            <CardContent className="py-4">
-              <div className="flex flex-col items-center text-center">
-                <Avatar className="h-20 w-20 border-4 border-background shadow-lg">
+          <Card className="overflow-hidden border-border bg-card py-0 gap-0">
+            {/* Cover Image Banner */}
+            <div className="relative h-32 w-full bg-muted">
+              {group.cover_url ? (
+                <>
+                  <img
+                    src={getAvatarUrl(group.cover_url)}
+                    alt={group.name}
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/40" />
+                </>
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent" />
+              )}
+            </div>
+
+            <CardContent className="pt-0 pb-6 px-6 relative">
+              <div className="flex flex-col items-center text-center -mt-10">
+                <Avatar className="h-20 w-20 border-4 border-card shadow-lg relative z-10">
                   <AvatarImage
                     src={getAvatarUrl(group.avatar_url)}
                     alt={group.name}
+                    className="object-cover"
                   />
                   <AvatarFallback className="text-xl font-bold bg-primary text-primary-foreground">
                     {group.name
@@ -226,15 +243,15 @@ export function GroupDetailClient({
                       .toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <h2 className="mt-1.5 text-lg font-semibold">{group.name}</h2>
+                <h2 className="mt-3 text-lg font-bold">{group.name}</h2>
                 {group.description && (
-                  <p className="text-muted-foreground text-sm mt-1">
+                  <p className="text-muted-foreground text-sm mt-1 line-clamp-2">
                     {group.description}
                   </p>
                 )}
 
                 {/* Stats */}
-                <div className="flex justify-center gap-6 mt-2 pt-2 border-t w-full">
+                <div className="flex justify-center gap-6 mt-4 pt-4 border-t w-full">
                   <div className="text-center">
                     <p className="text-lg font-bold">{group.member_count}</p>
                     <p className="text-xs text-muted-foreground">Members</p>
@@ -249,13 +266,15 @@ export function GroupDetailClient({
               </div>
 
               {/* Group Info */}
-              <div className="mt-2 space-y-1 text-sm">
+              <div className="mt-4 space-y-3 text-sm border-t pt-4">
                 <div className="flex items-center gap-3">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">{location}</span>
+                  <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground truncate">
+                    {location}
+                  </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Shield className="h-4 w-4 text-muted-foreground" />
+                  <Shield className="h-4 w-4 text-muted-foreground shrink-0" />
                   <Badge
                     className={`text-xs font-semibold ${
                       status.variant === "secondary"
@@ -267,51 +286,59 @@ export function GroupDetailClient({
                   </Badge>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
                   <span className="text-muted-foreground">
                     {group.created_at
-                      ? format(new Date(group.created_at), "dd MMMM yyyy")
+                      ? format(new Date(group.created_at), "dd MMM yyyy")
                       : "-"}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Copy className="h-4 w-4 text-muted-foreground" />
-                  <code className="font-mono text-muted-foreground">
-                    {group.invite_code}
-                  </code>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 cursor-pointer"
-                    onClick={copyInviteCode}
-                  >
-                    {copied ? (
-                      <Check className="h-3 w-3 text-green-500" />
-                    ) : (
-                      <Copy className="h-3 w-3" />
-                    )}
-                  </Button>
+                  <div className="flex items-center gap-2 w-full">
+                    <Copy className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <code className="font-mono text-muted-foreground text-xs bg-muted px-2 py-0.5 rounded flex-1 truncate">
+                      {group.invite_code}
+                    </code>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 cursor-pointer hover:bg-muted"
+                      onClick={copyInviteCode}
+                    >
+                      {copied ? (
+                        <Check className="h-3 w-3 text-green-500" />
+                      ) : (
+                        <Copy className="h-3 w-3" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </div>
 
               {/* Creator */}
-              <div className="mt-2 pt-2 border-t">
-                <p className="text-xs text-muted-foreground mb-1">Created by</p>
+              <div className="mt-4 pt-4 border-t">
+                <p className="text-xs text-muted-foreground mb-2">Created by</p>
                 <Link
                   href={`/users/${group.creator_id}`}
-                  className="flex items-center gap-2 hover:bg-muted rounded-lg p-1.5 -mx-1.5 transition-colors"
+                  className="flex items-center gap-3 hover:bg-muted rounded-lg p-2 -mx-2 transition-colors"
                 >
                   <Avatar className="h-8 w-8 border border-border">
                     <AvatarImage
                       src={getAvatarUrl(group.creator?.avatar_url)}
+                      className="object-cover"
                     />
                     <AvatarFallback className="text-xs">
                       {(group.creator?.fullname || "?").slice(0, 1)}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="font-medium text-sm hover:text-primary transition-colors">
-                    {group.creator?.fullname || "Unknown"}
-                  </span>
+                  <div className="overflow-hidden">
+                    <p className="font-medium text-sm hover:text-primary transition-colors truncate">
+                      {group.creator?.fullname || "Unknown"}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      @{group.creator?.username || "-"}
+                    </p>
+                  </div>
                 </Link>
               </div>
             </CardContent>
@@ -373,126 +400,116 @@ export function GroupDetailClient({
               </div>
             </CardHeader>
             <CardContent>
-
               {/* Members List */}
               {members.length > 0 ? (
                 <div className="space-y-2 max-h-[343px] overflow-y-auto pr-1">
-                  {members.map(
-                    (member, index) => {
-                      const name =
-                        member.fullname || member.username || "Unknown";
-                      const initials = name
-                        .split(" ")
-                        .map((w) => w[0])
-                        .join("")
-                        .slice(0, 2)
-                        .toUpperCase();
+                  {members.map((member, index) => {
+                    const name =
+                      member.fullname || member.username || "Unknown";
+                    const initials = name
+                      .split(" ")
+                      .map((w) => w[0])
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase();
 
-                      return (
-                        <div
-                          key={member.user_id || index}
-                          className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50"
+                    return (
+                      <div
+                        key={member.user_id || index}
+                        className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50"
+                      >
+                        <Link
+                          href={`/users/${member.user_id}`}
+                          className="flex items-center gap-3"
                         >
-                          <Link
-                            href={`/users/${member.user_id}`}
-                            className="flex items-center gap-3"
-                          >
-                            <Avatar className="h-10 w-10 border border-border">
-                              <AvatarImage
-                                src={getAvatarUrl(member.avatar_url)}
-                                alt={name}
-                              />
-                              <AvatarFallback className="text-sm">
-                                {initials}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <p className="font-medium hover:text-primary transition-colors">
-                                  {member.fullname || "Unknown"}
-                                </p>
-                                {member.role === "owner" && (
-                                  <Crown className="h-4 w-4 text-yellow-500" />
-                                )}
-                              </div>
-                              <p className="text-sm text-muted-foreground">
-                                @{member.username || "-"}
+                          <Avatar className="h-10 w-10 border border-border">
+                            <AvatarImage
+                              src={getAvatarUrl(member.avatar_url)}
+                              alt={name}
+                              className="object-cover"
+                            />
+                            <AvatarFallback className="text-sm">
+                              {initials}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium hover:text-primary transition-colors">
+                                {member.fullname || "Unknown"}
                               </p>
+                              {member.role === "owner" && (
+                                <Crown className="h-4 w-4 text-yellow-500" />
+                              )}
                             </div>
-                          </Link>
+                            <p className="text-sm text-muted-foreground">
+                              @{member.username || "-"}
+                            </p>
+                          </div>
+                        </Link>
 
-                          <div className="flex items-center gap-2">
-                            <Badge
-                              variant="outline"
-                              className={getRoleBadgeStyle(member.role)}
-                            >
-                              {member.role}
-                            </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant="outline"
+                            className={getRoleBadgeStyle(member.role)}
+                          >
+                            {member.role}
+                          </Badge>
 
-                            {member.role !== "owner" && (
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 cursor-pointer"
-                                  >
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  {member.role !== "admin" && (
-                                    <DropdownMenuItem
-                                      onClick={() =>
-                                        handleRoleChange(
-                                          member.user_id,
-                                          "admin"
-                                        )
-                                      }
-                                      className="cursor-pointer"
-                                    >
-                                      <Shield className="h-4 w-4 mr-2" />
-                                      Make Admin
-                                    </DropdownMenuItem>
-                                  )}
-                                  {member.role === "admin" && (
-                                    <DropdownMenuItem
-                                      onClick={() =>
-                                        handleRoleChange(
-                                          member.user_id,
-                                          "member"
-                                        )
-                                      }
-                                      className="cursor-pointer"
-                                    >
-                                      <UserMinus className="h-4 w-4 mr-2" />
-                                      Remove Admin
-                                    </DropdownMenuItem>
-                                  )}
-                                  <DropdownMenuSeparator />
+                          {member.role !== "owner" && (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 cursor-pointer"
+                                >
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                {member.role !== "admin" && (
                                   <DropdownMenuItem
                                     onClick={() =>
-                                      setRemoveMemberDialog({
-                                        open: true,
-                                        memberId: member.user_id,
-                                        memberName: name,
-                                      })
+                                      handleRoleChange(member.user_id, "admin")
                                     }
-                                    className="cursor-pointer text-destructive focus:text-destructive"
+                                    className="cursor-pointer"
                                   >
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    Remove from Group
+                                    <Shield className="h-4 w-4 mr-2" />
+                                    Make Admin
                                   </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            )}
-                          </div>
+                                )}
+                                {member.role === "admin" && (
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      handleRoleChange(member.user_id, "member")
+                                    }
+                                    className="cursor-pointer"
+                                  >
+                                    <UserMinus className="h-4 w-4 mr-2" />
+                                    Remove Admin
+                                  </DropdownMenuItem>
+                                )}
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    setRemoveMemberDialog({
+                                      open: true,
+                                      memberId: member.user_id,
+                                      memberName: name,
+                                    })
+                                  }
+                                  className="cursor-pointer text-destructive focus:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Remove from Group
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          )}
                         </div>
-                      );
-                    }
-                  )}
-
-                  
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-8 text-center">

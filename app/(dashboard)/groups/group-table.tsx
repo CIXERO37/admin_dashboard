@@ -11,8 +11,10 @@ import {
   Filter,
   RotateCcw,
 } from "lucide-react";
+import { format } from "date-fns";
 import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+
 import Link from "next/link";
 
 import { cn, getAvatarUrl } from "@/lib/utils";
@@ -66,12 +68,7 @@ interface GroupTableProps {
 
 function formatDate(dateString?: string | null): string {
   if (!dateString) return "-";
-  const date = new Date(dateString);
-  return date.toLocaleDateString("id-ID", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  return format(new Date(dateString), "dd MMM yyyy");
 }
 
 function getGroupStatus(group: Group): {
@@ -129,20 +126,22 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
       onClick={handleCardClick}
     >
       {/* Header with cover image or gradient fallback */}
-      <div
-        className="relative p-4 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent"
-        style={
-          coverUrl
-            ? {
-                backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url(${coverUrl})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }
-            : undefined
-        }
-      >
+      <div className="relative p-4 bg-muted overflow-hidden h-32">
+        {coverUrl ? (
+          <>
+            <img
+              src={coverUrl}
+              alt={name}
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/60" />
+          </>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent" />
+        )}
+
         {/* Status Badge Row */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="relative z-10 flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Badge
               variant={status.variant}
@@ -227,9 +226,13 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
         </div>
 
         {/* Avatar and Name */}
-        <div className="flex items-center gap-3">
+        <div className="relative z-10 flex items-center gap-3">
           <Avatar className="h-12 w-12 border-2 border-white/50 shadow-md ring-2 ring-background">
-            <AvatarImage src={getAvatarUrl(avatarUrl)} alt={name} />
+            <AvatarImage
+              src={getAvatarUrl(avatarUrl)}
+              alt={name}
+              className="object-cover"
+            />
             <AvatarFallback className="bg-muted text-muted-foreground font-bold text-sm">
               {initials}
             </AvatarFallback>

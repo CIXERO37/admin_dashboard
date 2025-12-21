@@ -298,10 +298,17 @@ export function ReportTable({
         }
         if (contentType === "quiz" && contentId) {
           return (
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Quiz</span>
-            </div>
+            <Link
+              href={`/quizzes/${contentId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 cursor-pointer group"
+            >
+              <FileText className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+              <span className="text-sm hover:text-primary transition-colors text-muted-foreground group-hover:text-primary">
+                Quiz
+              </span>
+            </Link>
           );
         }
         if (contentType) {
