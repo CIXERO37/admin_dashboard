@@ -55,18 +55,17 @@ function QuizCard({ quiz, onApprove, onReject }: QuizCardProps) {
       onClick={handleCardClick}
     >
       {/* Cover Image */}
-      <div
-        className="relative h-32 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent"
-        style={
-          coverUrl
-            ? {
-                backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.4)), url(${coverUrl})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }
-            : undefined
-        }
-      >
+      <div className="relative h-32 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent overflow-hidden">
+        {coverUrl && (
+          <>
+            <img
+              src={coverUrl}
+              alt={quiz.title}
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/40" />
+          </>
+        )}
         {/* Category & Status Badges */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
           <Badge

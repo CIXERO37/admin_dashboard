@@ -72,7 +72,7 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
           description: "Quiz not found",
           variant: "destructive",
         });
-        router.push("/support/quiz");
+        router.push("/quiz-approval");
         return;
       }
       setQuiz(data);
@@ -95,7 +95,7 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
         title: "Success",
         description: "Quiz has been approved and published",
       });
-      router.push("/support/quiz");
+      router.push("/quiz-approval");
     }
     setProcessing(false);
     setApproveDialog(false);
@@ -112,7 +112,7 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
       });
     } else {
       toast({ title: "Success", description: "Quiz has been rejected" });
-      router.push("/support/quiz");
+      router.push("/quiz-approval");
     }
     setProcessing(false);
     setRejectDialog(false);
@@ -140,13 +140,7 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href="/support">Support</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/support/quiz">Quiz Approval</Link>
+                  <Link href="/quiz-approval">Quiz Approval</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -189,16 +183,14 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         {/* Cover Image */}
         {(quiz.cover_image || quiz.image_url) && (
-          <div
-            className="h-48 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent"
-            style={{
-              backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.3)), url(${
-                quiz.cover_image || quiz.image_url
-              })`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          />
+          <div className="relative h-48 w-full overflow-hidden bg-muted">
+            <img
+              src={(quiz.cover_image || quiz.image_url) as string}
+              alt={quiz.title}
+              className="h-full w-full object-cover transition-transform hover:scale-105 duration-700"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/30" />
+          </div>
         )}
 
         <div className="p-6 space-y-6">
@@ -230,7 +222,7 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
               </div>
               {quiz.creator ? (
                 <Link
-                  href={`/users/${quiz.creator.id}?from=/support/quiz`}
+                  href={`/users/${quiz.creator.id}?from=/quiz-approval`}
                   className="flex items-center gap-3"
                 >
                   <Avatar className="h-10 w-10">
