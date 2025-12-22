@@ -253,7 +253,7 @@ export async function fetchProfiles({
 
   let query = supabase
     .from("profiles")
-    .select("*", { count: "exact" })
+    .select("*, state:states(name), city:cities(name)", { count: "exact" })
     .is("deleted_at", null)
 
   if (search) {
