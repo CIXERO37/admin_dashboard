@@ -150,7 +150,7 @@ export async function fetchGroupById(id: string): Promise<{ data: GroupDetail | 
 
   const { data: group, error: groupError } = await supabase
     .from("groups")
-    .select("*, creator:profiles!groups_creator_id_fkey(fullname, email, avatar_url, username)")
+    .select("*, creator:profiles!groups_creator_id_fkey(fullname, email, avatar_url, username, state:states(name), city:cities(name))")
     .eq("id", id)
     .single()
 
