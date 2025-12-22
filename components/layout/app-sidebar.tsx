@@ -108,6 +108,11 @@ const navigation: NavItem[] = [
         icon: LayoutDashboard,
       },
       { title: "Users", href: "/users", icon: User },
+      {
+        title: "Trash Bin",
+        href: "/trash-bin",
+        icon: Trash2,
+      },
     ],
   },
   {
@@ -119,11 +124,6 @@ const navigation: NavItem[] = [
       { title: "General", href: "/settings/general", icon: Sliders },
       { title: "Security", href: "/settings/security", icon: Shield },
     ],
-  },
-  {
-    title: "Trash Bin",
-    href: "/trash-bin",
-    icon: Trash2,
   },
 ];
 
