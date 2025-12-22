@@ -23,12 +23,14 @@ export interface QuizApprovalResponse {
   data: QuizApproval[]
   totalCount: number
   totalPages: number
+  categories: string[]
 }
 
 interface FetchQuizApprovalsParams {
   page?: number
   limit?: number
   search?: string
+  category?: string
 }
 
 // Dummy data for prototype
@@ -37,7 +39,7 @@ const DUMMY_QUIZZES: QuizApproval[] = [
     id: "quiz_001",
     title: "Matematika Dasar: Perkalian dan Pembagian",
     description: "Quiz untuk menguji kemampuan perkalian dan pembagian siswa SD kelas 4-6",
-    category: "mathematics",
+    category: "Math",
     language: "id",
     cover_image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=200&fit=crop",
     created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
@@ -51,14 +53,13 @@ const DUMMY_QUIZZES: QuizApproval[] = [
     questions: [
       { question: "Berapa hasil dari 12 x 8?", answers: [{ id: "0", answer: "96" }, { id: "1", answer: "86" }, { id: "2", answer: "106" }, { id: "3", answer: "76" }], correct: "0" },
       { question: "Berapa hasil dari 144 : 12?", answers: [{ id: "0", answer: "10" }, { id: "1", answer: "12" }, { id: "2", answer: "14" }, { id: "3", answer: "16" }], correct: "1" },
-      { question: "Berapa hasil dari 25 x 4?", answers: [{ id: "0", answer: "90" }, { id: "1", answer: "95" }, { id: "2", answer: "100" }, { id: "3", answer: "105" }], correct: "2" },
     ],
   },
   {
     id: "quiz_002",
     title: "English Vocabulary: Animals",
     description: "Test your knowledge about animal names in English",
-    category: "language",
+    category: "General",
     language: "en",
     cover_image: "https://images.unsplash.com/photo-1474511320723-9a56873571b7?w=400&h=200&fit=crop",
     created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
@@ -69,18 +70,13 @@ const DUMMY_QUIZZES: QuizApproval[] = [
       email: "sarah.johnson@email.com",
       avatar_url: null,
     },
-    questions: [
-      { question: "What is the largest mammal in the world?", answers: [{ id: "0", answer: "Elephant" }, { id: "1", answer: "Blue Whale" }, { id: "2", answer: "Giraffe" }, { id: "3", answer: "Hippopotamus" }], correct: "1" },
-      { question: "Which animal is known as the King of the Jungle?", answers: [{ id: "0", answer: "Tiger" }, { id: "1", answer: "Elephant" }, { id: "2", answer: "Lion" }, { id: "3", answer: "Bear" }], correct: "2" },
-      { question: "What do you call a baby dog?", answers: [{ id: "0", answer: "Kitten" }, { id: "1", answer: "Cub" }, { id: "2", answer: "Puppy" }, { id: "3", answer: "Calf" }], correct: "2" },
-      { question: "Which bird cannot fly?", answers: [{ id: "0", answer: "Eagle" }, { id: "1", answer: "Penguin" }, { id: "2", answer: "Sparrow" }, { id: "3", answer: "Owl" }], correct: "1" },
-    ],
+    questions: [],
   },
   {
     id: "quiz_003",
     title: "Sejarah Indonesia: Kemerdekaan",
     description: "Quiz tentang sejarah kemerdekaan Indonesia",
-    category: "history",
+    category: "History",
     language: "id",
     cover_image: "https://images.unsplash.com/photo-1555217851-6141535bd771?w=400&h=200&fit=crop",
     created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
@@ -91,19 +87,13 @@ const DUMMY_QUIZZES: QuizApproval[] = [
       email: "budi.santoso@yahoo.com",
       avatar_url: null,
     },
-    questions: [
-      { question: "Kapan Indonesia memproklamasikan kemerdekaan?", answers: [{ id: "0", answer: "17 Agustus 1945" }, { id: "1", answer: "17 Agustus 1944" }, { id: "2", answer: "17 Agustus 1946" }, { id: "3", answer: "17 Juli 1945" }], correct: "0" },
-      { question: "Siapa yang membacakan teks proklamasi?", answers: [{ id: "0", answer: "Mohammad Hatta" }, { id: "1", answer: "Soekarno" }, { id: "2", answer: "Ahmad Subarjo" }, { id: "3", answer: "Fatmawati" }], correct: "1" },
-      { question: "Di mana proklamasi kemerdekaan dibacakan?", answers: [{ id: "0", answer: "Jalan Menteng Raya" }, { id: "1", answer: "Jalan Pegangsaan Timur 56" }, { id: "2", answer: "Istana Merdeka" }, { id: "3", answer: "Gedung DPR" }], correct: "1" },
-      { question: "Siapa yang menjahit bendera merah putih pertama?", answers: [{ id: "0", answer: "Kartini" }, { id: "1", answer: "Cut Nyak Dien" }, { id: "2", answer: "Fatmawati" }, { id: "3", answer: "Dewi Sartika" }], correct: "2" },
-      { question: "Apa nama organisasi pemuda yang menculik Soekarno-Hatta?", answers: [{ id: "0", answer: "Sumpah Pemuda" }, { id: "1", answer: "PETA" }, { id: "2", answer: "Gerakan Pemuda" }, { id: "3", answer: "Menteng 31" }], correct: "3" },
-    ],
+    questions: [],
   },
   {
     id: "quiz_004",
     title: "Science: Solar System",
     description: "Learn about planets and the solar system",
-    category: "science",
+    category: "Science",
     language: "en",
     cover_image: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=400&h=200&fit=crop",
     created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
@@ -114,19 +104,15 @@ const DUMMY_QUIZZES: QuizApproval[] = [
       email: "diana.putri@gmail.com",
       avatar_url: null,
     },
-    questions: [
-      { question: "Which planet is known as the Red Planet?", answers: [{ id: "0", answer: "Venus" }, { id: "1", answer: "Mars" }, { id: "2", answer: "Jupiter" }, { id: "3", answer: "Saturn" }], correct: "1" },
-      { question: "What is the largest planet in our solar system?", answers: [{ id: "0", answer: "Saturn" }, { id: "1", answer: "Neptune" }, { id: "2", answer: "Jupiter" }, { id: "3", answer: "Uranus" }], correct: "2" },
-      { question: "How many planets are in our solar system?", answers: [{ id: "0", answer: "7" }, { id: "1", answer: "8" }, { id: "2", answer: "9" }, { id: "3", answer: "10" }], correct: "1" },
-    ],
+    questions: [],
   },
   {
     id: "quiz_005",
-    title: "Biologi: Sistem Pencernaan Manusia",
-    description: "Quiz tentang organ dan proses pencernaan pada manusia",
-    category: "science",
-    language: "id",
-    cover_image: "https://images.unsplash.com/photo-1530026405186-ed1f139313f8?w=400&h=200&fit=crop",
+    title: "Introduction to Python Programming",
+    description: "Basic concepts of Python",
+    category: "Technology",
+    language: "en",
+    cover_image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=200&fit=crop",
     created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     creator: {
       id: "user_005",
@@ -135,20 +121,15 @@ const DUMMY_QUIZZES: QuizApproval[] = [
       email: "eko.prasetyo@email.com",
       avatar_url: null,
     },
-    questions: [
-      { question: "Organ apa yang pertama kali mencerna makanan?", answers: [{ id: "0", answer: "Lambung" }, { id: "1", answer: "Mulut" }, { id: "2", answer: "Usus halus" }, { id: "3", answer: "Kerongkongan" }], correct: "1" },
-      { question: "Enzim apa yang terdapat dalam air liur?", answers: [{ id: "0", answer: "Pepsin" }, { id: "1", answer: "Lipase" }, { id: "2", answer: "Amilase" }, { id: "3", answer: "Tripsin" }], correct: "2" },
-      { question: "Di mana penyerapan nutrisi terjadi?", answers: [{ id: "0", answer: "Lambung" }, { id: "1", answer: "Usus besar" }, { id: "2", answer: "Usus halus" }, { id: "3", answer: "Kerongkongan" }], correct: "2" },
-      { question: "Apa fungsi utama usus besar?", answers: [{ id: "0", answer: "Mencerna protein" }, { id: "1", answer: "Menyerap air" }, { id: "2", answer: "Memproduksi enzim" }, { id: "3", answer: "Menyimpan makanan" }], correct: "1" },
-    ],
+    questions: [],
   },
   {
     id: "quiz_006",
-    title: "Geography: World Capitals",
-    description: "Test your knowledge of capital cities around the world",
-    category: "geography",
+    title: "Business Strategy 101",
+    description: "Fundamentals of business strategy",
+    category: "Business",
     language: "en",
-    cover_image: "https://images.unsplash.com/photo-1521295121783-8a321d551ad2?w=400&h=200&fit=crop",
+    cover_image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=200&fit=crop",
     created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
     creator: {
       id: "user_006",
@@ -157,11 +138,24 @@ const DUMMY_QUIZZES: QuizApproval[] = [
       email: "maria.garcia@email.com",
       avatar_url: null,
     },
-    questions: [
-      { question: "What is the capital of Japan?", answers: [{ id: "0", answer: "Osaka" }, { id: "1", answer: "Kyoto" }, { id: "2", answer: "Tokyo" }, { id: "3", answer: "Nagoya" }], correct: "2" },
-      { question: "What is the capital of Australia?", answers: [{ id: "0", answer: "Sydney" }, { id: "1", answer: "Melbourne" }, { id: "2", answer: "Brisbane" }, { id: "3", answer: "Canberra" }], correct: "3" },
-      { question: "What is the capital of Brazil?", answers: [{ id: "0", answer: "Rio de Janeiro" }, { id: "1", answer: "Sao Paulo" }, { id: "2", answer: "Brasilia" }, { id: "3", answer: "Salvador" }], correct: "2" },
-    ],
+    questions: [],
+  },
+  {
+    id: "quiz_007",
+    title: "Football Rules & Regulations",
+    description: "Do you know the rules of football?",
+    category: "Sports",
+    language: "en",
+    cover_image: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=400&h=200&fit=crop",
+    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    creator: {
+      id: "user_007",
+      fullname: "James Wilson",
+      username: "jamesw",
+      email: "james.wilson@email.com",
+      avatar_url: null,
+    },
+    questions: [],
   },
 ]
 
@@ -170,6 +164,7 @@ export async function fetchQuizApprovals({
   page = 1,
   limit = 10,
   search = "",
+  category = "all",
 }: FetchQuizApprovalsParams): Promise<QuizApprovalResponse> {
   // Filter by search
   let filteredData = DUMMY_QUIZZES
@@ -183,6 +178,16 @@ export async function fetchQuizApprovals({
     )
   }
 
+  // Filter by category
+  if (category && category !== "all") {
+    filteredData = filteredData.filter(
+      (quiz) => quiz.category?.toLowerCase() === category.toLowerCase()
+    )
+  }
+
+  // Extract unique categories
+  const categories = [...new Set(DUMMY_QUIZZES.map((q) => q.category).filter(Boolean) as string[])].sort()
+
   // Pagination
   const offset = (page - 1) * limit
   const paginatedData = filteredData.slice(offset, offset + limit)
@@ -193,6 +198,7 @@ export async function fetchQuizApprovals({
     data: paginatedData,
     totalCount,
     totalPages,
+    categories,
   }
 }
 

@@ -403,6 +403,33 @@ export function UserTable({
       },
     },
     {
+      key: "location",
+      label: "Locations",
+      render: (_: unknown, row: Record<string, unknown>) => {
+        const state = (row.state as string) || "";
+        const city = (row.city as string) || "";
+
+        if (!state && !city)
+          return <span className="text-muted-foreground">-</span>;
+
+        const locationText = [state, city].filter(Boolean).join(", ");
+        const encodedLocation = encodeURIComponent(locationText);
+
+        return (
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodedLocation}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-medium hover:underline hover:text-primary transition-colors"
+            title="View on Google Maps"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {locationText}
+          </a>
+        );
+      },
+    },
+    {
       key: "action",
       label: "Action",
       render: (_: unknown, row: Record<string, unknown>) => {
@@ -450,13 +477,15 @@ export function UserTable({
     email: profile.email,
     role: profile.role ?? "user",
     status: profile.is_blocked ? "Blocked" : "Active",
+    state: profile.state?.name,
+    city: profile.city?.name,
   }));
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Manage Users</h1>
+          <h1 className="text-3xl font-bold text-foreground">Users</h1>
         </div>
 
         <div className="flex items-center gap-3">

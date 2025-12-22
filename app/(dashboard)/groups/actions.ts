@@ -20,6 +20,8 @@ export interface Group {
     email: string | null
     avatar_url: string | null
     username: string | null
+    state?: { name: string } | null
+    city?: { name: string } | null
   } | null
 }
 
@@ -49,7 +51,7 @@ export async function fetchGroups({
 
   let query = supabase
     .from("groups")
-    .select("*, creator:profiles!groups_creator_id_fkey(fullname, email, avatar_url, username)", { count: "exact" })
+    .select("*, creator:profiles!groups_creator_id_fkey(fullname, email, avatar_url, username, state:states(name), city:cities(name))", { count: "exact" })
     .is("deleted_at", null)
 
   if (search) {

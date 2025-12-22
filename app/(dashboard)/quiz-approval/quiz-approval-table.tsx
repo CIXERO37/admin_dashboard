@@ -17,6 +17,24 @@ import {
   approveQuizAction,
   rejectQuizAction,
 } from "./actions";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { SlidersHorizontal } from "lucide-react";
 
 interface QuizApprovalTableProps {
   initialData: QuizApproval[];
@@ -24,12 +42,14 @@ interface QuizApprovalTableProps {
   currentPage: number;
   totalCount: number;
   searchQuery: string;
+  categories: string[];
+  categoryFilter: string;
 }
 
 interface QuizCardProps {
   quiz: QuizApproval;
-  onApprove: (id: string) => void;
-  onReject: (id: string) => void;
+  onApprove: (id: string, title: string) => void;
+  onReject: (id: string, title: string) => void;
 }
 
 function QuizCard({ quiz, onApprove, onReject }: QuizCardProps) {
@@ -161,7 +181,7 @@ function QuizCard({ quiz, onApprove, onReject }: QuizCardProps) {
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              onApprove(quiz.id);
+              onApprove(quiz.id, quiz.title);
             }}
           >
             <Check className="h-4 w-4" />
@@ -173,7 +193,7 @@ function QuizCard({ quiz, onApprove, onReject }: QuizCardProps) {
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              onReject(quiz.id);
+              onReject(quiz.id, quiz.title);
             }}
           >
             <X className="h-4 w-4" />
@@ -191,6 +211,8 @@ export function QuizApprovalTable({
   currentPage,
   totalCount,
   searchQuery,
+  categories,
+  categoryFilter,
 }: QuizApprovalTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -198,7 +220,35 @@ export function QuizApprovalTable({
   const [searchInput, setSearchInput] = useState(searchQuery);
   const { toast } = useToast();
 
-  const handleApprove = async (id: string) => {
+  const [rejectDialog, setRejectDialog] = useState<{
+    open: boolean;
+    id: string;
+    title: string;
+  }>({
+    open: false,
+    id: "",
+    title: "",
+  });
+  const [rejectionReason, setRejectionReason] = useState("");
+
+  const [approveDialog, setApproveDialog] = useState<{
+    open: boolean;
+    id: string;
+    title: string;
+  }>({
+    open: false,
+    id: "",
+    title: "",
+  });
+
+  const handleApprove = (id: string, title: string) => {
+    setApproveDialog({ open: true, id, title });
+  };
+
+  const executeApprove = async () => {
+    const { id, title } = approveDialog;
+    if (!id) return;
+
     const { error } = await approveQuizAction(id);
     if (error) {
       toast({
@@ -207,13 +257,35 @@ export function QuizApprovalTable({
         variant: "destructive",
       });
     } else {
-      toast({ title: "Success", description: "Quiz approved successfully" });
+      toast({
+        title: "Success",
+        description: `Quiz "${title}" has been approved successfully`,
+      });
       router.refresh();
     }
+
+    setApproveDialog((prev) => ({ ...prev, open: false }));
   };
 
-  const handleReject = async (id: string) => {
-    const { error } = await rejectQuizAction(id);
+  const handleReject = (id: string, title: string) => {
+    setRejectDialog({ open: true, id, title });
+    setRejectionReason("");
+  };
+
+  const executeReject = async () => {
+    const { id, title } = rejectDialog;
+    if (!id) return;
+
+    if (!rejectionReason.trim()) {
+      toast({
+        title: "Error",
+        description: "Please provide a rejection reason",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error } = await rejectQuizAction(id, rejectionReason);
     if (error) {
       toast({
         title: "Error",
@@ -221,16 +293,21 @@ export function QuizApprovalTable({
         variant: "destructive",
       });
     } else {
-      toast({ title: "Success", description: "Quiz rejected successfully" });
+      toast({
+        title: "Success",
+        description: `Quiz "${title}" has been rejected`,
+      });
       router.refresh();
     }
+
+    setRejectDialog((prev) => ({ ...prev, open: false }));
   };
 
   const updateUrl = (params: Record<string, string | number>) => {
     const newParams = new URLSearchParams(searchParams.toString());
 
     Object.entries(params).forEach(([key, value]) => {
-      if (value && value !== "") {
+      if (value && value !== "" && value !== "all") {
         newParams.set(key, String(value));
       } else {
         newParams.delete(key);
@@ -253,7 +330,7 @@ export function QuizApprovalTable({
   };
 
   const handlePageChange = (page: number) => {
-    updateUrl({ page, search: searchQuery });
+    updateUrl({ page, search: searchQuery, category: categoryFilter });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -282,6 +359,26 @@ export function QuizApprovalTable({
               <Search className="h-3.5 w-3.5" />
             </button>
           </div>
+
+          <Select
+            value={categoryFilter}
+            onValueChange={(value) => updateUrl({ category: value, page: 1 })}
+          >
+            <SelectTrigger className="w-36">
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal className="h-4 w-4" />
+                <SelectValue placeholder="Category" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Category</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {capitalizeFirst(cat)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -383,6 +480,80 @@ export function QuizApprovalTable({
           )}
         </div>
       )}
+      <Dialog
+        open={approveDialog.open}
+        onOpenChange={(open) => setApproveDialog((prev) => ({ ...prev, open }))}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Approve Quiz</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to approve this quiz?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() =>
+                setApproveDialog((prev) => ({ ...prev, open: false }))
+              }
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-emerald-500 hover:bg-emerald-600 text-white"
+              onClick={executeApprove}
+            >
+              Approve
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={rejectDialog.open}
+        onOpenChange={(open) => setRejectDialog((prev) => ({ ...prev, open }))}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Quiz</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to reject this quiz?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-2 py-2">
+            <Label htmlFor="reason">Reason for Rejection</Label>
+            <Textarea
+              id="reason"
+              placeholder="e.g., Inappropriate content, Low image quality, etc."
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              className="h-24 resize-none"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() =>
+                setRejectDialog((prev) => ({ ...prev, open: false }))
+              }
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={executeReject}
+              disabled={!rejectionReason.trim()}
+            >
+              Reject Quiz
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
+}
+
+function capitalizeFirst(str: string) {
+  if (!str || str === "-") return str;
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }

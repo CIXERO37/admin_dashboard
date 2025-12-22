@@ -112,7 +112,6 @@ export function GroupDetailClient({
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
 
-  const [copied, setCopied] = useState(false);
   const [searchInput, setSearchInput] = useState(searchQuery);
 
   const [removeMemberDialog, setRemoveMemberDialog] = useState<{
@@ -123,12 +122,6 @@ export function GroupDetailClient({
 
   const status = getGroupStatus(group);
   const location = getLocation(group);
-
-  const copyInviteCode = () => {
-    navigator.clipboard.writeText(group.invite_code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const updateUrl = (params: Record<string, string | number>) => {
     const newParams = new URLSearchParams(searchParams.toString());
@@ -289,29 +282,9 @@ export function GroupDetailClient({
                   <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
                   <span className="text-muted-foreground">
                     {group.created_at
-                      ? format(new Date(group.created_at), "dd MMM yyyy")
+                      ? format(new Date(group.created_at), "d MMM yyyy")
                       : "-"}
                   </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 w-full">
-                    <Copy className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <code className="font-mono text-muted-foreground text-xs bg-muted px-2 py-0.5 rounded flex-1 truncate">
-                      {group.invite_code}
-                    </code>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 cursor-pointer hover:bg-muted"
-                      onClick={copyInviteCode}
-                    >
-                      {copied ? (
-                        <Check className="h-3 w-3 text-green-500" />
-                      ) : (
-                        <Copy className="h-3 w-3" />
-                      )}
-                    </Button>
-                  </div>
                 </div>
               </div>
 

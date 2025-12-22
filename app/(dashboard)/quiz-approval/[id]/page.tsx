@@ -382,12 +382,11 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
 
       {/* Approve Dialog */}
       <Dialog open={approveDialog} onOpenChange={setApproveDialog}>
-        <DialogContent showCloseButton={false}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-green-600">Approve Quiz</DialogTitle>
+            <DialogTitle>Approve Quiz</DialogTitle>
             <DialogDescription>
-              Are you sure you want to approve <strong>{quiz.title}</strong>?
-              This quiz will be published and visible to all users.
+              Are you sure you want to approve this quiz?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -402,9 +401,9 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
             <Button
               onClick={handleApprove}
               disabled={processing}
-              className="bg-green-600 hover:bg-green-700 cursor-pointer"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white cursor-pointer"
             >
-              {processing ? "Processing..." : "Approve & Publish"}
+              {processing ? "Processing..." : "Approve"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -412,19 +411,18 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
 
       {/* Reject Dialog */}
       <Dialog open={rejectDialog} onOpenChange={setRejectDialog}>
-        <DialogContent showCloseButton={false}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-red-500">Reject Quiz</DialogTitle>
+            <DialogTitle>Reject Quiz</DialogTitle>
             <DialogDescription>
-              Are you sure you want to reject <strong>{quiz.title}</strong>? The
-              creator will be notified about the rejection.
+              Are you sure you want to reject this quiz?
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-4">
-            <Label htmlFor="reason">Rejection Reason (Optional)</Label>
+            <Label htmlFor="reason">Reason for Rejection</Label>
             <Textarea
               id="reason"
-              placeholder="Explain why this quiz is being rejected..."
+              placeholder="e.g., Inappropriate content, Low image quality, etc."
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               rows={3}
@@ -445,7 +443,7 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
             <Button
               variant="destructive"
               onClick={handleReject}
-              disabled={processing}
+              disabled={processing || !rejectReason.trim()}
               className="cursor-pointer"
             >
               {processing ? "Processing..." : "Reject Quiz"}

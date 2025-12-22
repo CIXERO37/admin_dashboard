@@ -68,7 +68,7 @@ interface GroupTableProps {
 
 function formatDate(dateString?: string | null): string {
   if (!dateString) return "-";
-  return format(new Date(dateString), "dd MMM yyyy");
+  return format(new Date(dateString), "d MMM yyyy");
 }
 
 function getGroupStatus(group: Group): {
@@ -84,8 +84,14 @@ function getGroupStatus(group: Group): {
 }
 
 function getLocation(group: Group): string {
+  const creator = group.creator;
+  if (creator?.state?.name || creator?.city?.name) {
+    const parts = [creator.state?.name, creator.city?.name].filter(Boolean);
+    return parts.join(", ");
+  }
+
   const settings = group.settings as { location?: string } | null;
-  return settings?.location || "Indonesia";
+  return settings?.location || "-";
 }
 
 interface GroupCardProps {
