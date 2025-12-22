@@ -84,6 +84,12 @@ function getGroupStatus(group: GroupDetail): {
 }
 
 function getLocation(group: GroupDetail): string {
+  const creator = group.creator;
+  if (creator?.state?.name || creator?.city?.name) {
+    const parts = [creator.state?.name, creator.city?.name].filter(Boolean);
+    return parts.join(", ");
+  }
+
   const settings = group.settings as { location?: string } | null;
   return settings?.location || "Indonesia";
 }
