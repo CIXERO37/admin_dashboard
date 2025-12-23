@@ -2,6 +2,16 @@
 
 import { getSupabaseAdminClient } from "@/lib/supabase-admin"
 
+export interface GroupActivity {
+  id: string
+  type: string
+  desc: string
+  nama: string
+  user: string
+  created: string
+  meta?: Record<string, any>
+}
+
 export interface Group {
   id: string
   name: string
@@ -14,6 +24,7 @@ export interface Group {
   category?: string | null
   members?: Record<string, unknown>[] | null
   settings?: Record<string, unknown> | null
+  activities?: GroupActivity[] | null
   created_at?: string | null
   creator?: {
     fullname: string | null

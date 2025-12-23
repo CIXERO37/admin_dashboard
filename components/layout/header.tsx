@@ -29,10 +29,13 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getAvatarUrl } from "@/lib/utils";
 import Link from "next/link";
 
+import { ModeToggle } from "@/components/mode-toggle";
+
 export function Header() {
   const { user, loading } = useCurrentUser();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
+  // ... (rest of logic)
   const handleLogout = async () => {
     await logout();
   };
@@ -52,11 +55,15 @@ export function Header() {
     return "AD";
   };
 
-  const displayName = user?.fullname || user?.username || user?.email?.split("@")[0] || "Admin";
+  const displayName =
+    user?.fullname || user?.username || user?.email?.split("@")[0] || "Admin";
   const displayEmail = user?.email || "-";
   return (
     <header className="flex h-16 items-center justify-end border-b border-border bg-card px-6">
       <div className="flex items-center gap-4">
+        {/* Mode Toggle */}
+        <ModeToggle />
+
         {/* Notifications */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -117,7 +124,10 @@ export function Header() {
               ) : (
                 <>
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={getAvatarUrl(user?.avatar_url)} alt={displayName} />
+                    <AvatarImage
+                      src={getAvatarUrl(user?.avatar_url)}
+                      alt={displayName}
+                    />
                     <AvatarFallback className="bg-primary text-primary-foreground">
                       {getInitials(user?.fullname ?? null, user?.email ?? null)}
                     </AvatarFallback>
@@ -142,13 +152,19 @@ export function Header() {
               Akun Saya
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-border" />
-            <DropdownMenuItem asChild className="text-foreground cursor-pointer">
+            <DropdownMenuItem
+              asChild
+              className="text-foreground cursor-pointer"
+            >
               <Link href="/settings/profile">
                 <User className="mr-2 h-4 w-4" />
                 Profil
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild className="text-foreground cursor-pointer">
+            <DropdownMenuItem
+              asChild
+              className="text-foreground cursor-pointer"
+            >
               <Link href="/settings">
                 <Settings className="mr-2 h-4 w-4" />
                 Pengaturan
