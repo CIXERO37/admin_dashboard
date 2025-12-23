@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -15,6 +16,14 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { isSameYear, subYears, parseISO } from "date-fns";
 
 interface LocationChartProps {
   profiles: Profile[];
@@ -25,6 +34,7 @@ interface LocationChartProps {
 interface ProfileWithLocation extends Profile {
   state?: { name: string } | null;
   city?: { name: string } | null;
+  created_at?: string | null;
 }
 
 const chartConfig = {
@@ -34,26 +44,54 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+const filterProfiles = (profiles: ProfileWithLocation[], range: string) => {
+  if (!profiles) return [];
+  if (range === "all") return profiles;
+
+  const now = new Date();
+  const lastYearDate = subYears(now, 1);
+
+  return profiles.filter((profile) => {
+    if (!profile.created_at) return false;
+    const date = new Date(profile.created_at);
+
+    if (range === "this-year") {
+      return isSameYear(date, now);
+    }
+    if (range === "last-year") {
+      return isSameYear(date, lastYearDate);
+    }
+    return true;
+  });
+};
+
 export function LocationChart({ profiles, loading }: LocationChartProps) {
-  if (loading) {
-    return (
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="h-[400px] animate-pulse bg-muted/20" />
-        <Card className="h-[400px] animate-pulse bg-muted/20" />
-      </div>
-    );
-  }
+  const [stateTimeRange, setStateTimeRange] = useState("all");
+  const [cityTimeRange, setCityTimeRange] = useState("all");
 
-  // Aggregate data
+  const filteredStateProfiles = useMemo(() => {
+    return filterProfiles(profiles as ProfileWithLocation[], stateTimeRange);
+  }, [profiles, stateTimeRange]);
+
+  const filteredCityProfiles = useMemo(() => {
+    return filterProfiles(profiles as ProfileWithLocation[], cityTimeRange);
+  }, [profiles, cityTimeRange]);
+
+  // Aggregate data for TOP STATES
   const stateCounts: Record<string, number> = {};
-  const cityCounts: Record<string, number> = {};
-
-  if (profiles) {
-    (profiles as ProfileWithLocation[]).forEach((profile) => {
+  if (filteredStateProfiles) {
+    filteredStateProfiles.forEach((profile) => {
       if (profile.state?.name) {
         const stateName = profile.state.name;
         stateCounts[stateName] = (stateCounts[stateName] || 0) + 1;
       }
+    });
+  }
+
+  // Aggregate data for TOP CITIES
+  const cityCounts: Record<string, number> = {};
+  if (filteredCityProfiles) {
+    filteredCityProfiles.forEach((profile) => {
       if (profile.city?.name) {
         const cityName = profile.city.name;
         cityCounts[cityName] = (cityCounts[cityName] || 0) + 1;
@@ -71,11 +109,40 @@ export function LocationChart({ profiles, loading }: LocationChartProps) {
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
 
+  if (loading) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="h-[400px] animate-pulse bg-muted/20" />
+        <Card className="h-[400px] animate-pulse bg-muted/20" />
+      </div>
+    );
+  }
+
   return (
     <div className="grid gap-4 md:grid-cols-2">
+      {/* Top States Chart */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle>Top States</CardTitle>
+          <Select value={stateTimeRange} onValueChange={setStateTimeRange}>
+            <SelectTrigger
+              className="w-[130px] rounded-lg sm:ml-auto"
+              aria-label="Select a value"
+            >
+              <SelectValue placeholder="All Time" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              <SelectItem value="all" className="rounded-lg">
+                All Time
+              </SelectItem>
+              <SelectItem value="this-year" className="rounded-lg">
+                This Year
+              </SelectItem>
+              <SelectItem value="last-year" className="rounded-lg">
+                Last Year
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </CardHeader>
         <CardContent>
           <ChartContainer
@@ -116,9 +183,29 @@ export function LocationChart({ profiles, loading }: LocationChartProps) {
         </CardContent>
       </Card>
 
+      {/* Top Cities Chart */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle>Top Cities</CardTitle>
+          <Select value={cityTimeRange} onValueChange={setCityTimeRange}>
+            <SelectTrigger
+              className="w-[130px] rounded-lg sm:ml-auto"
+              aria-label="Select a value"
+            >
+              <SelectValue placeholder="All Time" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              <SelectItem value="all" className="rounded-lg">
+                All Time
+              </SelectItem>
+              <SelectItem value="this-year" className="rounded-lg">
+                This Year
+              </SelectItem>
+              <SelectItem value="last-year" className="rounded-lg">
+                Last Year
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </CardHeader>
         <CardContent>
           <ChartContainer

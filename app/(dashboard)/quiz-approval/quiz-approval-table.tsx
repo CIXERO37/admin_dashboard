@@ -516,9 +516,6 @@ export function QuizApprovalTable({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Reject Quiz</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to reject this quiz?
-            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-2">
             <Label htmlFor="reason">Reason for Rejection</Label>
@@ -544,7 +541,7 @@ export function QuizApprovalTable({
               onClick={executeReject}
               disabled={!rejectionReason.trim()}
             >
-              Reject Quiz
+              Reject
             </Button>
           </DialogFooter>
         </DialogContent>
