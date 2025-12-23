@@ -85,14 +85,14 @@ export function DemographicChart({ profiles, loading }: DemographicChartProps) {
 
   const genderData = Object.entries(genderCounts).map(
     ([name, value], index) => ({
-      name,
+      name: name.charAt(0).toUpperCase() + name.slice(1),
       value,
       fill: COLORS[index % COLORS.length],
     })
   );
 
   const gradeData = Object.entries(gradeCounts).map(([name, value], index) => ({
-    name,
+    name: name.charAt(0).toUpperCase() + name.slice(1),
     value,
     fill: COLORS[index % COLORS.length], // Rotate colors
   }));
