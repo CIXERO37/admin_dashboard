@@ -29,6 +29,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getAvatarUrl } from "@/lib/utils";
 import Link from "next/link";
 
+import { ThemeCustomizer } from "@/components/theme-customizer";
 import { ModeToggle } from "@/components/mode-toggle";
 
 export function Header() {
@@ -61,17 +62,12 @@ export function Header() {
   return (
     <header className="flex h-16 items-center justify-end border-b border-border bg-card px-6">
       <div className="flex items-center gap-4">
-        {/* Mode Toggle */}
-        <ModeToggle />
-
         {/* Notifications */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-5 w-5 text-muted-foreground" />
-              <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center bg-primary text-primary-foreground">
-                3
-              </Badge>
+              <Badge className="absolute -right-1 -top-1 h-2 w-2 rounded-full p-0 bg-red-500 border-2 border-background" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -108,6 +104,12 @@ export function Header() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Mode Toggle */}
+        <ModeToggle />
+
+        {/* Settings */}
+        <ThemeCustomizer />
 
         {/* User Menu */}
         <DropdownMenu>

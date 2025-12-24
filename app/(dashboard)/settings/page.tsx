@@ -1,11 +1,19 @@
-"use client"
+"use client";
 
-import { StatCard } from "@/components/dashboard/stat-card"
-import { ActionCard } from "@/components/dashboard/action-card"
-import { SectionHeader } from "@/components/dashboard/section-header"
-import { User, Sliders, Shield, CheckCircle, AlertTriangle, Settings } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { StatCard } from "@/components/dashboard/stat-card";
+import { ActionCard } from "@/components/dashboard/action-card";
+import { SectionHeader } from "@/components/dashboard/section-header";
+import {
+  User,
+  Sliders,
+  Shield,
+  CheckCircle,
+  AlertTriangle,
+  Settings,
+  Palette,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export default function SettingsDashboardPage() {
   const systemStatus = [
@@ -13,19 +21,35 @@ export default function SettingsDashboardPage() {
     { name: "Payment Gateway", status: "Active", icon: CheckCircle },
     { name: "Storage", status: "Active", icon: CheckCircle },
     { name: "API Rate Limit", status: "Warning", icon: AlertTriangle },
-  ]
+  ];
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Settings Dashboard</h1>
-        <p className="mt-1 text-muted-foreground">System configuration and preferences</p>
+        <h1 className="text-3xl font-bold text-foreground">
+          Settings Dashboard
+        </h1>
+        <p className="mt-1 text-muted-foreground">
+          System configuration and preferences
+        </p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <StatCard title="Profile Completion" value="85%" change="Update profile" changeType="neutral" icon={User} />
-        <StatCard title="Security Score" value="Good" change="2FA enabled" changeType="increase" icon={Shield} />
+        <StatCard
+          title="Profile Completion"
+          value="85%"
+          change="Update profile"
+          changeType="neutral"
+          icon={User}
+        />
+        <StatCard
+          title="Security Score"
+          value="Good"
+          change="2FA enabled"
+          changeType="increase"
+          icon={Shield}
+        />
         <StatCard
           title="System Health"
           value="98%"
@@ -43,16 +67,24 @@ export default function SettingsDashboardPage() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2">
             {systemStatus.map((item) => {
-              const Icon = item.icon
-              const isActive = item.status === "Active"
+              const Icon = item.icon;
+              const isActive = item.status === "Active";
               return (
                 <div
                   key={item.name}
                   className="flex items-center justify-between rounded-lg border border-border bg-background p-4"
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className={`h-5 w-5 ${isActive ? "text-[var(--success)]" : "text-[var(--warning)]"}`} />
-                    <span className="font-medium text-foreground">{item.name}</span>
+                    <Icon
+                      className={`h-5 w-5 ${
+                        isActive
+                          ? "text-[var(--success)]"
+                          : "text-[var(--warning)]"
+                      }`}
+                    />
+                    <span className="font-medium text-foreground">
+                      {item.name}
+                    </span>
                   </div>
                   <Badge
                     variant="outline"
@@ -65,7 +97,7 @@ export default function SettingsDashboardPage() {
                     {item.status}
                   </Badge>
                 </div>
-              )
+              );
             })}
           </div>
         </CardContent>
@@ -73,7 +105,10 @@ export default function SettingsDashboardPage() {
 
       {/* Quick Access */}
       <div>
-        <SectionHeader title="Settings Modules" description="Configure your system" />
+        <SectionHeader
+          title="Settings Modules"
+          description="Configure your system"
+        />
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <ActionCard
             title="Profile Settings"
@@ -82,10 +117,10 @@ export default function SettingsDashboardPage() {
             icon={User}
           />
           <ActionCard
-            title="General Settings"
-            description="Configure general system options"
-            href="/settings/general"
-            icon={Sliders}
+            title="Appearance"
+            description="Customize the appearance of the app"
+            href="/appearance"
+            icon={Palette}
           />
           <ActionCard
             title="Security Settings"
@@ -96,5 +131,5 @@ export default function SettingsDashboardPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
