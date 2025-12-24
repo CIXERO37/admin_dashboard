@@ -29,6 +29,7 @@ import {
   PanelLeftClose,
   PanelLeft,
   Trash2,
+  Palette,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { useSidebar } from "@/components/ui/sidebar";
 
 interface NavChild {
   title: string;
@@ -119,17 +121,14 @@ const navigation: NavItem[] = [
     title: "Settings",
     href: "/settings",
     icon: Settings,
-    children: [
-      { title: "Profile", href: "/settings/profile", icon: User },
-      { title: "General", href: "/settings/general", icon: Sliders },
-      { title: "Security", href: "/settings/security", icon: Shield },
-    ],
+    children: [{ title: "Appearance", href: "/appearance", icon: Palette }],
   },
 ];
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
+  const { open, toggleSidebar } = useSidebar();
+  const collapsed = !open;
   const [openMenus, setOpenMenus] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
 
@@ -391,7 +390,7 @@ export function AppSidebar() {
           variant="ghost"
           size="sm"
           className="w-full justify-center text-sidebar-foreground hover:bg-secondary hover:text-foreground"
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={toggleSidebar}
         >
           {collapsed ? (
             <PanelLeft className="h-4 w-4" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -16,18 +16,13 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { isSameYear, subYears, parseISO } from "date-fns";
 
 interface LocationChartProps {
   profiles: Profile[];
   loading?: boolean;
+  timeRange: string;
 }
 
 // Helper specific type for profiles with joined data
@@ -65,17 +60,18 @@ const filterProfiles = (profiles: ProfileWithLocation[], range: string) => {
   });
 };
 
-export function LocationChart({ profiles, loading }: LocationChartProps) {
-  const [stateTimeRange, setStateTimeRange] = useState("all");
-  const [cityTimeRange, setCityTimeRange] = useState("all");
-
+export function LocationChart({
+  profiles,
+  loading,
+  timeRange,
+}: LocationChartProps) {
   const filteredStateProfiles = useMemo(() => {
-    return filterProfiles(profiles as ProfileWithLocation[], stateTimeRange);
-  }, [profiles, stateTimeRange]);
+    return filterProfiles(profiles as ProfileWithLocation[], timeRange);
+  }, [profiles, timeRange]);
 
   const filteredCityProfiles = useMemo(() => {
-    return filterProfiles(profiles as ProfileWithLocation[], cityTimeRange);
-  }, [profiles, cityTimeRange]);
+    return filterProfiles(profiles as ProfileWithLocation[], timeRange);
+  }, [profiles, timeRange]);
 
   // Aggregate data for TOP STATES
   const stateCounts: Record<string, number> = {};
@@ -124,25 +120,6 @@ export function LocationChart({ profiles, loading }: LocationChartProps) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle>Top States</CardTitle>
-          <Select value={stateTimeRange} onValueChange={setStateTimeRange}>
-            <SelectTrigger
-              className="w-[130px] rounded-lg sm:ml-auto"
-              aria-label="Select a value"
-            >
-              <SelectValue placeholder="All Time" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl">
-              <SelectItem value="all" className="rounded-lg">
-                All Time
-              </SelectItem>
-              <SelectItem value="this-year" className="rounded-lg">
-                This Year
-              </SelectItem>
-              <SelectItem value="last-year" className="rounded-lg">
-                Last Year
-              </SelectItem>
-            </SelectContent>
-          </Select>
         </CardHeader>
         <CardContent>
           <ChartContainer
@@ -187,25 +164,6 @@ export function LocationChart({ profiles, loading }: LocationChartProps) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle>Top Cities</CardTitle>
-          <Select value={cityTimeRange} onValueChange={setCityTimeRange}>
-            <SelectTrigger
-              className="w-[130px] rounded-lg sm:ml-auto"
-              aria-label="Select a value"
-            >
-              <SelectValue placeholder="All Time" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl">
-              <SelectItem value="all" className="rounded-lg">
-                All Time
-              </SelectItem>
-              <SelectItem value="this-year" className="rounded-lg">
-                This Year
-              </SelectItem>
-              <SelectItem value="last-year" className="rounded-lg">
-                Last Year
-              </SelectItem>
-            </SelectContent>
-          </Select>
         </CardHeader>
         <CardContent>
           <ChartContainer

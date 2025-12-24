@@ -129,9 +129,7 @@ export function GroupDetailClient({
   const { toast } = useToast();
 
   const [searchInput, setSearchInput] = useState(searchQuery);
-  const [activeTab, setActiveTab] = useState<
-    "members" | "settings" | "activity"
-  >("members");
+  const [activeTab, setActiveTab] = useState<"members" | "activity">("members");
 
   const [removeMemberDialog, setRemoveMemberDialog] = useState<{
     open: boolean;
@@ -319,17 +317,7 @@ export function GroupDetailClient({
               >
                 Members
               </button>
-              <button
-                onClick={() => setActiveTab("settings")}
-                className={cn(
-                  "px-6 py-3 text-sm font-medium transition-colors border-b-2",
-                  activeTab === "settings"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                )}
-              >
-                Settings
-              </button>
+
               <button
                 onClick={() => setActiveTab("activity")}
                 className={cn(
@@ -346,7 +334,7 @@ export function GroupDetailClient({
         </Card>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-12 px-6 pb-6 pt-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-12 pb-6 pt-0">
           {/* Left Sidebar (About/Creator) - ALways Visible */}
           <div className="md:col-span-4 lg:col-span-3 space-y-6">
             <Card>
@@ -648,23 +636,6 @@ export function GroupDetailClient({
                       </p>
                     </div>
                   )}
-                </CardContent>
-              </Card>
-            )}
-
-            {activeTab === "settings" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5" /> Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="py-12 text-center">
-                  <Settings className="h-12 w-12 mx-auto text-muted-foreground/20 mb-4" />
-                  <h3 className="text-lg font-medium">Coming Soon</h3>
-                  <p className="text-muted-foreground">
-                    Group settings are under development.
-                  </p>
                 </CardContent>
               </Card>
             )}
