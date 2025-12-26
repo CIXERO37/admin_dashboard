@@ -1,0 +1,65 @@
+{
+  "node": {
+    "0036e64456fb2be9f284aa63a8876a0297f090e2e1": {
+      "workers": {
+        "app/(dashboard)/profiles/[id]/page": {
+          "moduleId": 66614,
+          "async": false,
+          "exportedName": "logout",
+          "filename": "app/login/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/profiles/[id]/page": "action-browser"
+      },
+      "exportedName": "logout",
+      "filename": "app/login/actions.ts"
+    },
+    "4014a9e9d9809d90772414f31ae207ca1d2fd6dcad": {
+      "workers": {
+        "app/(dashboard)/profiles/[id]/page": {
+          "moduleId": 66614,
+          "async": false,
+          "exportedName": "fetchProfileById",
+          "filename": "app/(dashboard)/profiles/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/profiles/[id]/page": "rsc"
+      },
+      "exportedName": "fetchProfileById",
+      "filename": "app/(dashboard)/profiles/actions.ts"
+    },
+    "405298d407b02c4c08bb21300ac8af71ff5c557013": {
+      "workers": {
+        "app/(dashboard)/profiles/[id]/page": {
+          "moduleId": 66614,
+          "async": false,
+          "exportedName": "fetchCreatedQuizzes",
+          "filename": "app/(dashboard)/profiles/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/profiles/[id]/page": "rsc"
+      },
+      "exportedName": "fetchCreatedQuizzes",
+      "filename": "app/(dashboard)/profiles/actions.ts"
+    },
+    "40a8dbf7b59f5859d63a542ccf3de4c843b81cac74": {
+      "workers": {
+        "app/(dashboard)/profiles/[id]/page": {
+          "moduleId": 66614,
+          "async": false,
+          "exportedName": "fetchUserQuizzes",
+          "filename": "app/(dashboard)/profiles/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/profiles/[id]/page": "rsc"
+      },
+      "exportedName": "fetchUserQuizzes",
+      "filename": "app/(dashboard)/profiles/actions.ts"
+    }
+  },
+  "edge": {}
+}
