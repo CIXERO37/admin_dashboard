@@ -14,7 +14,11 @@
 /coverage
 
 # next.js
+# .next logic for Standalone Build
 /.next/
+# Whitelist standalone and static folders so they CAN be uploaded
+!/.next/standalone/
+!/.next/static/
 /out/
 
 # production
