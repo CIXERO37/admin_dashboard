@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
+import Link from "next/link";
 
 import { fetchQuizById } from "../actions";
 import { Badge } from "@/components/ui/badge";
@@ -60,7 +61,10 @@ export default async function QuizDetailPage({ params }: PageProps) {
             {quiz.creator && (
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Creator</p>
-                <div className="flex items-center gap-2">
+                <Link
+                  href={`/users/${quiz.creator.id}`}
+                  className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                >
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={getAvatarUrl(quiz.creator.avatar_url)} />
                     <AvatarFallback>
@@ -75,7 +79,7 @@ export default async function QuizDetailPage({ params }: PageProps) {
                       @{quiz.creator.username}
                     </p>
                   </div>
-                </div>
+                </Link>
               </div>
             )}
             <div className="space-y-1">
