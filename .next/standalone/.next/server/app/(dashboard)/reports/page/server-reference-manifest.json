@@ -1,0 +1,110 @@
+{
+  "node": {
+    "0036e64456fb2be9f284aa63a8876a0297f090e2e1": {
+      "workers": {
+        "app/(dashboard)/reports/page": {
+          "moduleId": 21314,
+          "async": false,
+          "exportedName": "logout",
+          "filename": "app/login/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/reports/page": "action-browser"
+      },
+      "exportedName": "logout",
+      "filename": "app/login/actions.ts"
+    },
+    "605119fd3bb11cba9580e24bcd1ac8c5475ab8e7b8": {
+      "workers": {
+        "app/(dashboard)/reports/page": {
+          "moduleId": 21314,
+          "async": false,
+          "exportedName": "updateReportAction",
+          "filename": "app/(dashboard)/reports/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/reports/page": "rsc"
+      },
+      "exportedName": "updateReportAction",
+      "filename": "app/(dashboard)/reports/actions.ts"
+    },
+    "4078aa72216dd8618e19b64ad67dd64058f296d8fe": {
+      "workers": {
+        "app/(dashboard)/reports/page": {
+          "moduleId": 21314,
+          "async": false,
+          "exportedName": "deleteReportAction",
+          "filename": "app/(dashboard)/reports/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/reports/page": "rsc"
+      },
+      "exportedName": "deleteReportAction",
+      "filename": "app/(dashboard)/reports/actions.ts"
+    },
+    "408d466254296b7f20cb3566814d43db3b327f5642": {
+      "workers": {
+        "app/(dashboard)/reports/page": {
+          "moduleId": 21314,
+          "async": false,
+          "exportedName": "fetchReports",
+          "filename": "app/(dashboard)/reports/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/reports/page": "rsc"
+      },
+      "exportedName": "fetchReports",
+      "filename": "app/(dashboard)/reports/actions.ts"
+    },
+    "40a00cc82d761c21ff51c6072dd709e0ba4d7fd6b2": {
+      "workers": {
+        "app/(dashboard)/reports/page": {
+          "moduleId": 21314,
+          "async": false,
+          "exportedName": "fetchReportById",
+          "filename": "app/(dashboard)/reports/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/reports/page": "rsc"
+      },
+      "exportedName": "fetchReportById",
+      "filename": "app/(dashboard)/reports/actions.ts"
+    },
+    "705e86f5161c577390255ba4fb253566a9537032be": {
+      "workers": {
+        "app/(dashboard)/reports/page": {
+          "moduleId": 21314,
+          "async": false,
+          "exportedName": "sendMessageAction",
+          "filename": "app/(dashboard)/reports/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/reports/page": "rsc"
+      },
+      "exportedName": "sendMessageAction",
+      "filename": "app/(dashboard)/reports/actions.ts"
+    },
+    "709691c9108acacaf3b5a9eb4c7eae85fb68c782ae": {
+      "workers": {
+        "app/(dashboard)/reports/page": {
+          "moduleId": 21314,
+          "async": false,
+          "exportedName": "deleteMessageAction",
+          "filename": "app/(dashboard)/reports/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/reports/page": "rsc"
+      },
+      "exportedName": "deleteMessageAction",
+      "filename": "app/(dashboard)/reports/actions.ts"
+    }
+  },
+  "edge": {}
+}

@@ -1,0 +1,110 @@
+{
+  "node": {
+    "0036e64456fb2be9f284aa63a8876a0297f090e2e1": {
+      "workers": {
+        "app/(dashboard)/users/page": {
+          "moduleId": 93400,
+          "async": false,
+          "exportedName": "logout",
+          "filename": "app/login/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/users/page": "action-browser"
+      },
+      "exportedName": "logout",
+      "filename": "app/login/actions.ts"
+    },
+    "60a15162366377943a3e23738e78de1e1e09a224da": {
+      "workers": {
+        "app/(dashboard)/users/page": {
+          "moduleId": 93400,
+          "async": false,
+          "exportedName": "updateProfileAction",
+          "filename": "app/(dashboard)/users/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/users/page": "rsc"
+      },
+      "exportedName": "updateProfileAction",
+      "filename": "app/(dashboard)/users/actions.ts"
+    },
+    "409eb8c54c498120c30cb6b42f4cedc11e98b7d901": {
+      "workers": {
+        "app/(dashboard)/users/page": {
+          "moduleId": 93400,
+          "async": false,
+          "exportedName": "deleteProfileAction",
+          "filename": "app/(dashboard)/users/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/users/page": "rsc"
+      },
+      "exportedName": "deleteProfileAction",
+      "filename": "app/(dashboard)/users/actions.ts"
+    },
+    "4014172907f628299944a4ab6f46399e59b565df69": {
+      "workers": {
+        "app/(dashboard)/users/page": {
+          "moduleId": 93400,
+          "async": false,
+          "exportedName": "fetchProfileById",
+          "filename": "app/(dashboard)/users/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/users/page": "rsc"
+      },
+      "exportedName": "fetchProfileById",
+      "filename": "app/(dashboard)/users/actions.ts"
+    },
+    "401b46a54cf9aacb6116e51f34e82a1b8ffbf0da7b": {
+      "workers": {
+        "app/(dashboard)/users/page": {
+          "moduleId": 93400,
+          "async": false,
+          "exportedName": "fetchProfiles",
+          "filename": "app/(dashboard)/users/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/users/page": "rsc"
+      },
+      "exportedName": "fetchProfiles",
+      "filename": "app/(dashboard)/users/actions.ts"
+    },
+    "403bce59f4e139321b5f7fc31182adbc446af90d67": {
+      "workers": {
+        "app/(dashboard)/users/page": {
+          "moduleId": 93400,
+          "async": false,
+          "exportedName": "fetchUserQuizzes",
+          "filename": "app/(dashboard)/users/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/users/page": "rsc"
+      },
+      "exportedName": "fetchUserQuizzes",
+      "filename": "app/(dashboard)/users/actions.ts"
+    },
+    "40627fbafb57187a3b46613f78a336295f04a4c1dd": {
+      "workers": {
+        "app/(dashboard)/users/page": {
+          "moduleId": 93400,
+          "async": false,
+          "exportedName": "fetchCreatedQuizzes",
+          "filename": "app/(dashboard)/users/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/users/page": "rsc"
+      },
+      "exportedName": "fetchCreatedQuizzes",
+      "filename": "app/(dashboard)/users/actions.ts"
+    }
+  },
+  "edge": {}
+}

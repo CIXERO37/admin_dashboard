@@ -1,0 +1,65 @@
+{
+  "node": {
+    "0036e64456fb2be9f284aa63a8876a0297f090e2e1": {
+      "workers": {
+        "app/(dashboard)/quiz-approval/[id]/page": {
+          "moduleId": 92105,
+          "async": false,
+          "exportedName": "logout",
+          "filename": "app/login/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/quiz-approval/[id]/page": "action-browser"
+      },
+      "exportedName": "logout",
+      "filename": "app/login/actions.ts"
+    },
+    "408b1bb5da3e4894bbefe538834abf78eaa54dcce4": {
+      "workers": {
+        "app/(dashboard)/quiz-approval/[id]/page": {
+          "moduleId": 92105,
+          "async": false,
+          "exportedName": "fetchQuizApprovalById",
+          "filename": "app/(dashboard)/quiz-approval/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/quiz-approval/[id]/page": "action-browser"
+      },
+      "exportedName": "fetchQuizApprovalById",
+      "filename": "app/(dashboard)/quiz-approval/actions.ts"
+    },
+    "40ecfbe13c77b0f12999ae8fb0052dfbf4b88227b8": {
+      "workers": {
+        "app/(dashboard)/quiz-approval/[id]/page": {
+          "moduleId": 92105,
+          "async": false,
+          "exportedName": "approveQuizAction",
+          "filename": "app/(dashboard)/quiz-approval/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/quiz-approval/[id]/page": "action-browser"
+      },
+      "exportedName": "approveQuizAction",
+      "filename": "app/(dashboard)/quiz-approval/actions.ts"
+    },
+    "60f6b9ffa54f61be1e26bbc70d89e33509e1909362": {
+      "workers": {
+        "app/(dashboard)/quiz-approval/[id]/page": {
+          "moduleId": 92105,
+          "async": false,
+          "exportedName": "rejectQuizAction",
+          "filename": "app/(dashboard)/quiz-approval/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/quiz-approval/[id]/page": "action-browser"
+      },
+      "exportedName": "rejectQuizAction",
+      "filename": "app/(dashboard)/quiz-approval/actions.ts"
+    }
+  },
+  "edge": {}
+}

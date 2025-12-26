@@ -1,0 +1,50 @@
+{
+  "node": {
+    "0036e64456fb2be9f284aa63a8876a0297f090e2e1": {
+      "workers": {
+        "app/(dashboard)/address/city/page": {
+          "moduleId": 50954,
+          "async": false,
+          "exportedName": "logout",
+          "filename": "app/login/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/address/city/page": "action-browser"
+      },
+      "exportedName": "logout",
+      "filename": "app/login/actions.ts"
+    },
+    "40646e06b42d4f92a06c7791928d104030bd5bbc16": {
+      "workers": {
+        "app/(dashboard)/address/city/page": {
+          "moduleId": 50954,
+          "async": false,
+          "exportedName": "fetchCityById",
+          "filename": "app/(dashboard)/address/city/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/address/city/page": "rsc"
+      },
+      "exportedName": "fetchCityById",
+      "filename": "app/(dashboard)/address/city/actions.ts"
+    },
+    "405d40ba4952378f7ae7965f5d262d9a5f3450acbc": {
+      "workers": {
+        "app/(dashboard)/address/city/page": {
+          "moduleId": 50954,
+          "async": false,
+          "exportedName": "fetchCities",
+          "filename": "app/(dashboard)/address/city/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/address/city/page": "rsc"
+      },
+      "exportedName": "fetchCities",
+      "filename": "app/(dashboard)/address/city/actions.ts"
+    }
+  },
+  "edge": {}
+}
