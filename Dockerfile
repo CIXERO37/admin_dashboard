@@ -16,8 +16,8 @@ COPY .next/static ./.next/static
 # Copy folder public (favicon, gambar statis)
 COPY public ./public
 
-# Expose port 3000
-EXPOSE 3000
+# Expose port 3007
+EXPOSE 3007
 
 # Jalankan server
 CMD ["node", "server.js"]
