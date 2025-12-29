@@ -7,10 +7,13 @@ import { ActionCard } from "@/components/dashboard/action-card";
 import { SectionHeader } from "@/components/dashboard/section-header";
 import { useQuizzes } from "@/hooks/useQuizzes";
 import { useProfiles } from "@/hooks/useProfiles";
+import { useGameStats } from "@/hooks/useGameStats";
+import { MasterStatsCharts } from "@/components/dashboard/master-stats-charts";
 
 export default function MasterDashboardPage() {
   const { data: quizzes } = useQuizzes();
-  const { aggregates } = useProfiles();
+  const { data: profiles, aggregates } = useProfiles();
+  const { sessionCounts } = useGameStats();
 
   const activeQuizzes = quizzes.filter((quiz) => !(quiz.is_hidden ?? false));
   const countriesCount = aggregates?.countries.length ?? 0;
@@ -42,6 +45,15 @@ export default function MasterDashboardPage() {
           change="Quizzes + locations"
           changeType="neutral"
           icon={Database}
+        />
+      </div>
+
+      {/* Charts */}
+      <div>
+        <MasterStatsCharts
+          quizzes={quizzes}
+          profiles={profiles}
+          sessionCounts={sessionCounts}
         />
       </div>
 
