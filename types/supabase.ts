@@ -7,6 +7,8 @@ export interface Profile {
   role?: string | null
   last_active?: string | null
   is_blocked?: boolean | null
+  blocked_at?: string | null
+  admin_since?: string | null
   [key: string]: unknown
 }
 
