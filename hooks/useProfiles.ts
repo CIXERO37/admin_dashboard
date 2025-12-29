@@ -21,7 +21,7 @@ export function useProfiles() {
 
         const { data, error } = await supabase
           .from("profiles")
-          .select("*, state:states(name), city:cities(name)")
+          .select("*, state:states(name), city:cities(name), country:countries(name)")
           .order("last_active", { ascending: false, nullsFirst: false })
           .abortSignal(controller.signal)
 

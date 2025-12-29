@@ -14,19 +14,45 @@ import { DemographicChart } from "@/components/dashboard/demographic-chart";
 
 import { useProfiles } from "@/hooks/useProfiles";
 import { Users, Shield, UserCheck, UserX } from "lucide-react";
+import { isSameYear, subYears } from "date-fns";
 
 export default function AdministratorDashboardPage() {
-  const [timeRange, setTimeRange] = useState("all");
+  const [timeRange, setTimeRange] = useState("this-year");
   const { data: profiles, loading } = useProfiles();
 
-  const userCount = profiles.filter(
+  const checkDate = (dateStr: string | null | undefined, range: string) => {
+    if (range === "all") return true;
+    if (!dateStr) return false;
+
+    const date = new Date(dateStr);
+    const now = new Date();
+
+    if (range === "this-year") {
+      return isSameYear(date, now);
+    }
+    if (range === "last-year") {
+      return isSameYear(date, subYears(now, 1));
+    }
+    return true;
+  };
+
+  const filteredProfiles = profiles.filter((profile) =>
+    checkDate(profile.created_at as string, timeRange)
+  );
+
+  const userCount = filteredProfiles.filter(
     (p) => !p.role || p.role.toLowerCase() === "user"
   ).length;
   const adminCount = profiles.filter(
-    (p) => p.role?.toLowerCase() === "admin"
+    (p) =>
+      p.role?.toLowerCase() === "admin" &&
+      checkDate(p.admin_since as string, timeRange)
   ).length;
-  const activeCount = profiles.filter((p) => !p.is_blocked).length;
-  const blockedCount = profiles.filter((p) => p.is_blocked).length;
+  const activeCount = filteredProfiles.filter((p) => !p.is_blocked).length;
+
+  const blockedCount = profiles.filter(
+    (p) => p.is_blocked && checkDate(p.blocked_at as string, timeRange)
+  ).length;
 
   return (
     <div className="space-y-8">
@@ -39,14 +65,14 @@ export default function AdministratorDashboardPage() {
             className="w-[130px] rounded-lg"
             aria-label="Select a value"
           >
-            <SelectValue placeholder="All Time" />
+            <SelectValue placeholder="This Year" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
-            <SelectItem value="all" className="rounded-lg">
-              All Time
-            </SelectItem>
             <SelectItem value="this-year" className="rounded-lg">
               This Year
+            </SelectItem>
+            <SelectItem value="all" className="rounded-lg">
+              All Time
             </SelectItem>
             <SelectItem value="last-year" className="rounded-lg">
               Last Year
@@ -85,13 +111,13 @@ export default function AdministratorDashboardPage() {
 
       {/* Location Charts */}
       <LocationChart
-        profiles={profiles}
+        profiles={filteredProfiles}
         loading={loading}
         timeRange={timeRange}
       />
 
       {/* Demographic Charts */}
-      <DemographicChart profiles={profiles} loading={loading} />
+      <DemographicChart profiles={filteredProfiles} loading={loading} />
     </div>
   );
 }

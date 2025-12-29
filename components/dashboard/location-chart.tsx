@@ -29,6 +29,7 @@ interface LocationChartProps {
 interface ProfileWithLocation extends Profile {
   state?: { name: string } | null;
   city?: { name: string } | null;
+  country?: { name: string } | null;
   created_at?: string | null;
 }
 
@@ -65,32 +66,37 @@ export function LocationChart({
   loading,
   timeRange,
 }: LocationChartProps) {
-  const filteredStateProfiles = useMemo(() => {
-    return filterProfiles(profiles as ProfileWithLocation[], timeRange);
-  }, [profiles, timeRange]);
-
-  const filteredCityProfiles = useMemo(() => {
+  /* 
+     Consolidated filtering: 
+     Since filter logic is identical for all location types, we use one filtered list.
+  */
+  const filteredData = useMemo(() => {
     return filterProfiles(profiles as ProfileWithLocation[], timeRange);
   }, [profiles, timeRange]);
 
   // Aggregate data for TOP STATES
   const stateCounts: Record<string, number> = {};
-  if (filteredStateProfiles) {
-    filteredStateProfiles.forEach((profile) => {
+  // Aggregate data for TOP CITIES
+  const cityCounts: Record<string, number> = {};
+  // Aggregate data for TOP COUNTRIES
+  const countryCounts: Record<string, number> = {};
+
+  if (filteredData) {
+    filteredData.forEach((profile) => {
+      // State
       if (profile.state?.name) {
         const stateName = profile.state.name;
         stateCounts[stateName] = (stateCounts[stateName] || 0) + 1;
       }
-    });
-  }
-
-  // Aggregate data for TOP CITIES
-  const cityCounts: Record<string, number> = {};
-  if (filteredCityProfiles) {
-    filteredCityProfiles.forEach((profile) => {
+      // City
       if (profile.city?.name) {
         const cityName = profile.city.name;
         cityCounts[cityName] = (cityCounts[cityName] || 0) + 1;
+      }
+      // Country
+      if (profile.country?.name) {
+        const countryName = profile.country.name;
+        countryCounts[countryName] = (countryCounts[countryName] || 0) + 1;
       }
     });
   }
@@ -105,9 +111,15 @@ export function LocationChart({
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
 
+  const topCountries = Object.entries(countryCounts)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
   if (loading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="h-[400px] animate-pulse bg-muted/20" />
         <Card className="h-[400px] animate-pulse bg-muted/20" />
         <Card className="h-[400px] animate-pulse bg-muted/20" />
       </div>
@@ -115,7 +127,51 @@ export function LocationChart({
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-4 md:grid-cols-3">
+      {/* Top Countries Chart */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle>Top Countries</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ChartContainer
+            config={chartConfig}
+            className="aspect-auto h-[250px] w-full"
+          >
+            <BarChart
+              accessibilityLayer
+              data={topCountries}
+              layout="vertical"
+              margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+            >
+              <CartesianGrid horizontal={false} />
+              <YAxis
+                dataKey="name"
+                type="category"
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+                width={120}
+                tickFormatter={(value) =>
+                  value.length > 20 ? `${value.slice(0, 20)}...` : value
+                }
+              />
+              <XAxis dataKey="count" type="number" hide />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel />}
+              />
+              <Bar
+                dataKey="count"
+                fill="var(--color-count)"
+                radius={[0, 4, 4, 0]}
+                barSize={20}
+              />
+            </BarChart>
+          </ChartContainer>
+        </CardContent>
+      </Card>
+
       {/* Top States Chart */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

@@ -103,6 +103,7 @@ export function UserTable({
     fullname: string;
     username: string;
     role: string;
+    originalRole: string;
     status: string;
     showConfirm: boolean;
   }>({
@@ -111,6 +112,7 @@ export function UserTable({
     fullname: "",
     username: "",
     role: "user",
+    originalRole: "user",
     status: "active",
     showConfirm: false,
   });
@@ -182,8 +184,10 @@ export function UserTable({
 
   const handleConfirm = async () => {
     if (confirmDialog.type === "role") {
+      const isAdmin = confirmDialog.newValue === "admin";
       const { error } = await updateProfileAction(confirmDialog.id, {
         role: confirmDialog.newValue,
+        admin_since: isAdmin ? new Date().toISOString() : null,
       });
       if (error) {
         toast({
@@ -196,8 +200,10 @@ export function UserTable({
         router.refresh();
       }
     } else {
+      const isBlocked = confirmDialog.newValue === "Blocked";
       const { error } = await updateProfileAction(confirmDialog.id, {
-        is_blocked: confirmDialog.newValue === "Blocked",
+        is_blocked: isBlocked,
+        blocked_at: isBlocked ? new Date().toISOString() : null,
       });
       if (error) {
         toast({
@@ -214,12 +220,14 @@ export function UserTable({
   };
 
   const openEditDialog = (row: Record<string, unknown>) => {
+    const role = ((row.role as string) || "user").toLowerCase();
     setEditDialog({
       open: true,
       id: row.id as string,
       fullname: (row.fullname as string) || "",
       username: (row.username as string) || "",
-      role: ((row.role as string) || "user").toLowerCase(),
+      role: role,
+      originalRole: role,
       status: (row.status as string) === "Blocked" ? "blocked" : "active",
       showConfirm: false,
     });
@@ -231,12 +239,26 @@ export function UserTable({
       return;
     }
 
-    const { error } = await updateProfileAction(editDialog.id, {
+    const isBlocked = editDialog.status === "blocked";
+
+    const updates: Partial<Profile> = {
       fullname: editDialog.fullname,
       username: editDialog.username,
       role: editDialog.role,
-      is_blocked: editDialog.status === "blocked",
-    });
+      is_blocked: isBlocked,
+      blocked_at: isBlocked ? new Date().toISOString() : null,
+    };
+
+    if (editDialog.role === "admin" && editDialog.originalRole !== "admin") {
+      updates.admin_since = new Date().toISOString();
+    } else if (
+      editDialog.role !== "admin" &&
+      editDialog.originalRole === "admin"
+    ) {
+      updates.admin_since = null;
+    }
+
+    const { error } = await updateProfileAction(editDialog.id, updates);
 
     if (error) {
       toast({
