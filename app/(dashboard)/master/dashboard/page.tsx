@@ -31,11 +31,7 @@ export default function MasterDashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Total Quizzes"
-          value={quizzes.length}
-          icon={BookOpen}
-        />
+        <StatCard title="Quizzes" value={quizzes.length} icon={BookOpen} />
         <StatCard title="Categories" value={categoriesCount} icon={Layers} />
         <StatCard title="Public" value={activeQuizzes.length} icon={Globe} />
         <StatCard title="Private" value={hiddenQuizzes} icon={Lock} />
