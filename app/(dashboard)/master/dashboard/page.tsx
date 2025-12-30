@@ -15,8 +15,8 @@ export default function MasterDashboardPage() {
   const { data: profiles, aggregates } = useProfiles();
   const { sessionCounts } = useGameStats();
 
-  const activeQuizzes = quizzes.filter((quiz) => !(quiz.is_hidden ?? false));
-  const hiddenQuizzes = quizzes.length - activeQuizzes.length;
+  const publicQuizzes = quizzes.filter((quiz) => quiz.is_public);
+  const privateCount = quizzes.length - publicQuizzes.length;
   const categoriesCount = new Set(
     quizzes.map((q) => q.category).filter(Boolean)
   ).size;
@@ -33,8 +33,8 @@ export default function MasterDashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Quizzes" value={quizzes.length} icon={BookOpen} />
         <StatCard title="Categories" value={categoriesCount} icon={Layers} />
-        <StatCard title="Public" value={activeQuizzes.length} icon={Globe} />
-        <StatCard title="Private" value={hiddenQuizzes} icon={Lock} />
+        <StatCard title="Public" value={publicQuizzes.length} icon={Globe} />
+        <StatCard title="Private" value={privateCount} icon={Lock} />
       </div>
 
       {/* Charts */}
