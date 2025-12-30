@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Globe, MapPin, Database } from "lucide-react";
+import { BookOpen, Globe, Layers, Lock } from "lucide-react";
 
 import { StatCard } from "@/components/dashboard/stat-card";
 import { ActionCard } from "@/components/dashboard/action-card";
@@ -16,9 +16,10 @@ export default function MasterDashboardPage() {
   const { sessionCounts } = useGameStats();
 
   const activeQuizzes = quizzes.filter((quiz) => !(quiz.is_hidden ?? false));
-  const countriesCount = aggregates?.countries.length ?? 0;
-  const provincesCount = aggregates?.provinces.length ?? 0;
-  const totalRecords = quizzes.length + countriesCount + provincesCount;
+  const hiddenQuizzes = quizzes.length - activeQuizzes.length;
+  const categoriesCount = new Set(
+    quizzes.map((q) => q.category).filter(Boolean)
+  ).size;
 
   return (
     <div className="space-y-8">
@@ -31,21 +32,13 @@ export default function MasterDashboardPage() {
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Quizzes"
+          title="Total Quizzes"
           value={quizzes.length}
-          change={`${activeQuizzes.length} visible`}
-          changeType="neutral"
           icon={BookOpen}
         />
-        <StatCard title="Countries" value={countriesCount} icon={Globe} />
-        <StatCard title="Locations" value={provincesCount} icon={MapPin} />
-        <StatCard
-          title="Records"
-          value={totalRecords}
-          change="Quizzes + locations"
-          changeType="neutral"
-          icon={Database}
-        />
+        <StatCard title="Categories" value={categoriesCount} icon={Layers} />
+        <StatCard title="Public" value={activeQuizzes.length} icon={Globe} />
+        <StatCard title="Private" value={hiddenQuizzes} icon={Lock} />
       </div>
 
       {/* Charts */}
@@ -55,37 +48,6 @@ export default function MasterDashboardPage() {
           profiles={profiles}
           sessionCounts={sessionCounts}
         />
-      </div>
-
-      {/* Quick Access Cards */}
-      <div>
-        <SectionHeader
-          title="Master Data Modules"
-          description="Quick access to all master data"
-        />
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <ActionCard
-            title="Quiz Data"
-            description="Manage quiz content and settings"
-            href="/master/quiz"
-            icon={BookOpen}
-            stats={`${quizzes.length} quizzes`}
-          />
-          <ActionCard
-            title="Country Data"
-            description="Aggregate users per country"
-            href="/master/country"
-            icon={Globe}
-            stats={`${countriesCount} countries`}
-          />
-          <ActionCard
-            title="Location Data"
-            description="Profile locations with coordinates"
-            href="/master/province"
-            icon={MapPin}
-            stats={`${provincesCount} locations`}
-          />
-        </div>
       </div>
     </div>
   );
