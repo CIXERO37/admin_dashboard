@@ -71,11 +71,11 @@ export default function AdministratorDashboardPage() {
             <SelectItem value="this-year" className="rounded-lg">
               This Year
             </SelectItem>
-            <SelectItem value="all" className="rounded-lg">
-              All Time
-            </SelectItem>
             <SelectItem value="last-year" className="rounded-lg">
               Last Year
+            </SelectItem>
+            <SelectItem value="all" className="rounded-lg">
+              All Time
             </SelectItem>
           </SelectContent>
         </Select>

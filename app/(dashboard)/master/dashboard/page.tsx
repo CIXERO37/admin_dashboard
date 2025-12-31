@@ -1,6 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import { BookOpen, Globe, Layers, Lock } from "lucide-react";
+import { isSameYear, subYears } from "date-fns";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { StatCard } from "@/components/dashboard/stat-card";
 import { ActionCard } from "@/components/dashboard/action-card";
@@ -14,24 +24,59 @@ export default function MasterDashboardPage() {
   const { data: quizzes } = useQuizzes();
   const { data: profiles, aggregates } = useProfiles();
   const { sessionCounts } = useGameStats();
+  const [timeRange, setTimeRange] = useState("this-year");
 
-  const publicQuizzes = quizzes.filter((quiz) => quiz.is_public);
-  const privateCount = quizzes.length - publicQuizzes.length;
+  const checkDate = (dateStr: string | null | undefined, range: string) => {
+    if (range === "all") return true;
+    if (!dateStr) return false;
+
+    const date = new Date(dateStr);
+    const now = new Date();
+
+    if (range === "this-year") {
+      return isSameYear(date, now);
+    }
+    if (range === "last-year") {
+      return isSameYear(date, subYears(now, 1));
+    }
+    return true;
+  };
+
+  const filteredQuizzes = quizzes.filter((quiz) =>
+    checkDate(quiz.created_at, timeRange)
+  );
+
+  const publicQuizzes = filteredQuizzes.filter((quiz) => quiz.is_public);
+  const privateCount = filteredQuizzes.length - publicQuizzes.length;
   const categoriesCount = new Set(
-    quizzes.map((q) => q.category).filter(Boolean)
+    filteredQuizzes.map((q) => q.category).filter(Boolean)
   ).size;
 
   return (
     <div className="space-y-8">
-      <div>
+      <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">
           Master Data Dashboard
         </h1>
+        <Select value={timeRange} onValueChange={setTimeRange}>
+          <SelectTrigger className="w-[130px]" aria-label="Select a value">
+            <SelectValue placeholder="This Year" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="this-year">This Year</SelectItem>
+            <SelectItem value="last-year">Last Year</SelectItem>
+            <SelectItem value="all">All Time</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Quizzes" value={quizzes.length} icon={BookOpen} />
+        <StatCard
+          title="Quizzes"
+          value={filteredQuizzes.length}
+          icon={BookOpen}
+        />
         <StatCard title="Categories" value={categoriesCount} icon={Layers} />
         <StatCard title="Public" value={publicQuizzes.length} icon={Globe} />
         <StatCard title="Private" value={privateCount} icon={Lock} />
@@ -40,7 +85,7 @@ export default function MasterDashboardPage() {
       {/* Charts */}
       <div>
         <MasterStatsCharts
-          quizzes={quizzes}
+          quizzes={filteredQuizzes}
           profiles={profiles}
           sessionCounts={sessionCounts}
         />
