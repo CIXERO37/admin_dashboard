@@ -1,15 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Profile } from "@/types/supabase";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { MapPinOff } from "lucide-react";
 import {
   ChartConfig,
   ChartContainer,
@@ -17,7 +12,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-import { isSameYear, subYears, parseISO } from "date-fns";
+import { isSameYear, subYears } from "date-fns";
 
 interface LocationChartProps {
   profiles: Profile[];
@@ -66,10 +61,6 @@ export function LocationChart({
   loading,
   timeRange,
 }: LocationChartProps) {
-  /* 
-     Consolidated filtering: 
-     Since filter logic is identical for all location types, we use one filtered list.
-  */
   const filteredData = useMemo(() => {
     return filterProfiles(profiles as ProfileWithLocation[], timeRange);
   }, [profiles, timeRange]);
@@ -134,41 +125,48 @@ export function LocationChart({
           <CardTitle>Top Countries</CardTitle>
         </CardHeader>
         <CardContent>
-          <ChartContainer
-            config={chartConfig}
-            className="aspect-auto h-[250px] w-full"
-          >
-            <BarChart
-              accessibilityLayer
-              data={topCountries}
-              layout="vertical"
-              margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+          {topCountries.length > 0 ? (
+            <ChartContainer
+              config={chartConfig}
+              className="aspect-auto h-[250px] w-full"
             >
-              <CartesianGrid horizontal={false} />
-              <YAxis
-                dataKey="name"
-                type="category"
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-                width={120}
-                tickFormatter={(value) =>
-                  value.length > 20 ? `${value.slice(0, 20)}...` : value
-                }
-              />
-              <XAxis dataKey="count" type="number" hide />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel />}
-              />
-              <Bar
-                dataKey="count"
-                fill="var(--color-count)"
-                radius={[0, 4, 4, 0]}
-                barSize={20}
-              />
-            </BarChart>
-          </ChartContainer>
+              <BarChart
+                accessibilityLayer
+                data={topCountries}
+                layout="vertical"
+                margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid horizontal={false} />
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                  width={120}
+                  tickFormatter={(value) =>
+                    value.length > 20 ? `${value.slice(0, 20)}...` : value
+                  }
+                />
+                <XAxis dataKey="count" type="number" hide />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel />}
+                />
+                <Bar
+                  dataKey="count"
+                  fill="var(--color-count)"
+                  radius={[0, 4, 4, 0]}
+                  barSize={20}
+                />
+              </BarChart>
+            </ChartContainer>
+          ) : (
+            <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+              <MapPinOff className="h-10 w-10 opacity-20" />
+              <p className="text-sm">No country data available</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -178,41 +176,48 @@ export function LocationChart({
           <CardTitle>Top States</CardTitle>
         </CardHeader>
         <CardContent>
-          <ChartContainer
-            config={chartConfig}
-            className="aspect-auto h-[250px] w-full"
-          >
-            <BarChart
-              accessibilityLayer
-              data={topStates}
-              layout="vertical"
-              margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+          {topStates.length > 0 ? (
+            <ChartContainer
+              config={chartConfig}
+              className="aspect-auto h-[250px] w-full"
             >
-              <CartesianGrid horizontal={false} />
-              <YAxis
-                dataKey="name"
-                type="category"
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-                width={120}
-                tickFormatter={(value) =>
-                  value.length > 20 ? `${value.slice(0, 20)}...` : value
-                }
-              />
-              <XAxis dataKey="count" type="number" hide />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel />}
-              />
-              <Bar
-                dataKey="count"
-                fill="var(--color-count)"
-                radius={[0, 4, 4, 0]}
-                barSize={20}
-              />
-            </BarChart>
-          </ChartContainer>
+              <BarChart
+                accessibilityLayer
+                data={topStates}
+                layout="vertical"
+                margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid horizontal={false} />
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                  width={120}
+                  tickFormatter={(value) =>
+                    value.length > 20 ? `${value.slice(0, 20)}...` : value
+                  }
+                />
+                <XAxis dataKey="count" type="number" hide />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel />}
+                />
+                <Bar
+                  dataKey="count"
+                  fill="var(--color-count)"
+                  radius={[0, 4, 4, 0]}
+                  barSize={20}
+                />
+              </BarChart>
+            </ChartContainer>
+          ) : (
+            <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+              <MapPinOff className="h-10 w-10 opacity-20" />
+              <p className="text-sm">No state data available</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -222,41 +227,48 @@ export function LocationChart({
           <CardTitle>Top Cities</CardTitle>
         </CardHeader>
         <CardContent>
-          <ChartContainer
-            config={chartConfig}
-            className="aspect-auto h-[250px] w-full"
-          >
-            <BarChart
-              accessibilityLayer
-              data={topCities}
-              layout="vertical"
-              margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+          {topCities.length > 0 ? (
+            <ChartContainer
+              config={chartConfig}
+              className="aspect-auto h-[250px] w-full"
             >
-              <CartesianGrid horizontal={false} />
-              <YAxis
-                dataKey="name"
-                type="category"
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-                width={120}
-                tickFormatter={(value) =>
-                  value.length > 20 ? `${value.slice(0, 20)}...` : value
-                }
-              />
-              <XAxis dataKey="count" type="number" hide />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel />}
-              />
-              <Bar
-                dataKey="count"
-                fill="var(--color-count)"
-                radius={[0, 4, 4, 0]}
-                barSize={20}
-              />
-            </BarChart>
-          </ChartContainer>
+              <BarChart
+                accessibilityLayer
+                data={topCities}
+                layout="vertical"
+                margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid horizontal={false} />
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                  width={120}
+                  tickFormatter={(value) =>
+                    value.length > 20 ? `${value.slice(0, 20)}...` : value
+                  }
+                />
+                <XAxis dataKey="count" type="number" hide />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel />}
+                />
+                <Bar
+                  dataKey="count"
+                  fill="var(--color-count)"
+                  radius={[0, 4, 4, 0]}
+                  barSize={20}
+                />
+              </BarChart>
+            </ChartContainer>
+          ) : (
+            <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+              <MapPinOff className="h-10 w-10 opacity-20" />
+              <p className="text-sm">No city data available</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

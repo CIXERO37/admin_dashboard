@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell, User, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +35,14 @@ import { ModeToggle } from "@/components/mode-toggle";
 export function Header() {
   const { user, loading } = useCurrentUser();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Show loading state on SSR and until mounted to prevent hydration mismatch
+  const isLoading = !mounted || loading;
 
   // ... (rest of logic)
   const handleLogout = async () => {
@@ -65,7 +73,12 @@ export function Header() {
         {/* Notifications */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative"
+              suppressHydrationWarning
+            >
               <Bell className="h-5 w-5 text-muted-foreground" />
               <Badge className="absolute -right-1 -top-1 h-2 w-2 rounded-full p-0 bg-red-500 border-2 border-background" />
             </Button>
@@ -114,8 +127,12 @@ export function Header() {
         {/* User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2 px-2">
-              {loading ? (
+            <Button
+              variant="ghost"
+              className="flex items-center gap-2 px-2"
+              suppressHydrationWarning
+            >
+              {isLoading ? (
                 <>
                   <Skeleton className="h-8 w-8 rounded-full" />
                   <div className="hidden md:flex flex-col gap-1">
