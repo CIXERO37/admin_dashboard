@@ -31,6 +31,8 @@ interface FetchQuizApprovalsParams {
   limit?: number
   search?: string
   category?: string
+  timeRange?: "this-year" | "last-year" | "all"
+  year?: number
 }
 
 // Dummy data for prototype
@@ -165,6 +167,8 @@ export async function fetchQuizApprovals({
   limit = 10,
   search = "",
   category = "all",
+  timeRange = "all",
+  year,
 }: FetchQuizApprovalsParams): Promise<QuizApprovalResponse> {
   // Filter by search
   let filteredData = DUMMY_QUIZZES
@@ -176,6 +180,30 @@ export async function fetchQuizApprovals({
         quiz.description?.toLowerCase().includes(searchLower) ||
         quiz.creator?.fullname?.toLowerCase().includes(searchLower)
     )
+  }
+
+  // Filter by timeRange or year
+  if (year) {
+    filteredData = filteredData.filter((quiz) => {
+      if (!quiz.created_at) return false
+      const createdDate = new Date(quiz.created_at)
+      return createdDate.getFullYear() === year
+    })
+  } else if (timeRange !== "all") {
+    const now = new Date()
+    const currentYear = now.getFullYear()
+    
+    filteredData = filteredData.filter((quiz) => {
+      if (!quiz.created_at) return false
+      const createdDate = new Date(quiz.created_at)
+      
+      if (timeRange === "this-year") {
+        return createdDate.getFullYear() === currentYear
+      } else if (timeRange === "last-year") {
+        return createdDate.getFullYear() === currentYear - 1
+      }
+      return true
+    })
   }
 
   // Filter by category

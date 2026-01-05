@@ -3,14 +3,31 @@
 import { getSupabaseAdminClient } from "@/lib/supabase-admin"
 
 // Fetch group category distribution
-export async function fetchGroupCategoryCounts() {
+export async function fetchGroupCategoryCounts(timeRange: "this-year" | "last-year" | "all" = "all") {
   const supabase = getSupabaseAdminClient()
   
   // Fetch all groups categories
-  const { data, error } = await supabase
+  let query = supabase
     .from("groups")
     .select("category")
     .is("deleted_at", null)
+
+  if (timeRange !== "all") {
+    const now = new Date()
+    const currentYear = now.getFullYear()
+    
+    if (timeRange === "this-year") {
+      const startOfYear = new Date(currentYear, 0, 1).toISOString()
+      const endOfYear = new Date(currentYear + 1, 0, 1).toISOString()
+      query = query.gte("created_at", startOfYear).lt("created_at", endOfYear)
+    } else if (timeRange === "last-year") {
+      const startOfLastYear = new Date(currentYear - 1, 0, 1).toISOString()
+      const endOfLastYear = new Date(currentYear, 0, 1).toISOString()
+      query = query.gte("created_at", startOfLastYear).lt("created_at", endOfLastYear)
+    }
+  }
+
+  const { data, error } = await query
 
   if (error || !data) {
     console.error("Error fetching group categories:", error)
