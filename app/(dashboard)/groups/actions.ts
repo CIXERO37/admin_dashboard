@@ -48,6 +48,8 @@ interface FetchGroupsParams {
   search?: string
   status?: string
   category?: string
+  timeRange?: "this-year" | "last-year" | "all"
+  year?: number
 }
 
 export async function fetchGroups({
@@ -56,6 +58,8 @@ export async function fetchGroups({
   search = "",
   status = "all",
   category = "",
+  timeRange = "all",
+  year,
 }: FetchGroupsParams): Promise<GroupsResponse> {
   const supabase = getSupabaseAdminClient()
   const offset = (page - 1) * limit
@@ -92,6 +96,26 @@ export async function fetchGroups({
     // Create OR query for all possible terms: category.ilike.term1,category.ilike.term2
     const orQuery = searchTerms.map(term => `category.ilike.%${term}%`).join(",")
     query = query.or(orQuery)
+  }
+
+  // Filter by year or timeRange
+  if (year) {
+    const startOfYear = new Date(year, 0, 1).toISOString()
+    const endOfYear = new Date(year + 1, 0, 1).toISOString()
+    query = query.gte("created_at", startOfYear).lt("created_at", endOfYear)
+  } else if (timeRange !== "all") {
+    const now = new Date()
+    const currentYear = now.getFullYear()
+    
+    if (timeRange === "this-year") {
+      const startOfYear = new Date(currentYear, 0, 1).toISOString()
+      const endOfYear = new Date(currentYear + 1, 0, 1).toISOString()
+      query = query.gte("created_at", startOfYear).lt("created_at", endOfYear)
+    } else if (timeRange === "last-year") {
+      const startOfLastYear = new Date(currentYear - 1, 0, 1).toISOString()
+      const endOfLastYear = new Date(currentYear, 0, 1).toISOString()
+      query = query.gte("created_at", startOfLastYear).lt("created_at", endOfLastYear)
+    }
   }
 
   const { data, count, error } = await query

@@ -128,9 +128,10 @@ const navigation: NavItem[] = [
 export function AppSidebar() {
   const pathname = usePathname();
   const { open, toggleSidebar } = useSidebar();
-  const collapsed = !open;
-  const [openMenus, setOpenMenus] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
+  // Default to open (not collapsed) during SSR to match server render
+  const collapsed = mounted ? !open : false;
+  const [openMenus, setOpenMenus] = useState<string[]>([]);
 
   const isActive = (href: string) => {
     if (href === "/dashboard") return pathname === "/dashboard";
@@ -263,6 +264,7 @@ export function AppSidebar() {
               >
                 <CollapsibleTrigger asChild>
                   <button
+                    suppressHydrationWarning
                     className={cn(
                       "flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                       active || isChildActive(item)
@@ -300,6 +302,7 @@ export function AppSidebar() {
                         >
                           <CollapsibleTrigger asChild>
                             <button
+                              suppressHydrationWarning
                               className={cn(
                                 "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors",
                                 isNestedOpen || pathname.startsWith(child.href)

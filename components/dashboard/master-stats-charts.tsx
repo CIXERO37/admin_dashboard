@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { BarChart2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartConfig,
@@ -98,11 +99,13 @@ export function MasterStatsCharts({
     return Object.entries(sessionCounts)
       .map(([quizId, count]) => {
         const quiz = quizzes.find((q) => q.id === quizId);
+        if (!quiz) return null;
         return {
-          name: quiz?.title || "Unknown Quiz",
+          name: quiz.title,
           value: count,
         };
       })
+      .filter((item): item is { name: string; value: number } => item !== null)
       .sort((a, b) => b.value - a.value)
       .slice(0, 5);
   }, [sessionCounts, quizzes]);
@@ -130,14 +133,30 @@ export function MasterStatsCharts({
     return Object.entries(counts)
       .map(([quizId, count]) => {
         const quiz = quizzes.find((q) => q.id === quizId);
+        if (!quiz) return null;
         return {
-          name: quiz?.title || "Unknown Quiz",
+          name: quiz.title,
           value: count,
         };
       })
+      .filter((item): item is { name: string; value: number } => item !== null)
       .sort((a, b) => b.value - a.value)
       .slice(0, 5);
   }, [profiles, quizzes]);
+
+  // 4. Top Creators
+  const creatorData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    quizzes.forEach((quiz) => {
+      const name = quiz.creator?.fullname || quiz.creator?.email || "Unknown";
+      counts[name] = (counts[name] || 0) + 1;
+    });
+
+    return Object.entries(counts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5);
+  }, [quizzes]);
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -147,39 +166,46 @@ export function MasterStatsCharts({
           <CardTitle>Top Categories</CardTitle>
         </CardHeader>
         <CardContent>
-          <ChartContainer
-            config={chartConfig}
-            className="aspect-auto h-[250px] w-full"
-          >
-            <BarChart
-              accessibilityLayer
-              data={categoryData}
-              layout="vertical"
-              margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+          {categoryData.length > 0 ? (
+            <ChartContainer
+              config={chartConfig}
+              className="aspect-auto h-[250px] w-full"
             >
-              <CartesianGrid horizontal={false} />
-              <YAxis
-                dataKey="name"
-                type="category"
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-                width={160}
-                tick={CustomYAxisTick}
-              />
-              <XAxis dataKey="value" type="number" hide />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel />}
-              />
-              <Bar
-                dataKey="value"
-                fill="var(--color-value)"
-                radius={[0, 4, 4, 0]}
-                barSize={20}
-              />
-            </BarChart>
-          </ChartContainer>
+              <BarChart
+                accessibilityLayer
+                data={categoryData}
+                layout="vertical"
+                margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid horizontal={false} />
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                  width={160}
+                  tick={CustomYAxisTick}
+                />
+                <XAxis dataKey="value" type="number" hide />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel />}
+                />
+                <Bar
+                  dataKey="value"
+                  fill="var(--color-value)"
+                  radius={[0, 4, 4, 0]}
+                  barSize={20}
+                />
+              </BarChart>
+            </ChartContainer>
+          ) : (
+            <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+              <BarChart2 className="h-10 w-10 opacity-20" />
+              <p className="text-sm">No category data available</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -189,39 +215,46 @@ export function MasterStatsCharts({
           <CardTitle>Most Played</CardTitle>
         </CardHeader>
         <CardContent>
-          <ChartContainer
-            config={chartConfig}
-            className="aspect-auto h-[250px] w-full"
-          >
-            <BarChart
-              accessibilityLayer
-              data={popularData}
-              layout="vertical"
-              margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+          {popularData.length > 0 ? (
+            <ChartContainer
+              config={chartConfig}
+              className="aspect-auto h-[250px] w-full"
             >
-              <CartesianGrid horizontal={false} />
-              <YAxis
-                dataKey="name"
-                type="category"
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-                width={160}
-                tick={CustomYAxisTick}
-              />
-              <XAxis dataKey="value" type="number" hide />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel />}
-              />
-              <Bar
-                dataKey="value"
-                fill="var(--color-value)"
-                radius={[0, 4, 4, 0]}
-                barSize={20}
-              />
-            </BarChart>
-          </ChartContainer>
+              <BarChart
+                accessibilityLayer
+                data={popularData}
+                layout="vertical"
+                margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid horizontal={false} />
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                  width={160}
+                  tick={CustomYAxisTick}
+                />
+                <XAxis dataKey="value" type="number" hide />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel />}
+                />
+                <Bar
+                  dataKey="value"
+                  fill="var(--color-value)"
+                  radius={[0, 4, 4, 0]}
+                  barSize={20}
+                />
+              </BarChart>
+            </ChartContainer>
+          ) : (
+            <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+              <BarChart2 className="h-10 w-10 opacity-20" />
+              <p className="text-sm">No play data available</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -231,39 +264,95 @@ export function MasterStatsCharts({
           <CardTitle>Most Favorited</CardTitle>
         </CardHeader>
         <CardContent>
-          <ChartContainer
-            config={chartConfig}
-            className="aspect-auto h-[250px] w-full"
-          >
-            <BarChart
-              accessibilityLayer
-              data={favoriteData}
-              layout="vertical"
-              margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+          {favoriteData.length > 0 ? (
+            <ChartContainer
+              config={chartConfig}
+              className="aspect-auto h-[250px] w-full"
             >
-              <CartesianGrid horizontal={false} />
-              <YAxis
-                dataKey="name"
-                type="category"
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-                width={160}
-                tick={CustomYAxisTick}
-              />
-              <XAxis dataKey="value" type="number" hide />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel />}
-              />
-              <Bar
-                dataKey="value"
-                fill="var(--color-value)"
-                radius={[0, 4, 4, 0]}
-                barSize={20}
-              />
-            </BarChart>
-          </ChartContainer>
+              <BarChart
+                accessibilityLayer
+                data={favoriteData}
+                layout="vertical"
+                margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid horizontal={false} />
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                  width={160}
+                  tick={CustomYAxisTick}
+                />
+                <XAxis dataKey="value" type="number" hide />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel />}
+                />
+                <Bar
+                  dataKey="value"
+                  fill="var(--color-value)"
+                  radius={[0, 4, 4, 0]}
+                  barSize={20}
+                />
+              </BarChart>
+            </ChartContainer>
+          ) : (
+            <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+              <BarChart2 className="h-10 w-10 opacity-20" />
+              <p className="text-sm">No favorite data available</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Top Creators Chart */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle>Top Creators</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {creatorData.length > 0 ? (
+            <ChartContainer
+              config={chartConfig}
+              className="aspect-auto h-[250px] w-full"
+            >
+              <BarChart
+                accessibilityLayer
+                data={creatorData}
+                layout="vertical"
+                margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid horizontal={false} />
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                  width={160}
+                  tick={CustomYAxisTick}
+                />
+                <XAxis dataKey="value" type="number" hide />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel />}
+                />
+                <Bar
+                  dataKey="value"
+                  fill="var(--color-value)"
+                  radius={[0, 4, 4, 0]}
+                  barSize={20}
+                />
+              </BarChart>
+            </ChartContainer>
+          ) : (
+            <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+              <BarChart2 className="h-10 w-10 opacity-20" />
+              <p className="text-sm">No creator data available</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

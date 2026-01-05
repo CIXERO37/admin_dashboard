@@ -45,16 +45,17 @@ export function ThemeCustomizer() {
 
   const sidebarMode = open ? "default" : "icon";
 
-  if (!mounted) {
-    return (
-      <Button variant="ghost" size="icon">
-        <Settings className="h-5 w-5 text-muted-foreground" />
-      </Button>
-    );
-  }
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  // Prevent opening popover until mounted to avoid hydration issues
+  const handleOpenChange = (open: boolean) => {
+    if (mounted) {
+      setIsOpen(open);
+    }
+  };
 
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon">
           <Settings className="h-5 w-5 text-muted-foreground" />
