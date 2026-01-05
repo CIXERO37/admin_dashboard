@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Profile } from "@/types/supabase";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { UserX } from "lucide-react";
 import {
   ChartConfig,
   ChartContainer,
@@ -153,41 +154,50 @@ export function DemographicChart({ profiles, loading }: DemographicChartProps) {
           <CardTitle>Age</CardTitle>
         </CardHeader>
         <CardContent>
-          <ChartContainer
-            config={ageConfig}
-            className="mx-auto aspect-square max-h-[250px] w-full"
-          >
-            <PieChart>
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel nameKey="name" />}
-              />
-              <Pie
-                data={ageData}
-                dataKey="value"
-                nameKey="name"
-                innerRadius={60}
-                strokeWidth={5}
+          {ageData.length > 0 ? (
+            <>
+              <ChartContainer
+                config={ageConfig}
+                className="mx-auto aspect-square max-h-[250px] w-full"
               >
+                <PieChart>
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent hideLabel nameKey="name" />}
+                  />
+                  <Pie
+                    data={ageData}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={60}
+                    strokeWidth={5}
+                  >
+                    {ageData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ChartContainer>
+              <div className="mt-4 flex flex-wrap justify-center gap-4">
                 {ageData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                  <div key={index} className="flex items-center gap-2">
+                    <div
+                      className="h-3 w-3 rounded-full"
+                      style={{ backgroundColor: entry.fill }}
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      {entry.name}
+                    </span>
+                  </div>
                 ))}
-              </Pie>
-            </PieChart>
-          </ChartContainer>
-          <div className="mt-4 flex flex-wrap justify-center gap-4">
-            {ageData.map((entry, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <div
-                  className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: entry.fill }}
-                />
-                <span className="text-sm text-muted-foreground">
-                  {entry.name}
-                </span>
               </div>
-            ))}
-          </div>
+            </>
+          ) : (
+            <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+              <UserX className="h-10 w-10 opacity-20" />
+              <p className="text-sm">No age data available</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -197,41 +207,50 @@ export function DemographicChart({ profiles, loading }: DemographicChartProps) {
           <CardTitle>Gender</CardTitle>
         </CardHeader>
         <CardContent>
-          <ChartContainer
-            config={genderConfig}
-            className="mx-auto aspect-square max-h-[250px] w-full"
-          >
-            <PieChart>
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel nameKey="name" />}
-              />
-              <Pie
-                data={genderData}
-                dataKey="value"
-                nameKey="name"
-                innerRadius={60}
-                strokeWidth={5}
+          {genderData.length > 0 ? (
+            <>
+              <ChartContainer
+                config={genderConfig}
+                className="mx-auto aspect-square max-h-[250px] w-full"
               >
+                <PieChart>
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent hideLabel nameKey="name" />}
+                  />
+                  <Pie
+                    data={genderData}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={60}
+                    strokeWidth={5}
+                  >
+                    {genderData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ChartContainer>
+              <div className="mt-4 flex flex-wrap justify-center gap-4">
                 {genderData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                  <div key={index} className="flex items-center gap-2">
+                    <div
+                      className="h-3 w-3 rounded-full"
+                      style={{ backgroundColor: entry.fill }}
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      {entry.name}
+                    </span>
+                  </div>
                 ))}
-              </Pie>
-            </PieChart>
-          </ChartContainer>
-          <div className="mt-4 flex flex-wrap justify-center gap-4">
-            {genderData.map((entry, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <div
-                  className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: entry.fill }}
-                />
-                <span className="text-sm text-muted-foreground">
-                  {entry.name}
-                </span>
               </div>
-            ))}
-          </div>
+            </>
+          ) : (
+            <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+              <UserX className="h-10 w-10 opacity-20" />
+              <p className="text-sm">No gender data available</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -241,41 +260,50 @@ export function DemographicChart({ profiles, loading }: DemographicChartProps) {
           <CardTitle>Education</CardTitle>
         </CardHeader>
         <CardContent>
-          <ChartContainer
-            config={gradeConfig}
-            className="mx-auto aspect-square max-h-[250px] w-full"
-          >
-            <PieChart>
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel nameKey="name" />}
-              />
-              <Pie
-                data={gradeData}
-                dataKey="value"
-                nameKey="name"
-                innerRadius={60}
-                strokeWidth={5}
+          {gradeData.length > 0 ? (
+            <>
+              <ChartContainer
+                config={gradeConfig}
+                className="mx-auto aspect-square max-h-[250px] w-full"
               >
+                <PieChart>
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent hideLabel nameKey="name" />}
+                  />
+                  <Pie
+                    data={gradeData}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={60}
+                    strokeWidth={5}
+                  >
+                    {gradeData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ChartContainer>
+              <div className="mt-4 flex flex-wrap justify-center gap-4">
                 {gradeData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                  <div key={index} className="flex items-center gap-2">
+                    <div
+                      className="h-3 w-3 rounded-full"
+                      style={{ backgroundColor: entry.fill }}
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      {entry.name}
+                    </span>
+                  </div>
                 ))}
-              </Pie>
-            </PieChart>
-          </ChartContainer>
-          <div className="mt-4 flex flex-wrap justify-center gap-4">
-            {gradeData.map((entry, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <div
-                  className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: entry.fill }}
-                />
-                <span className="text-sm text-muted-foreground">
-                  {entry.name}
-                </span>
               </div>
-            ))}
-          </div>
+            </>
+          ) : (
+            <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+              <UserX className="h-10 w-10 opacity-20" />
+              <p className="text-sm">No education data available</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
