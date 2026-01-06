@@ -1,5 +1,8 @@
 "use server"
 
+import { getSupabaseAdminClient } from "@/lib/supabase-admin"
+import { revalidatePath } from "next/cache"
+
 export interface QuizApproval {
   id: string
   title: string
@@ -35,222 +38,179 @@ interface FetchQuizApprovalsParams {
   year?: number
 }
 
-// Dummy data for prototype
-const DUMMY_QUIZZES: QuizApproval[] = [
-  {
-    id: "quiz_001",
-    title: "Matematika Dasar: Perkalian dan Pembagian",
-    description: "Quiz untuk menguji kemampuan perkalian dan pembagian siswa SD kelas 4-6",
-    category: "Math",
-    language: "id",
-    cover_image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=200&fit=crop",
-    created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    creator: {
-      id: "user_001",
-      fullname: "Ahmad Rizki",
-      username: "ahmadrizki",
-      email: "ahmad.rizki@gmail.com",
-      avatar_url: null,
-    },
-    questions: [
-      { question: "Berapa hasil dari 12 x 8?", answers: [{ id: "0", answer: "96" }, { id: "1", answer: "86" }, { id: "2", answer: "106" }, { id: "3", answer: "76" }], correct: "0" },
-      { question: "Berapa hasil dari 144 : 12?", answers: [{ id: "0", answer: "10" }, { id: "1", answer: "12" }, { id: "2", answer: "14" }, { id: "3", answer: "16" }], correct: "1" },
-    ],
-  },
-  {
-    id: "quiz_002",
-    title: "English Vocabulary: Animals",
-    description: "Test your knowledge about animal names in English",
-    category: "General",
-    language: "en",
-    cover_image: "https://images.unsplash.com/photo-1474511320723-9a56873571b7?w=400&h=200&fit=crop",
-    created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-    creator: {
-      id: "user_002",
-      fullname: "Sarah Johnson",
-      username: "sarahj",
-      email: "sarah.johnson@email.com",
-      avatar_url: null,
-    },
-    questions: [],
-  },
-  {
-    id: "quiz_003",
-    title: "Sejarah Indonesia: Kemerdekaan",
-    description: "Quiz tentang sejarah kemerdekaan Indonesia",
-    category: "History",
-    language: "id",
-    cover_image: "https://images.unsplash.com/photo-1555217851-6141535bd771?w=400&h=200&fit=crop",
-    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    creator: {
-      id: "user_003",
-      fullname: "Budi Santoso",
-      username: "budisantoso",
-      email: "budi.santoso@yahoo.com",
-      avatar_url: null,
-    },
-    questions: [],
-  },
-  {
-    id: "quiz_004",
-    title: "Science: Solar System",
-    description: "Learn about planets and the solar system",
-    category: "Science",
-    language: "en",
-    cover_image: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=400&h=200&fit=crop",
-    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    creator: {
-      id: "user_004",
-      fullname: "Diana Putri",
-      username: "dianaputri",
-      email: "diana.putri@gmail.com",
-      avatar_url: null,
-    },
-    questions: [],
-  },
-  {
-    id: "quiz_005",
-    title: "Introduction to Python Programming",
-    description: "Basic concepts of Python",
-    category: "Technology",
-    language: "en",
-    cover_image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=200&fit=crop",
-    created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    creator: {
-      id: "user_005",
-      fullname: "Eko Prasetyo",
-      username: "ekoprasetyo",
-      email: "eko.prasetyo@email.com",
-      avatar_url: null,
-    },
-    questions: [],
-  },
-  {
-    id: "quiz_006",
-    title: "Business Strategy 101",
-    description: "Fundamentals of business strategy",
-    category: "Business",
-    language: "en",
-    cover_image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=200&fit=crop",
-    created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-    creator: {
-      id: "user_006",
-      fullname: "Maria Garcia",
-      username: "mariagarcia",
-      email: "maria.garcia@email.com",
-      avatar_url: null,
-    },
-    questions: [],
-  },
-  {
-    id: "quiz_007",
-    title: "Football Rules & Regulations",
-    description: "Do you know the rules of football?",
-    category: "Sports",
-    language: "en",
-    cover_image: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=400&h=200&fit=crop",
-    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    creator: {
-      id: "user_007",
-      fullname: "James Wilson",
-      username: "jamesw",
-      email: "james.wilson@email.com",
-      avatar_url: null,
-    },
-    questions: [],
-  },
-]
-
-// Fetch quizzes pending approval (using dummy data for prototype)
 export async function fetchQuizApprovals({
   page = 1,
-  limit = 10,
+  limit = 8,
   search = "",
   category = "all",
   timeRange = "all",
   year,
 }: FetchQuizApprovalsParams): Promise<QuizApprovalResponse> {
-  // Filter by search
-  let filteredData = DUMMY_QUIZZES
+  const supabase = getSupabaseAdminClient()
+  const offset = (page - 1) * limit
+
+  // 1. Fetch Quizzes
+  let query = supabase
+    .from("quizzes")
+    .select("*", { count: "exact" })
+    .eq("request", true)
+
+  // Search (Title or Description)
   if (search) {
-    const searchLower = search.toLowerCase()
-    filteredData = DUMMY_QUIZZES.filter(
-      (quiz) =>
-        quiz.title.toLowerCase().includes(searchLower) ||
-        quiz.description?.toLowerCase().includes(searchLower) ||
-        quiz.creator?.fullname?.toLowerCase().includes(searchLower)
-    )
+    query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`)
   }
 
-  // Filter by timeRange or year
-  if (year) {
-    filteredData = filteredData.filter((quiz) => {
-      if (!quiz.created_at) return false
-      const createdDate = new Date(quiz.created_at)
-      return createdDate.getFullYear() === year
-    })
-  } else if (timeRange !== "all") {
-    const now = new Date()
-    const currentYear = now.getFullYear()
-    
-    filteredData = filteredData.filter((quiz) => {
-      if (!quiz.created_at) return false
-      const createdDate = new Date(quiz.created_at)
-      
-      if (timeRange === "this-year") {
-        return createdDate.getFullYear() === currentYear
-      } else if (timeRange === "last-year") {
-        return createdDate.getFullYear() === currentYear - 1
-      }
-      return true
-    })
-  }
-
-  // Filter by category
+  // Filter by Category
   if (category && category !== "all") {
-    filteredData = filteredData.filter(
-      (quiz) => quiz.category?.toLowerCase() === category.toLowerCase()
-    )
+    query = query.eq("category", category)
   }
 
-  // Extract unique categories
-  const categories = [...new Set(DUMMY_QUIZZES.map((q) => q.category).filter(Boolean) as string[])].sort()
+  // Filter by Time
+  if (year) {
+    const start = `${year}-01-01`
+    const end = `${year}-12-31`
+    query = query.gte("created_at", start).lte("created_at", end)
+  } else if (timeRange === "this-year") {
+    const y = new Date().getFullYear();
+    query = query.gte("created_at", `${y}-01-01`).lte("created_at", `${y}-12-31`)
+  } else if (timeRange === "last-year") {
+    const y = new Date().getFullYear() - 1;
+    query = query.gte("created_at", `${y}-01-01`).lte("created_at", `${y}-12-31`)
+  }
 
   // Pagination
-  const offset = (page - 1) * limit
-  const paginatedData = filteredData.slice(offset, offset + limit)
-  const totalCount = filteredData.length
-  const totalPages = Math.ceil(totalCount / limit)
+  query = query.range(offset, offset + limit - 1).order("created_at", { ascending: false })
+
+  const { data: quizzes, count, error } = await query
+
+  if (error) {
+    console.error("Error fetching quizzes for approval:", error)
+    return { data: [], totalCount: 0, totalPages: 0, categories: [] }
+  }
+
+  // 2. Fetch Creators (Profiles)
+  let quizApprovals: QuizApproval[] = []
+
+  if (quizzes && quizzes.length > 0) {
+    const creatorIds = [...new Set(quizzes.map((q) => q.creator_id).filter(Boolean))]
+    
+    let profilesMap: Record<string, any> = {}
+    
+    if (creatorIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, fullname, username, email, avatar_url")
+        .in("id", creatorIds)
+      
+      if (profiles) {
+        profiles.forEach(p => {
+          profilesMap[p.id] = p
+        })
+      }
+    }
+
+    // 3. Map Data
+    quizApprovals = quizzes.map((quiz) => ({
+      id: quiz.id,
+      title: quiz.title,
+      description: quiz.description,
+      category: quiz.category,
+      language: quiz.language,
+      cover_image: quiz.cover_image || quiz.image_url, // Handle legacy image fields
+      questions: quiz.questions,
+      created_at: quiz.created_at,
+      creator: profilesMap[quiz.creator_id] || null
+    }))
+  }
+
+  // 4. Fetch distinct categories (Optimized: separate query or hardcoded list usually better)
+  // For now, we reuse the existing strategy but query DB
+  // To avoid heavy query, we'll return empty or common categories if not critical,
+  // Or fetch distinct categories from DB.
+  // Let's do a quick distinct query
+  const { data: catData } = await supabase.from("quizzes").select("category")
+  const categories = [...new Set(catData?.map(c => c.category).filter(Boolean) as string[])].sort()
 
   return {
-    data: paginatedData,
-    totalCount,
-    totalPages,
+    data: quizApprovals,
+    totalCount: count || 0,
+    totalPages: Math.ceil((count || 0) / limit),
     categories,
   }
 }
 
-// Fetch single quiz by ID (using dummy data for prototype)
 export async function fetchQuizApprovalById(id: string): Promise<{ data: QuizApproval | null; error: string | null }> {
-  const quiz = DUMMY_QUIZZES.find((q) => q.id === id)
+  const supabase = getSupabaseAdminClient()
   
-  if (!quiz) {
-    return { data: null, error: "Quiz not found" }
+  const { data: quiz, error } = await supabase
+    .from("quizzes")
+    .select("*")
+    .eq("id", id)
+    .single()
+
+  if (error || !quiz) {
+    return { data: null, error: error?.message || "Quiz not found" }
   }
 
-  return { data: quiz, error: null }
+  let creator = null
+  if (quiz.creator_id) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id, fullname, username, email, avatar_url")
+      .eq("id", quiz.creator_id)
+      .single()
+    creator = profile
+  }
+
+  const result: QuizApproval = {
+      id: quiz.id,
+      title: quiz.title,
+      description: quiz.description,
+      category: quiz.category,
+      language: quiz.language,
+      cover_image: quiz.cover_image || quiz.image_url,
+      questions: quiz.questions,
+      created_at: quiz.created_at,
+      creator
+  }
+
+  return { data: result, error: null }
 }
 
-// Approve quiz (dummy - just return success for prototype)
 export async function approveQuizAction(id: string) {
-  // In production, this would update the database
-  console.log(`Approving quiz: ${id}`)
+  const supabase = getSupabaseAdminClient()
+
+  // Approve: request = false, is_public = true (Assuming approval makes it public)
+  const { error } = await supabase
+    .from("quizzes")
+    .update({ request: false, is_public: true }) 
+    .eq("id", id)
+
+  if (error) {
+    console.error("Error approving quiz:", error)
+    return { error: error.message }
+  }
+
+  revalidatePath("/support/quiz-approval")
   return { error: null }
 }
 
-// Reject quiz (dummy - just return success for prototype)
 export async function rejectQuizAction(id: string, reason?: string) {
-  // In production, this would update the database
-  console.log(`Rejecting quiz: ${id}, reason: ${reason}`)
+  const supabase = getSupabaseAdminClient()
+
+  // Reject: request = false (removed from pending list)
+  // Optionally store rejection reason in db if column exists.
+  // For now, just clear request flag.
+  const { error } = await supabase
+    .from("quizzes")
+    .update({ request: false }) 
+    .eq("id", id)
+
+  if (error) {
+    console.error("Error rejecting quiz:", error)
+    return { error: error.message }
+  }
+
+  revalidatePath("/support/quiz-approval")
   return { error: null }
 }

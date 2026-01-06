@@ -18,7 +18,7 @@ export default async function SupportQuizPage({ searchParams }: PageProps) {
   const { data, totalPages, totalCount, categories } = await fetchQuizApprovals(
     {
       page,
-      limit: 10,
+      limit: 8,
       search,
       category,
     }
