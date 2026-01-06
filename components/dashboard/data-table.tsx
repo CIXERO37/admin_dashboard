@@ -41,7 +41,7 @@ export function DataTable({
   onPageChange,
   onRowClick,
 }: DataTableProps) {
-  const showPagination = totalPages > 1 && onPageChange;
+  const showPagination = totalPages >= 1 && !!onPageChange;
   const [editingEllipsis, setEditingEllipsis] = useState<string | null>(null);
   const [jumpPage, setJumpPage] = useState("");
 
@@ -116,125 +116,127 @@ export function DataTable({
             of <span className="font-medium text-foreground">{totalPages}</span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => onPageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className={cn(
-                "px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors",
-                currentPage === 1
-                  ? "border-border bg-secondary/50 text-muted-foreground cursor-not-allowed"
-                  : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer"
-              )}
-            >
-              Previous
-            </button>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onPageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={cn(
+                  "px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors",
+                  currentPage === 1
+                    ? "border-border bg-secondary/50 text-muted-foreground cursor-not-allowed"
+                    : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer"
+                )}
+              >
+                Previous
+              </button>
 
-            <div className="flex items-center gap-1">
-              {(() => {
-                const pages: (number | string)[] = [];
+              <div className="flex items-center gap-1">
+                {(() => {
+                  const pages: (number | string)[] = [];
 
-                if (totalPages <= 7) {
-                  for (let i = 1; i <= totalPages; i++) {
-                    pages.push(i);
-                  }
-                } else {
-                  pages.push(1);
-
-                  if (currentPage <= 3) {
-                    pages.push(2, 3, 4, "...", totalPages);
-                  } else if (currentPage >= totalPages - 2) {
-                    pages.push(
-                      "...",
-                      totalPages - 3,
-                      totalPages - 2,
-                      totalPages - 1,
-                      totalPages
-                    );
+                  if (totalPages <= 7) {
+                    for (let i = 1; i <= totalPages; i++) {
+                      pages.push(i);
+                    }
                   } else {
-                    pages.push(
-                      "...",
-                      currentPage - 1,
-                      currentPage,
-                      currentPage + 1,
-                      "...",
-                      totalPages
-                    );
-                  }
-                }
+                    pages.push(1);
 
-                return pages.map((page, index) => {
-                  if (page === "...") {
-                    const ellipsisKey = `ellipsis-${index}`;
-                    
-                    if (editingEllipsis === ellipsisKey) {
+                    if (currentPage <= 3) {
+                      pages.push(2, 3, 4, "...", totalPages);
+                    } else if (currentPage >= totalPages - 2) {
+                      pages.push(
+                        "...",
+                        totalPages - 3,
+                        totalPages - 2,
+                        totalPages - 1,
+                        totalPages
+                      );
+                    } else {
+                      pages.push(
+                        "...",
+                        currentPage - 1,
+                        currentPage,
+                        currentPage + 1,
+                        "...",
+                        totalPages
+                      );
+                    }
+                  }
+
+                  return pages.map((page, index) => {
+                    if (page === "...") {
+                      const ellipsisKey = `ellipsis-${index}`;
+
+                      if (editingEllipsis === ellipsisKey) {
+                        return (
+                          <form
+                            key={ellipsisKey}
+                            onSubmit={handleJumpToPage}
+                            className="relative"
+                          >
+                            <Search className="absolute left-1.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+                            <input
+                              type="number"
+                              min={1}
+                              max={totalPages}
+                              value={jumpPage}
+                              onChange={(e) => setJumpPage(e.target.value)}
+                              onBlur={() => {
+                                setEditingEllipsis(null);
+                                setJumpPage("");
+                              }}
+                              autoFocus
+                              className="w-14 h-9 pl-6 pr-1 text-sm text-center font-medium rounded-lg border border-primary bg-card text-foreground focus:outline-none focus:ring-1 focus:ring-primary [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            />
+                          </form>
+                        );
+                      }
+
                       return (
-                        <form
+                        <button
                           key={ellipsisKey}
-                          onSubmit={handleJumpToPage}
-                          className="relative"
+                          onClick={() => setEditingEllipsis(ellipsisKey)}
+                          className="w-9 h-9 flex items-center justify-center text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/80 rounded-lg border border-transparent hover:border-border transition-colors cursor-pointer"
+                          title="Click to jump to page"
                         >
-                          <Search className="absolute left-1.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
-                          <input
-                            type="number"
-                            min={1}
-                            max={totalPages}
-                            value={jumpPage}
-                            onChange={(e) => setJumpPage(e.target.value)}
-                            onBlur={() => {
-                              setEditingEllipsis(null);
-                              setJumpPage("");
-                            }}
-                            autoFocus
-                            className="w-14 h-9 pl-6 pr-1 text-sm text-center font-medium rounded-lg border border-primary bg-card text-foreground focus:outline-none focus:ring-1 focus:ring-primary [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                          />
-                        </form>
+                          ...
+                        </button>
                       );
                     }
 
                     return (
                       <button
-                        key={ellipsisKey}
-                        onClick={() => setEditingEllipsis(ellipsisKey)}
-                        className="w-9 h-9 flex items-center justify-center text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/80 rounded-lg border border-transparent hover:border-border transition-colors cursor-pointer"
-                        title="Click to jump to page"
+                        key={page}
+                        onClick={() => onPageChange(page as number)}
+                        className={cn(
+                          "w-9 h-9 text-sm font-medium rounded-lg border transition-colors cursor-pointer",
+                          currentPage === page
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border bg-card text-foreground hover:bg-secondary/80"
+                        )}
                       >
-                        ...
+                        {page}
                       </button>
                     );
-                  }
+                  });
+                })()}
+              </div>
 
-                  return (
-                    <button
-                      key={page}
-                      onClick={() => onPageChange(page as number)}
-                      className={cn(
-                        "w-9 h-9 text-sm font-medium rounded-lg border transition-colors cursor-pointer",
-                        currentPage === page
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border bg-card text-foreground hover:bg-secondary/80"
-                      )}
-                    >
-                      {page}
-                    </button>
-                  );
-                });
-              })()}
+              <button
+                onClick={() => onPageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={cn(
+                  "px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors",
+                  currentPage === totalPages
+                    ? "border-border bg-secondary/50 text-muted-foreground cursor-not-allowed"
+                    : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer"
+                )}
+              >
+                Next
+              </button>
             </div>
-
-            <button
-              onClick={() => onPageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className={cn(
-                "px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors",
-                currentPage === totalPages
-                  ? "border-border bg-secondary/50 text-muted-foreground cursor-not-allowed"
-                  : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer"
-              )}
-            >
-              Next
-            </button>
-          </div>
+          )}
         </div>
       )}
     </div>

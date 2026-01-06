@@ -1,7 +1,24 @@
 "use client";
 
-import { Search, FileQuestion, Calendar, Check, X } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import {
+  Search,
+  FileQuestion,
+  Calendar,
+  Check,
+  X,
+  Book,
+  BookOpen,
+  Beaker,
+  Calculator,
+  Clock,
+  Globe,
+  Languages,
+  Laptop,
+  Dumbbell,
+  Film,
+  Briefcase,
+} from "lucide-react";
+import { format } from "date-fns";
 import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -36,6 +53,87 @@ import {
 } from "@/components/ui/select";
 import { SlidersHorizontal } from "lucide-react";
 
+// Categories and languages
+const CATEGORY_CONFIG = [
+  {
+    value: "all",
+    label: "All Categories",
+    icon: <Book className="h-4 w-4 text-blue-500" />,
+    bgImage:
+      "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&h=600&fit=crop&crop=entropy&auto=format&q=80",
+  },
+  {
+    value: "general",
+    label: "General",
+    icon: <BookOpen className="h-4 w-4" />,
+    bgImage:
+      "https://images.unsplash.com/photo-1707926310424-f7b837508c40?q=80&w=1632&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  },
+  {
+    value: "science",
+    label: "Science",
+    icon: <Beaker className="h-4 w-4 text-green-500" />,
+    bgImage:
+      "https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  },
+  {
+    value: "math",
+    label: "Mathematics",
+    icon: <Calculator className="h-4 w-4 text-red-500" />,
+    bgImage:
+      "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  },
+  {
+    value: "history",
+    label: "History",
+    icon: <Clock className="h-4 w-4 text-yellow-500" />,
+    bgImage:
+      "https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=800&h=600&fit=crop&crop=entropy&auto=format&q=80",
+  },
+  {
+    value: "geography",
+    label: "Geography",
+    icon: <Globe className="h-4 w-4 text-teal-500" />,
+    bgImage:
+      "https://images.unsplash.com/photo-1592252032050-34897f779223?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  },
+  {
+    value: "language",
+    label: "Language",
+    icon: <Languages className="h-4 w-4 text-purple-500" />,
+    bgImage:
+      "https://images.unsplash.com/photo-1620969427101-7a2bb6d83273?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  },
+  {
+    value: "technology",
+    label: "Technology",
+    icon: <Laptop className="h-4 w-4 text-blue-500" />,
+    bgImage:
+      "https://plus.unsplash.com/premium_photo-1661963874418-df1110ee39c1?q=80&w=1086&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  },
+  {
+    value: "sports",
+    label: "Sports",
+    icon: <Dumbbell className="h-4 w-4 text-orange-500" />,
+    bgImage:
+      "https://images.unsplash.com/photo-1556817411-31ae72fa3ea0?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  },
+  {
+    value: "entertainment",
+    label: "Entertainment",
+    icon: <Film className="h-4 w-4 text-pink-500" />,
+    bgImage:
+      "https://images.unsplash.com/photo-1470020618177-f49a96241ae7?q=80&w=688&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  },
+  {
+    value: "business",
+    label: "Business",
+    icon: <Briefcase className="h-4 w-4 text-indigo-500" />,
+    bgImage:
+      "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&h=600&fit=crop&crop=entropy&auto=format&q=80",
+  },
+];
+
 interface QuizApprovalTableProps {
   initialData: QuizApproval[];
   totalPages: number;
@@ -57,7 +155,16 @@ function QuizCard({ quiz, onApprove, onReject }: QuizCardProps) {
   const questionsCount = Array.isArray(quiz.questions)
     ? quiz.questions.length
     : 0;
-  const coverUrl = quiz.cover_image || quiz.image_url;
+
+  // Logic to determine cover image
+  let coverUrl = quiz.cover_image || quiz.image_url;
+  if (!coverUrl) {
+    const categoryLower = (quiz.category || "general").toLowerCase();
+    const config =
+      CATEGORY_CONFIG.find((c) => c.value === categoryLower) ||
+      CATEGORY_CONFIG.find((c) => c.value === "general");
+    coverUrl = config?.bgImage || "";
+  }
   const creatorInitials = (quiz.creator?.fullname || "?")
     .split(" ")
     .map((w) => w[0])
@@ -163,9 +270,7 @@ function QuizCard({ quiz, onApprove, onReject }: QuizCardProps) {
             <Calendar className="h-3.5 w-3.5" />
             <span>
               {quiz.created_at
-                ? formatDistanceToNow(new Date(quiz.created_at), {
-                    addSuffix: true,
-                  })
+                ? format(new Date(quiz.created_at), "d MMM yyyy")
                 : "-"}
             </span>
           </div>

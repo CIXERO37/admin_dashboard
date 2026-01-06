@@ -173,9 +173,6 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
 
         <div>
           <h1 className="text-2xl font-bold text-foreground">Review Quiz</h1>
-          <p className="text-sm text-muted-foreground">
-            Review the quiz content before approving
-          </p>
         </div>
       </div>
 

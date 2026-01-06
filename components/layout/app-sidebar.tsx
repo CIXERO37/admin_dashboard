@@ -77,7 +77,7 @@ const navigation: NavItem[] = [
     icon: CreditCard,
     children: [
       { title: "Dashboard", href: "/billing/dashboard", icon: LayoutDashboard },
-      { title: "Subscriptions", href: "/subcriptions", icon: Users },
+      { title: "Subscriptions", href: "/subscriptions", icon: Users },
     ],
   },
   {
