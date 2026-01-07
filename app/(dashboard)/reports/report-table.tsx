@@ -173,11 +173,11 @@ export function ReportTable({
     if (error) {
       toast({
         title: "Error",
-        description: "Gagal mengubah status",
+        description: "Failed to change status",
         variant: "destructive",
       });
     } else {
-      toast({ title: "Berhasil", description: "Status berhasil diubah" });
+      toast({ title: "Success", description: "Status changed successfully" });
       router.refresh();
     }
     setConfirmDialog((prev) => ({ ...prev, open: false }));
@@ -206,11 +206,11 @@ export function ReportTable({
     if (error) {
       toast({
         title: "Error",
-        description: "Gagal menyimpan catatan",
+        description: "Failed to save notes",
         variant: "destructive",
       });
     } else {
-      toast({ title: "Berhasil", description: "Catatan berhasil disimpan" });
+      toast({ title: "Success", description: "Notes saved successfully" });
       router.refresh();
     }
     setNotesDialog((prev) => ({ ...prev, open: false }));
@@ -452,7 +452,7 @@ export function ReportTable({
         <div className="flex items-center gap-3">
           <div className="relative">
             <Input
-              placeholder="Cari laporan..."
+              placeholder="Search reports..."
               className="pr-10 w-64 bg-background border-border"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -505,9 +505,9 @@ export function ReportTable({
       >
         <DialogContent showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle>Ubah Status</DialogTitle>
+            <DialogTitle>Change Status</DialogTitle>
             <DialogDescription>
-              Apakah Anda yakin ingin mengubah status dari?
+              Are you sure you want to change the status?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -517,9 +517,9 @@ export function ReportTable({
                 setConfirmDialog((prev) => ({ ...prev, open: false }))
               }
             >
-              Batal
+              Cancel
             </Button>
-            <Button onClick={handleConfirm}>Ubah</Button>
+            <Button onClick={handleConfirm}>Change</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -602,7 +602,7 @@ export function ReportTable({
               onChange={(e) =>
                 setNotesDialog((prev) => ({ ...prev, notes: e.target.value }))
               }
-              placeholder="Tambahkan catatan admin..."
+              placeholder="Add admin notes..."
               rows={4}
             />
           </div>
@@ -613,9 +613,9 @@ export function ReportTable({
                 setNotesDialog((prev) => ({ ...prev, open: false }))
               }
             >
-              Batal
+              Cancel
             </Button>
-            <Button onClick={handleSaveNotes}>Simpan</Button>
+            <Button onClick={handleSaveNotes}>Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

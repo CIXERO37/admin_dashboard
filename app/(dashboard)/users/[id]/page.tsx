@@ -80,11 +80,11 @@ export default async function ProfileDetailPage({ params }: PageProps) {
         />
       </Suspense>
 
-      <div className="flex flex-col lg:flex-row lg:items-start gap-6">
+      <div className="flex flex-col lg:flex-row gap-6">
         {/* Left Sidebar */}
         <div className="lg:w-80">
           {/* Profile Card */}
-          <Card>
+          <Card className="h-full">
             <CardContent className="pt-6 pb-6">
               <div className="flex flex-col items-center text-center">
                 <AvatarDialog
@@ -167,7 +167,7 @@ export default async function ProfileDetailPage({ params }: PageProps) {
         {/* Main Content */}
         <div className="flex-1">
           {/* Quiz Terbanyak Dimainkan */}
-          <Card>
+          <Card className="h-full">
             <CardHeader className="flex-row items-center justify-between pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <Trophy className="h-4 w-4 text-amber-500" />

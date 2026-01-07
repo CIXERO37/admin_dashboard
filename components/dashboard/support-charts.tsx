@@ -196,7 +196,7 @@ export function SupportCharts({ reports, groupStats }: SupportChartsProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Monthly Activity</CardTitle>
+          <CardTitle>Activity</CardTitle>
         </CardHeader>
         <CardContent>
           {monthlyData.some((d) => d.count > 0) ? (

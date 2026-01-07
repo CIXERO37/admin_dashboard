@@ -513,7 +513,7 @@ export function UserTable({
         <div className="flex items-center gap-3">
           <div className="relative">
             <Input
-              placeholder="Cari pengguna..."
+              placeholder="Search users..."
               className="pr-10 w-64 bg-background border-border"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -581,12 +581,12 @@ export function UserTable({
       >
         <DialogContent showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle>Konfirmasi Perubahan</DialogTitle>
+            <DialogTitle>Confirm Change</DialogTitle>
             <DialogDescription>
-              Apakah Anda yakin ingin mengubah{" "}
-              {confirmDialog.type === "role" ? "role" : "status"}{" "}
-              <strong>{confirmDialog.userName}</strong> dari{" "}
-              <strong>{confirmDialog.currentValue}</strong> menjadi{" "}
+              Are you sure you want to change the{" "}
+              {confirmDialog.type === "role" ? "role" : "status"} of{" "}
+              <strong>{confirmDialog.userName}</strong> from{" "}
+              <strong>{confirmDialog.currentValue}</strong> to{" "}
               <strong>{confirmDialog.newValue}</strong>?
             </DialogDescription>
           </DialogHeader>
@@ -597,9 +597,9 @@ export function UserTable({
                 setConfirmDialog((prev) => ({ ...prev, open: false }))
               }
             >
-              Batal
+              Cancel
             </Button>
-            <Button onClick={handleConfirm}>Ya, Ubah</Button>
+            <Button onClick={handleConfirm}>Yes, Change</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -614,20 +614,18 @@ export function UserTable({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editDialog.showConfirm
-                ? "Konfirmasi Perubahan"
-                : "Edit Pengguna"}
+              {editDialog.showConfirm ? "Confirm Changes" : "Edit User"}
             </DialogTitle>
             {editDialog.showConfirm && (
               <DialogDescription>
-                Apakah Anda yakin ingin menyimpan perubahan ini?
+                Are you sure you want to save these changes?
               </DialogDescription>
             )}
           </DialogHeader>
           {!editDialog.showConfirm ? (
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="fullname">Nama Lengkap</Label>
+                <Label htmlFor="fullname">Full Name</Label>
                 <Input
                   id="fullname"
                   value={editDialog.fullname}
@@ -701,10 +699,10 @@ export function UserTable({
                 }))
               }
             >
-              Batal
+              Cancel
             </Button>
             <Button onClick={handleEditSave}>
-              {editDialog.showConfirm ? "Ya, Simpan" : "Simpan"}
+              {editDialog.showConfirm ? "Yes, Save" : "Save"}
             </Button>
           </DialogFooter>
         </DialogContent>

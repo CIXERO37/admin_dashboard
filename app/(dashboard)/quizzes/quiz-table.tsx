@@ -38,7 +38,7 @@ import { Label } from "@/components/ui/label";
 import { type Quiz, updateQuizVisibility, blockQuizAction } from "./actions";
 
 const visibilityColors: Record<string, string> = {
-  Publik:
+  Public:
     "bg-[var(--success)]/20 text-[var(--success)] border-[var(--success)]/30",
   Private:
     "bg-[var(--warning)]/20 text-[var(--warning)] border-[var(--warning)]/30",
@@ -57,6 +57,7 @@ interface QuizTableProps {
   searchQuery: string;
   categoryFilter: string;
   visibilityFilter: string;
+  statusFilter: string;
 }
 
 export function QuizTable({
@@ -67,6 +68,7 @@ export function QuizTable({
   searchQuery,
   categoryFilter,
   visibilityFilter,
+  statusFilter,
 }: QuizTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -133,6 +135,7 @@ export function QuizTable({
       search: searchQuery,
       category: categoryFilter,
       visibility: visibilityFilter,
+      status: statusFilter,
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -149,16 +152,19 @@ export function QuizTable({
   const handleConfirm = async () => {
     const { error } = await updateQuizVisibility(
       confirmDialog.id,
-      confirmDialog.newValue === "Publik"
+      confirmDialog.newValue === "Public"
     );
     if (error) {
       toast({
         title: "Error",
-        description: "Gagal mengubah visibility",
+        description: "Failed to change visibility",
         variant: "destructive",
       });
     } else {
-      toast({ title: "Berhasil", description: "Visibility berhasil diubah" });
+      toast({
+        title: "Success",
+        description: "Visibility changed successfully",
+      });
       router.refresh();
     }
     setConfirmDialog((prev) => ({ ...prev, open: false }));
@@ -210,11 +216,11 @@ export function QuizTable({
           <div className="flex items-center gap-2">
             <Link
               href={`/users/${creator.id}`}
-              className="flex flex-col min-w-0 hover:underline"
+              className="flex flex-col min-w-0 group"
               onClick={(e) => e.stopPropagation()}
             >
               <span
-                className="text-sm font-medium truncate max-w-[120px]"
+                className="text-sm font-medium truncate max-w-[120px] group-hover:text-primary transition-colors"
                 title={creator.fullname}
               >
                 {creator.fullname}
@@ -272,7 +278,7 @@ export function QuizTable({
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-              {visibility === "Publik" ? (
+              {visibility === "Public" ? (
                 <DropdownMenuItem
                   onClick={() =>
                     openConfirmDialog(id, visibility, "Private", quizTitle)
@@ -284,11 +290,11 @@ export function QuizTable({
               ) : (
                 <DropdownMenuItem
                   onClick={() =>
-                    openConfirmDialog(id, visibility, "Publik", quizTitle)
+                    openConfirmDialog(id, visibility, "Public", quizTitle)
                   }
                   className="cursor-pointer"
                 >
-                  Publik
+                  Public
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -343,7 +349,7 @@ export function QuizTable({
     category: quiz.category ?? "-",
     questions: Array.isArray(quiz.questions) ? quiz.questions.length : 0,
     language: quiz.language ?? "ID",
-    difficulty: quiz.is_public ? "Publik" : "Private",
+    difficulty: quiz.is_public ? "Public" : "Private",
     createdAt: quiz.created_at
       ? format(new Date(quiz.created_at), "dd MMM yyyy")
       : "-",
@@ -360,7 +366,7 @@ export function QuizTable({
         <div className="flex items-center gap-3">
           <div className="relative">
             <Input
-              placeholder="Cari quiz..."
+              placeholder="Search quiz..."
               className="pr-10 w-64 bg-background border-border"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -406,9 +412,24 @@ export function QuizTable({
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="publik">Publik</SelectItem>
+              <SelectItem value="all">All Visibility</SelectItem>
+              <SelectItem value="publik">Public</SelectItem>
               <SelectItem value="private">Private</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={statusFilter}
+            onValueChange={(value) => updateUrl({ status: value, page: 1 })}
+          >
+            <SelectTrigger className="w-36">
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal className="h-4 w-4" />
+                <SelectValue placeholder="Status" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="active">Active</SelectItem>
               <SelectItem value="block">Block</SelectItem>
             </SelectContent>
@@ -433,11 +454,11 @@ export function QuizTable({
       >
         <DialogContent showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle>Ubah Visibility Quiz</DialogTitle>
+            <DialogTitle>Change Quiz Visibility</DialogTitle>
             <DialogDescription>
-              Apakah Anda yakin ingin mengubah visibility quiz{" "}
-              <strong>{confirmDialog.quizTitle}</strong> dari{" "}
-              <strong>{confirmDialog.currentValue}</strong> menjadi{" "}
+              Are you sure you want to change the visibility of quiz{" "}
+              <strong>{confirmDialog.quizTitle}</strong> from{" "}
+              <strong>{confirmDialog.currentValue}</strong> to{" "}
               <strong>{confirmDialog.newValue}</strong>?
             </DialogDescription>
           </DialogHeader>
@@ -448,9 +469,9 @@ export function QuizTable({
                 setConfirmDialog((prev) => ({ ...prev, open: false }))
               }
             >
-              Batal
+              Cancel
             </Button>
-            <Button onClick={handleConfirm}>Ya, Ubah</Button>
+            <Button onClick={handleConfirm}>Yes, Change</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -465,14 +486,15 @@ export function QuizTable({
           <DialogHeader>
             <DialogTitle className="text-destructive">Block Quiz</DialogTitle>
             <DialogDescription>
-              Anda akan memblokir quiz <strong>{blockDialog.quizTitle}</strong>.
-              Status quiz akan berubah menjadi block.
+              You are about to block quiz{" "}
+              <strong>{blockDialog.quizTitle}</strong>. The quiz status will be
+              changed to blocked.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-4">
             <Label htmlFor="confirmBlock">
-              Ketik <strong className="text-destructive">Block</strong> untuk
-              mengkonfirmasi
+              Type <strong className="text-destructive">Block</strong> to
+              confirm
             </Label>
             <Input
               id="confirmBlock"
@@ -483,7 +505,7 @@ export function QuizTable({
                   confirmText: e.target.value,
                 }))
               }
-              placeholder="Ketik 'Block' di sini"
+              placeholder="Type 'Block' here"
             />
           </div>
           <DialogFooter>
@@ -497,7 +519,7 @@ export function QuizTable({
                 }))
               }
             >
-              Batal
+              Cancel
             </Button>
             <Button
               variant="destructive"

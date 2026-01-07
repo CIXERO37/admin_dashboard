@@ -36,6 +36,7 @@ interface FetchQuizzesParams {
   search?: string
   category?: string
   visibility?: string
+  status?: string
 }
 
 export async function fetchQuizzes({
@@ -44,6 +45,7 @@ export async function fetchQuizzes({
   search = "",
   category = "all",
   visibility = "all",
+  status = "all",
 }: FetchQuizzesParams): Promise<QuizzesResponse> {
   const supabase = getSupabaseAdminClient()
   const offset = (page - 1) * limit
@@ -61,12 +63,20 @@ export async function fetchQuizzes({
     query = query.eq("category", category)
   }
 
+  // Visibility filter (Public/Private)
   if (visibility && visibility !== "all") {
-    if (visibility === "publik" || visibility === "private") {
-      query = query.eq("is_public", visibility === "publik")
-    } else if (visibility === "active") {
+    if (visibility === "publik") {
+      query = query.eq("is_public", true)
+    } else if (visibility === "private") {
+      query = query.eq("is_public", false)
+    }
+  }
+
+  // Status filter (Active/Block)
+  if (status && status !== "all") {
+    if (status === "active") {
       query = query.or("status.is.null,status.neq.block")
-    } else if (visibility === "block") {
+    } else if (status === "block") {
       query = query.eq("status", "block")
     }
   }

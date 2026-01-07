@@ -1,23 +1,25 @@
-import { Suspense } from "react"
-import { QuizTable } from "./quiz-table"
-import { fetchQuizzes } from "./actions"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Suspense } from "react";
+import { QuizTable } from "./quiz-table";
+import { fetchQuizzes } from "./actions";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface PageProps {
   searchParams: Promise<{
-    page?: string
-    search?: string
-    category?: string
-    visibility?: string
-  }>
+    page?: string;
+    search?: string;
+    category?: string;
+    visibility?: string;
+    status?: string;
+  }>;
 }
 
 export default async function MasterQuizPage({ searchParams }: PageProps) {
-  const params = await searchParams
-  const page = Number(params.page) || 1
-  const search = params.search || ""
-  const category = params.category || "all"
-  const visibility = params.visibility || "all"
+  const params = await searchParams;
+  const page = Number(params.page) || 1;
+  const search = params.search || "";
+  const category = params.category || "all";
+  const visibility = params.visibility || "all";
+  const status = params.status || "all";
 
   const { data, totalPages, categories } = await fetchQuizzes({
     page,
@@ -25,7 +27,8 @@ export default async function MasterQuizPage({ searchParams }: PageProps) {
     search,
     category,
     visibility,
-  })
+    status,
+  });
 
   return (
     <Suspense fallback={<QuizTableSkeleton />}>
@@ -37,9 +40,10 @@ export default async function MasterQuizPage({ searchParams }: PageProps) {
         searchQuery={search}
         categoryFilter={category}
         visibilityFilter={visibility}
+        statusFilter={status}
       />
     </Suspense>
-  )
+  );
 }
 
 function QuizTableSkeleton() {
@@ -51,9 +55,10 @@ function QuizTableSkeleton() {
           <Skeleton className="h-10 w-64" />
           <Skeleton className="h-10 w-36" />
           <Skeleton className="h-10 w-36" />
+          <Skeleton className="h-10 w-36" />
         </div>
       </div>
       <Skeleton className="h-[600px] w-full rounded-xl" />
     </div>
-  )
+  );
 }
