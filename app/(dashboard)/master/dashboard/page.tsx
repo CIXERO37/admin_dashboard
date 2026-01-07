@@ -13,18 +13,23 @@ import {
 } from "@/components/ui/select";
 
 import { StatCard } from "@/components/dashboard/stat-card";
-import { ActionCard } from "@/components/dashboard/action-card";
-import { SectionHeader } from "@/components/dashboard/section-header";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useQuizzes } from "@/hooks/useQuizzes";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useGameStats } from "@/hooks/useGameStats";
 import { MasterStatsCharts } from "@/components/dashboard/master-stats-charts";
 
 export default function MasterDashboardPage() {
-  const { data: quizzes } = useQuizzes();
-  const { data: profiles, aggregates } = useProfiles();
-  const { sessionCounts } = useGameStats();
+  const { data: quizzes, loading: quizzesLoading } = useQuizzes();
+  const {
+    data: profiles,
+    aggregates,
+    loading: profilesLoading,
+  } = useProfiles();
+  const { sessionCounts, loading: gameStatsLoading } = useGameStats();
   const [timeRange, setTimeRange] = useState("this-year");
+
+  const loading = quizzesLoading || profilesLoading;
 
   const checkDate = (dateStr: string | null | undefined, range: string) => {
     if (range === "all") return true;
@@ -72,23 +77,49 @@ export default function MasterDashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Quizzes"
-          value={filteredQuizzes.length}
-          icon={BookOpen}
-        />
-        <StatCard title="Categories" value={categoriesCount} icon={Layers} />
-        <StatCard title="Public" value={publicQuizzes.length} icon={Globe} />
-        <StatCard title="Private" value={privateCount} icon={Lock} />
+        {loading ? (
+          <>
+            <Skeleton className="h-32 rounded-xl" />
+            <Skeleton className="h-32 rounded-xl" />
+            <Skeleton className="h-32 rounded-xl" />
+            <Skeleton className="h-32 rounded-xl" />
+          </>
+        ) : (
+          <>
+            <StatCard
+              title="Quizzes"
+              value={filteredQuizzes.length}
+              icon={BookOpen}
+            />
+            <StatCard
+              title="Categories"
+              value={categoriesCount}
+              icon={Layers}
+            />
+            <StatCard
+              title="Public"
+              value={publicQuizzes.length}
+              icon={Globe}
+            />
+            <StatCard title="Private" value={privateCount} icon={Lock} />
+          </>
+        )}
       </div>
 
       {/* Charts */}
       <div>
-        <MasterStatsCharts
-          quizzes={filteredQuizzes}
-          profiles={profiles}
-          sessionCounts={sessionCounts}
-        />
+        {loading || gameStatsLoading ? (
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Skeleton className="h-[400px] rounded-xl" />
+            <Skeleton className="h-[400px] rounded-xl" />
+          </div>
+        ) : (
+          <MasterStatsCharts
+            quizzes={filteredQuizzes}
+            profiles={profiles}
+            sessionCounts={sessionCounts}
+          />
+        )}
       </div>
     </div>
   );

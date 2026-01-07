@@ -54,78 +54,93 @@ interface NavItem {
   children?: NavChild[];
 }
 
+import { useTranslation } from "@/lib/i18n";
+
 const navigation: NavItem[] = [
   {
-    title: "Dashboard",
+    title: "nav.dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
   },
   {
-    title: "Support",
+    title: "nav.support",
     href: "/support",
     icon: Headphones,
     children: [
-      { title: "Dashboard", href: "/support/dashboard", icon: LayoutDashboard },
-      { title: "Reports", href: "/reports", icon: FileText },
-      { title: "Quiz Approval", href: "/quiz-approval", icon: HelpCircle },
-      { title: "Groups", href: "/groups", icon: Users },
+      {
+        title: "nav.dashboard",
+        href: "/support/dashboard",
+        icon: LayoutDashboard,
+      },
+      { title: "nav.reports", href: "/reports", icon: FileText },
+      { title: "nav.quiz_approval", href: "/quiz-approval", icon: HelpCircle },
+      { title: "nav.groups", href: "/groups", icon: Users },
     ],
   },
   {
-    title: "Billing",
+    title: "nav.billing",
     href: "/billing",
     icon: CreditCard,
     children: [
-      { title: "Dashboard", href: "/billing/dashboard", icon: LayoutDashboard },
-      { title: "Subscriptions", href: "/subscriptions", icon: Users },
+      {
+        title: "nav.dashboard",
+        href: "/billing/dashboard",
+        icon: LayoutDashboard,
+      },
+      { title: "nav.subscriptions", href: "/subscriptions", icon: Users },
     ],
   },
   {
-    title: "Master Data",
+    title: "nav.master_data",
     href: "/master",
     icon: Database,
     children: [
-      { title: "Dashboard", href: "/master/dashboard", icon: LayoutDashboard },
-      { title: "Quizzes", href: "/quizzes", icon: BookOpen },
       {
-        title: "Address",
+        title: "nav.dashboard",
+        href: "/master/dashboard",
+        icon: LayoutDashboard,
+      },
+      { title: "nav.quizzes", href: "/quizzes", icon: BookOpen },
+      {
+        title: "nav.address",
         href: "/address",
         icon: MapPin,
         children: [
-          { title: "Country", href: "/address/country", icon: Globe },
-          { title: "State", href: "/address/state", icon: Map },
-          { title: "City", href: "/address/city", icon: Building2 },
+          { title: "nav.country", href: "/address/country", icon: Globe },
+          { title: "nav.state", href: "/address/state", icon: Map },
+          { title: "nav.city", href: "/address/city", icon: Building2 },
         ],
       },
     ],
   },
   {
-    title: "Administrator",
+    title: "nav.administrator",
     href: "/administrator",
     icon: UserCog,
     children: [
       {
-        title: "Dashboard",
+        title: "nav.dashboard",
         href: "/administrator/dashboard",
         icon: LayoutDashboard,
       },
-      { title: "Users", href: "/users", icon: User },
+      { title: "nav.users", href: "/users", icon: User },
       {
-        title: "Trash Bin",
+        title: "nav.trash_bin",
         href: "/trash-bin",
         icon: Trash2,
       },
     ],
   },
   {
-    title: "Settings",
+    title: "nav.settings",
     href: "/settings",
     icon: Settings,
-    children: [{ title: "Appearance", href: "/appearance", icon: Palette }],
+    children: [{ title: "nav.appearance", href: "/appearance", icon: Palette }],
   },
 ];
 
 export function AppSidebar() {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const { open, toggleSidebar } = useSidebar();
   const [mounted, setMounted] = useState(false);
@@ -248,7 +263,7 @@ export function AppSidebar() {
                   >
                     <div className="flex items-center gap-3">
                       <Icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <span>{t(item.title)}</span>
                     </div>
                     <ChevronDown className="h-4 w-4" />
                   </button>
@@ -274,7 +289,7 @@ export function AppSidebar() {
                   >
                     <div className="flex items-center gap-3">
                       <Icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <span>{t(item.title)}</span>
                     </div>
                     <ChevronDown
                       className={cn(
@@ -312,7 +327,7 @@ export function AppSidebar() {
                             >
                               <div className="flex items-center gap-3">
                                 <ChildIcon className="h-4 w-4" />
-                                <span>{child.title}</span>
+                                <span>{t(child.title)}</span>
                               </div>
                               <ChevronDown
                                 className={cn(
@@ -337,7 +352,7 @@ export function AppSidebar() {
                                   )}
                                 >
                                   <GrandChildIcon className="h-4 w-4" />
-                                  <span>{grandChild.title}</span>
+                                  <span>{t(grandChild.title)}</span>
                                 </Link>
                               );
                             })}
@@ -358,7 +373,7 @@ export function AppSidebar() {
                         )}
                       >
                         <ChildIcon className="h-4 w-4" />
-                        <span>{child.title}</span>
+                        <span>{t(child.title)}</span>
                       </Link>
                     );
                   })}
@@ -378,10 +393,10 @@ export function AppSidebar() {
                   : "text-sidebar-foreground hover:bg-secondary hover:text-foreground",
                 collapsed && "justify-center px-2"
               )}
-              title={collapsed ? item.title : undefined}
+              title={collapsed ? t(item.title) : undefined}
             >
               <Icon className="h-4 w-4 flex-shrink-0" />
-              {!collapsed && <span>{item.title}</span>}
+              {!collapsed && <span>{t(item.title)}</span>}
             </Link>
           );
         })}
@@ -400,7 +415,7 @@ export function AppSidebar() {
           ) : (
             <>
               <PanelLeftClose className="h-4 w-4 mr-2" />
-              <span>Collapse</span>
+              <span>{t("nav.collapse")}</span>
             </>
           )}
         </Button>

@@ -31,8 +31,11 @@ import Link from "next/link";
 
 import { ThemeCustomizer } from "@/components/theme-customizer";
 import { ModeToggle } from "@/components/mode-toggle";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { useTranslation } from "@/lib/i18n";
 
 export function Header() {
+  const { t } = useTranslation();
   const { user, loading } = useCurrentUser();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -121,6 +124,9 @@ export function Header() {
         {/* Mode Toggle */}
         <ModeToggle />
 
+        {/* Language Switcher */}
+        <LanguageSwitcher />
+
         {/* Settings */}
         <ThemeCustomizer />
 
@@ -168,7 +174,7 @@ export function Header() {
             className="w-56 bg-popover border-border"
           >
             <DropdownMenuLabel className="text-foreground">
-              Akun Saya
+              {t("header.my_account")}
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-border" />
             <DropdownMenuItem
@@ -177,7 +183,7 @@ export function Header() {
             >
               <Link href="/settings/profile">
                 <User className="mr-2 h-4 w-4" />
-                Profil
+                {t("header.profile")}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -186,7 +192,7 @@ export function Header() {
             >
               <Link href="/settings">
                 <Settings className="mr-2 h-4 w-4" />
-                Pengaturan
+                {t("header.settings")}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-border" />
@@ -195,7 +201,7 @@ export function Header() {
               onClick={() => setShowLogoutDialog(true)}
             >
               <LogOut className="mr-2 h-4 w-4" />
-              Keluar
+              {t("header.logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -203,15 +209,15 @@ export function Header() {
         <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Keluar dari akun?</AlertDialogTitle>
+              <AlertDialogTitle>{t("header.logout_title")}</AlertDialogTitle>
               <AlertDialogDescription>
-                Anda akan keluar dari dashboard admin.
+                {t("header.logout_desc")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Batal</AlertDialogCancel>
+              <AlertDialogCancel>{t("header.cancel")}</AlertDialogCancel>
               <AlertDialogAction onClick={handleLogout}>
-                Keluar
+                {t("header.logout")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
