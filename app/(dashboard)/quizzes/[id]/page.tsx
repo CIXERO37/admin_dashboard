@@ -13,7 +13,7 @@ interface PageProps {
 }
 
 const visibilityColors: Record<string, string> = {
-  Publik:
+  Public:
     "bg-[var(--success)]/20 text-[var(--success)] border-[var(--success)]/30",
   Private:
     "bg-[var(--warning)]/20 text-[var(--warning)] border-[var(--warning)]/30",
@@ -32,7 +32,7 @@ export default async function QuizDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const visibility = quiz.is_public ? "Publik" : "Private";
+  const visibility = quiz.is_public ? "Public" : "Private";
   const status = quiz.status === "block" ? "Block" : "Active";
   const questions = Array.isArray(quiz.questions) ? quiz.questions : [];
 
@@ -63,7 +63,7 @@ export default async function QuizDetailPage({ params }: PageProps) {
                 <p className="text-sm text-muted-foreground">Creator</p>
                 <Link
                   href={`/users/${quiz.creator.id}`}
-                  className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                  className="flex items-center gap-2 group"
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={getAvatarUrl(quiz.creator.avatar_url)} />
@@ -72,7 +72,7 @@ export default async function QuizDetailPage({ params }: PageProps) {
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="text-foreground font-medium text-sm">
+                    <p className="text-foreground font-medium text-sm group-hover:text-primary transition-colors">
                       {quiz.creator.fullname}
                     </p>
                     <p className="text-xs text-muted-foreground">
