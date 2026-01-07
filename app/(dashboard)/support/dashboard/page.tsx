@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { FileText, HelpCircle, Clock, Users } from "lucide-react";
 import { isSameYear, subYears } from "date-fns";
 
@@ -18,9 +18,10 @@ import { SupportCharts } from "@/components/dashboard/support-charts";
 import { fetchQuizApprovals } from "@/app/(dashboard)/quiz-approval/actions";
 import { fetchGroups } from "@/app/(dashboard)/groups/actions";
 import { fetchGroupCategoryCounts } from "@/app/(dashboard)/groups/stats-actions";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SupportDashboardPage() {
-  const { data: reports, loading, error, stats } = useReports();
+  const { data: reports, loading: reportsLoading } = useReports();
   const [approvalCount, setApprovalCount] = useState(0);
   const [groupCount, setGroupCount] = useState(0);
   const [timeRange, setTimeRange] = useState<"this-year" | "last-year" | "all">(
@@ -29,6 +30,11 @@ export default function SupportDashboardPage() {
   const [groupStats, setGroupStats] = useState<
     { category: string; count: number }[]
   >([]);
+
+  // Loading states for async data
+  const [isLoadingApprovals, setIsLoadingApprovals] = useState(true);
+  const [isLoadingGroups, setIsLoadingGroups] = useState(true);
+  const [isLoadingGroupStats, setIsLoadingGroupStats] = useState(true);
 
   // Filter reports client-side
   const filteredReports = reports.filter((report) => {
@@ -60,17 +66,42 @@ export default function SupportDashboardPage() {
     ).length,
   };
 
-  useEffect(() => {
-    fetchQuizApprovals({ limit: 1, timeRange }).then((res) => {
-      setApprovalCount(res.totalCount);
-    });
-    fetchGroups({ limit: 1, timeRange }).then((res) => {
-      setGroupCount(res.totalCount);
-    });
-    fetchGroupCategoryCounts(timeRange).then((res) => {
-      setGroupStats(res);
-    });
+  // Fetch data with proper loading states
+  const fetchData = useCallback(async () => {
+    // Reset data immediately when filter changes to prevent stale data
+    setApprovalCount(0);
+    setGroupCount(0);
+    setGroupStats([]);
+
+    // Set loading states
+    setIsLoadingApprovals(true);
+    setIsLoadingGroups(true);
+    setIsLoadingGroupStats(true);
+
+    // Fetch all data in parallel
+    const [approvalsRes, groupsRes, groupStatsRes] = await Promise.all([
+      fetchQuizApprovals({ limit: 1, timeRange }),
+      fetchGroups({ limit: 1, timeRange }),
+      fetchGroupCategoryCounts(timeRange),
+    ]);
+
+    // Update state after all data is fetched (prevents flickering)
+    setApprovalCount(approvalsRes.totalCount);
+    setIsLoadingApprovals(false);
+
+    setGroupCount(groupsRes.totalCount);
+    setIsLoadingGroups(false);
+
+    setGroupStats(groupStatsRes);
+    setIsLoadingGroupStats(false);
   }, [timeRange]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Combined loading state for charts
+  const isChartsLoading = reportsLoading || isLoadingGroupStats;
 
   return (
     <div className="space-y-8">
@@ -81,7 +112,9 @@ export default function SupportDashboardPage() {
         </h1>
         <Select
           value={timeRange}
-          onValueChange={(val: any) => setTimeRange(val)}
+          onValueChange={(val: "this-year" | "last-year" | "all") =>
+            setTimeRange(val)
+          }
         >
           <SelectTrigger className="w-[130px]">
             <SelectValue placeholder="Time Range" />
@@ -96,27 +129,46 @@ export default function SupportDashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Reports"
-          value={filteredReports.length}
-          icon={FileText}
-        />
-        <StatCard
-          title="Pending Reports"
-          value={filteredStats.pending}
-          icon={Clock}
-        />
-        <StatCard
-          title="Pending Approvals"
-          value={approvalCount}
-          icon={HelpCircle}
-        />
-        <StatCard title="Groups" value={groupCount} icon={Users} />
+        {reportsLoading || isLoadingApprovals || isLoadingGroups ? (
+          <>
+            <Skeleton className="h-32 rounded-xl" />
+            <Skeleton className="h-32 rounded-xl" />
+            <Skeleton className="h-32 rounded-xl" />
+            <Skeleton className="h-32 rounded-xl" />
+          </>
+        ) : (
+          <>
+            <StatCard
+              title="Reports"
+              value={filteredReports.length}
+              icon={FileText}
+            />
+            <StatCard
+              title="Pending Reports"
+              value={filteredStats.pending}
+              icon={Clock}
+            />
+            <StatCard
+              title="Pending Approvals"
+              value={approvalCount}
+              icon={HelpCircle}
+            />
+            <StatCard title="Groups" value={groupCount} icon={Users} />
+          </>
+        )}
       </div>
 
       {/* Charts */}
       <div className="grid gap-4 md:grid-cols-3">
-        <SupportCharts reports={filteredReports} groupStats={groupStats} />
+        {isChartsLoading ? (
+          <>
+            <Skeleton className="h-[350px] rounded-xl" />
+            <Skeleton className="h-[350px] rounded-xl" />
+            <Skeleton className="h-[350px] rounded-xl" />
+          </>
+        ) : (
+          <SupportCharts reports={filteredReports} groupStats={groupStats} />
+        )}
       </div>
     </div>
   );

@@ -2,33 +2,22 @@
 
 import {
   Search,
-  FileQuestion,
-  Calendar,
   Check,
   X,
-  Book,
-  BookOpen,
-  Beaker,
-  Calculator,
-  Clock,
-  Globe,
-  Languages,
-  Laptop,
-  Dumbbell,
-  Film,
-  Briefcase,
+  FileQuestion,
+  SlidersHorizontal,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-import { cn, getAvatarUrl } from "@/lib/utils";
+import { getAvatarUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import { DataTable } from "@/components/dashboard/data-table";
 import {
   type QuizApproval,
   approveQuizAction,
@@ -51,88 +40,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SlidersHorizontal } from "lucide-react";
-
-// Categories and languages
-const CATEGORY_CONFIG = [
-  {
-    value: "all",
-    label: "All Categories",
-    icon: <Book className="h-4 w-4 text-blue-500" />,
-    bgImage:
-      "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&h=600&fit=crop&crop=entropy&auto=format&q=80",
-  },
-  {
-    value: "general",
-    label: "General",
-    icon: <BookOpen className="h-4 w-4" />,
-    bgImage:
-      "https://images.unsplash.com/photo-1707926310424-f7b837508c40?q=80&w=1632&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  },
-  {
-    value: "science",
-    label: "Science",
-    icon: <Beaker className="h-4 w-4 text-green-500" />,
-    bgImage:
-      "https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  },
-  {
-    value: "math",
-    label: "Mathematics",
-    icon: <Calculator className="h-4 w-4 text-red-500" />,
-    bgImage:
-      "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  },
-  {
-    value: "history",
-    label: "History",
-    icon: <Clock className="h-4 w-4 text-yellow-500" />,
-    bgImage:
-      "https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=800&h=600&fit=crop&crop=entropy&auto=format&q=80",
-  },
-  {
-    value: "geography",
-    label: "Geography",
-    icon: <Globe className="h-4 w-4 text-teal-500" />,
-    bgImage:
-      "https://images.unsplash.com/photo-1592252032050-34897f779223?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  },
-  {
-    value: "language",
-    label: "Language",
-    icon: <Languages className="h-4 w-4 text-purple-500" />,
-    bgImage:
-      "https://images.unsplash.com/photo-1620969427101-7a2bb6d83273?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  },
-  {
-    value: "technology",
-    label: "Technology",
-    icon: <Laptop className="h-4 w-4 text-blue-500" />,
-    bgImage:
-      "https://plus.unsplash.com/premium_photo-1661963874418-df1110ee39c1?q=80&w=1086&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  },
-  {
-    value: "sports",
-    label: "Sports",
-    icon: <Dumbbell className="h-4 w-4 text-orange-500" />,
-    bgImage:
-      "https://images.unsplash.com/photo-1556817411-31ae72fa3ea0?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  },
-  {
-    value: "entertainment",
-    label: "Entertainment",
-    icon: <Film className="h-4 w-4 text-pink-500" />,
-    bgImage:
-      "https://images.unsplash.com/photo-1470020618177-f49a96241ae7?q=80&w=688&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  },
-  {
-    value: "business",
-    label: "Business",
-    icon: <Briefcase className="h-4 w-4 text-indigo-500" />,
-    bgImage:
-      "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&h=600&fit=crop&crop=entropy&auto=format&q=80",
-  },
-];
 
 interface QuizApprovalTableProps {
   initialData: QuizApproval[];
@@ -142,172 +49,6 @@ interface QuizApprovalTableProps {
   searchQuery: string;
   categories: string[];
   categoryFilter: string;
-}
-
-interface QuizCardProps {
-  quiz: QuizApproval;
-  onApprove: (id: string, title: string) => void;
-  onReject: (id: string, title: string) => void;
-}
-
-function QuizCard({ quiz, onApprove, onReject }: QuizCardProps) {
-  const router = useRouter();
-  const questionsCount = Array.isArray(quiz.questions)
-    ? quiz.questions.length
-    : 0;
-
-  // Logic to determine cover image
-  let coverUrl = quiz.cover_image || quiz.image_url;
-  if (!coverUrl) {
-    const categoryLower = (quiz.category || "general").toLowerCase();
-    const config =
-      CATEGORY_CONFIG.find((c) => c.value === categoryLower) ||
-      CATEGORY_CONFIG.find((c) => c.value === "general");
-    coverUrl = config?.bgImage || "";
-  }
-  const creatorInitials = (quiz.creator?.fullname || "?")
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
-  const handleCardClick = () => {
-    router.push(`/quiz-approval/${quiz.id}`);
-  };
-
-  return (
-    <div
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl hover:border-primary/50 cursor-pointer"
-      onClick={handleCardClick}
-    >
-      {/* Cover Image */}
-      <div className="relative h-32 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent overflow-hidden">
-        {coverUrl && (
-          <>
-            <img
-              src={coverUrl}
-              alt={quiz.title}
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/40" />
-          </>
-        )}
-        {/* Category & Status Badges */}
-        <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-          <Badge
-            variant="outline"
-            className="text-[10px] font-semibold px-2 py-0.5 bg-black/60 text-white border-white/20"
-          >
-            {quiz.category?.toUpperCase() || "UNCATEGORIZED"}
-          </Badge>
-          <Badge
-            variant="outline"
-            className="text-[10px] font-semibold px-2 py-0.5 bg-yellow-500/90 text-white border-yellow-500"
-          >
-            PENDING
-          </Badge>
-        </div>
-
-        {/* Questions Count */}
-        <div className="absolute bottom-3 right-3">
-          <Badge
-            variant="secondary"
-            className="gap-1 bg-black/50 text-white border-0"
-          >
-            <FileQuestion className="h-3 w-3" />
-            {questionsCount} Questions
-          </Badge>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 p-4 space-y-3">
-        {/* Title */}
-        <h3
-          className="font-bold text-base text-foreground line-clamp-2"
-          title={quiz.title}
-        >
-          {quiz.title}
-        </h3>
-
-        {/* Creator Info */}
-        <Link
-          href={`/users/${quiz.creator?.id}`}
-          className="flex items-center gap-2"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Avatar className="h-8 w-8 border border-border">
-            <AvatarImage
-              src={getAvatarUrl(quiz.creator?.avatar_url)}
-              alt={quiz.creator?.fullname || ""}
-            />
-            <AvatarFallback className="bg-muted text-muted-foreground text-xs font-medium">
-              {creatorInitials}
-            </AvatarFallback>
-          </Avatar>
-          <div className="min-w-0">
-            <p
-              className="text-sm font-medium text-foreground truncate hover:text-primary transition-colors"
-              title={quiz.creator?.fullname || "Unknown"}
-            >
-              {quiz.creator?.fullname || "Unknown"}
-            </p>
-            <p
-              className="text-xs text-muted-foreground truncate"
-              title={`@${quiz.creator?.username || "-"}`}
-            >
-              @{quiz.creator?.username || "-"}
-            </p>
-          </div>
-        </Link>
-      </div>
-
-      {/* Footer */}
-      <div className="px-4 py-3 border-t border-border/50 bg-muted/30">
-        <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
-          <div className="flex items-center gap-1.5">
-            <Calendar className="h-3.5 w-3.5" />
-            <span>
-              {quiz.created_at
-                ? format(new Date(quiz.created_at), "d MMM yyyy")
-                : "-"}
-            </span>
-          </div>
-          <span className="uppercase text-[10px] font-medium">
-            {quiz.language || "ID"}
-          </span>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-2">
-          <Button
-            className="flex-1 gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-medium cursor-pointer shadow-sm hover:shadow-md transition-all duration-200"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onApprove(quiz.id, quiz.title);
-            }}
-          >
-            <Check className="h-4 w-4" />
-            Approve
-          </Button>
-          <Button
-            variant="outline"
-            className="flex-1 gap-1.5 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-400 font-medium cursor-pointer transition-all duration-200 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950 dark:hover:text-red-300"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onReject(quiz.id, quiz.title);
-            }}
-          >
-            <X className="h-4 w-4" />
-            Reject
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 export function QuizApprovalTable({
@@ -439,6 +180,122 @@ export function QuizApprovalTable({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const columns = [
+    {
+      key: "title",
+      label: "Title",
+      render: (value: unknown) => (
+        <span
+          className="block max-w-[250px] truncate font-medium"
+          title={value as string}
+        >
+          {value as string}
+        </span>
+      ),
+    },
+    {
+      key: "creator",
+      label: "Creator",
+      render: (value: unknown) => {
+        const creator = value as {
+          id: string;
+          username: string;
+          fullname: string;
+          avatar_url: string;
+        } | null;
+        if (!creator) return <span className="text-muted-foreground">-</span>;
+        return (
+          <Link
+            href={`/users/${creator.id}`}
+            className="flex flex-col min-w-0 group"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span
+              className="text-sm font-medium truncate max-w-[120px] group-hover:text-primary transition-colors"
+              title={creator.fullname}
+            >
+              {creator.fullname}
+            </span>
+            <span
+              className="text-xs text-muted-foreground truncate max-w-[120px]"
+              title={creator.username}
+            >
+              @{creator.username}
+            </span>
+          </Link>
+        );
+      },
+    },
+    {
+      key: "category",
+      label: "Category",
+      render: (value: unknown) => {
+        const category = capitalizeFirst(value as string);
+        return (
+          <Badge variant="secondary" className="text-xs">
+            {category || "-"}
+          </Badge>
+        );
+      },
+    },
+    { key: "questions", label: "Questions" },
+    {
+      key: "language",
+      label: "Language",
+      render: (value: unknown) => (
+        <span className="uppercase text-xs font-medium">
+          {(value as string) || "ID"}
+        </span>
+      ),
+    },
+    { key: "createdAt", label: "Created" },
+    {
+      key: "actions",
+      label: "Actions",
+      render: (_value: unknown, row: Record<string, unknown>) => {
+        const id = row.id as string;
+        const title = row.title as string;
+        return (
+          <div
+            className="flex items-center gap-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Button
+              size="sm"
+              className="h-8 gap-1 bg-emerald-500 hover:bg-emerald-600 text-white"
+              onClick={() => handleApprove(id, title)}
+            >
+              <Check className="h-3.5 w-3.5" />
+              Approve
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 gap-1 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
+              onClick={() => handleReject(id, title)}
+            >
+              <X className="h-3.5 w-3.5" />
+              Reject
+            </Button>
+          </div>
+        );
+      },
+    },
+  ];
+
+  const tableData = initialData.map((quiz) => ({
+    id: quiz.id,
+    title: quiz.title,
+    creator: quiz.creator,
+    category: quiz.category ?? "-",
+    questions: Array.isArray(quiz.questions) ? quiz.questions.length : 0,
+    language: quiz.language ?? "ID",
+    createdAt: quiz.created_at
+      ? format(new Date(quiz.created_at), "dd MMM yyyy")
+      : "-",
+    actions: null,
+  }));
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -487,21 +344,19 @@ export function QuizApprovalTable({
         </div>
       </div>
 
-      {/* Quiz Cards Grid */}
+      {/* Table */}
       <div className={isPending ? "opacity-60 pointer-events-none" : ""}>
         {initialData.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {initialData.map((quiz) => (
-              <QuizCard
-                key={quiz.id}
-                quiz={quiz}
-                onApprove={handleApprove}
-                onReject={handleReject}
-              />
-            ))}
-          </div>
+          <DataTable
+            columns={columns}
+            data={tableData as Record<string, unknown>[]}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            onRowClick={(row) => router.push(`/quiz-approval/${row.id}`)}
+          />
         ) : (
-          <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-border rounded-lg">
+          <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-border rounded-xl bg-card">
             <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
               <FileQuestion className="h-6 w-6 text-muted-foreground" />
             </div>
@@ -517,74 +372,7 @@ export function QuizApprovalTable({
         )}
       </div>
 
-      {/* Pagination */}
-      {totalPages > 0 && (
-        <div className="flex items-center justify-between rounded-xl border border-border bg-card px-6 py-4">
-          <div className="text-sm text-muted-foreground">
-            Page{" "}
-            <span className="font-medium text-foreground">{currentPage}</span>{" "}
-            of{" "}
-            <span className="font-medium text-foreground">
-              {totalPages || 1}
-            </span>
-          </div>
-
-          {totalPages > 1 && (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1 || isPending}
-                className={cn(
-                  "px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors",
-                  currentPage === 1 || isPending
-                    ? "border-border bg-secondary/50 text-muted-foreground cursor-not-allowed"
-                    : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer"
-                )}
-              >
-                Previous
-              </button>
-
-              <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                  let page = i + 1;
-                  if (totalPages > 5) {
-                    if (currentPage > 3) page = currentPage - 2 + i;
-                    if (currentPage > totalPages - 2) page = totalPages - 4 + i;
-                  }
-                  return (
-                    <button
-                      key={page}
-                      onClick={() => handlePageChange(page)}
-                      disabled={isPending}
-                      className={cn(
-                        "w-9 h-9 text-sm font-medium rounded-lg border transition-colors cursor-pointer",
-                        currentPage === page
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border bg-card text-foreground hover:bg-secondary/80"
-                      )}
-                    >
-                      {page}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages || isPending}
-                className={cn(
-                  "px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors",
-                  currentPage === totalPages || isPending
-                    ? "border-border bg-secondary/50 text-muted-foreground cursor-not-allowed"
-                    : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer"
-                )}
-              >
-                Next
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+      {/* Approve Dialog */}
       <Dialog
         open={approveDialog.open}
         onOpenChange={(open) => setApproveDialog((prev) => ({ ...prev, open }))}
@@ -614,6 +402,8 @@ export function QuizApprovalTable({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Reject Dialog */}
       <Dialog
         open={rejectDialog.open}
         onOpenChange={(open) => setRejectDialog((prev) => ({ ...prev, open }))}

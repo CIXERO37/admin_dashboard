@@ -11,6 +11,7 @@ import {
 import { StatCard } from "@/components/dashboard/stat-card";
 import { LocationChart } from "@/components/dashboard/location-chart";
 import { DemographicChart } from "@/components/dashboard/demographic-chart";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { useProfiles } from "@/hooks/useProfiles";
 import { Users, Shield, UserCheck, UserX } from "lucide-react";
@@ -83,30 +84,41 @@ export default function AdministratorDashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="User"
-          value={loading ? 0 : userCount}
-          icon={Users}
-          href="/users?role=user"
-        />
-        <StatCard
-          title="Admin"
-          value={loading ? 0 : adminCount}
-          icon={Shield}
-          href="/users?role=admin"
-        />
-        <StatCard
-          title="Active"
-          value={loading ? 0 : activeCount}
-          icon={UserCheck}
-          href="/users?status=active"
-        />
-        <StatCard
-          title="Blocked"
-          value={loading ? 0 : blockedCount}
-          icon={UserX}
-          href="/users?status=blocked"
-        />
+        {loading ? (
+          <>
+            <Skeleton className="h-32 rounded-xl" />
+            <Skeleton className="h-32 rounded-xl" />
+            <Skeleton className="h-32 rounded-xl" />
+            <Skeleton className="h-32 rounded-xl" />
+          </>
+        ) : (
+          <>
+            <StatCard
+              title="User"
+              value={userCount}
+              icon={Users}
+              href="/users?role=user"
+            />
+            <StatCard
+              title="Admin"
+              value={adminCount}
+              icon={Shield}
+              href="/users?role=admin"
+            />
+            <StatCard
+              title="Active"
+              value={activeCount}
+              icon={UserCheck}
+              href="/users?status=active"
+            />
+            <StatCard
+              title="Blocked"
+              value={blockedCount}
+              icon={UserX}
+              href="/users?status=blocked"
+            />
+          </>
+        )}
       </div>
 
       {/* Location Charts */}
