@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { DataTable } from "@/components/dashboard/data-table";
+import { useTranslation } from "@/lib/i18n";
 
 // Dummy Data matching the design
 const SUBSCRIPTIONS = [
@@ -106,36 +107,37 @@ const SUBSCRIPTIONS = [
   },
 ];
 
-const STATS = [
-  {
-    title: "Total Active Subscriptions",
-    value: "1,284",
-    change: "+12%",
-    changeType: "positive",
-    description: "vs. previous month",
-    icon: Users,
-  },
-  {
-    title: "Monthly Recurring Revenue",
-    value: "$48,290",
-    change: "+5.4%",
-    changeType: "positive",
-    description: "vs. previous month",
-    icon: CreditCard,
-  },
-  {
-    title: "Churn Rate",
-    value: "2.1%",
-    change: "+0.2%",
-    changeType: "negative",
-    description: "vs. previous month",
-    icon: TrendingDown,
-  },
-];
-
 export default function SubscriptionsPage() {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+
+  const STATS = [
+    {
+      title: t("subscriptions.active_subscriptions"),
+      value: "1,284",
+      change: "+12%",
+      changeType: "positive",
+      description: t("subscriptions.from_last_month"),
+      icon: Users,
+    },
+    {
+      title: t("subscriptions.total_revenue"),
+      value: "$48,290",
+      change: "+5.4%",
+      changeType: "positive",
+      description: t("subscriptions.from_last_month"),
+      icon: CreditCard,
+    },
+    {
+      title: t("subscriptions.churn_rate"),
+      value: "2.1%",
+      change: "+0.2%",
+      changeType: "negative",
+      description: t("subscriptions.from_last_month"),
+      icon: TrendingDown,
+    },
+  ];
 
   const getPlanBadgeColor = (plan: string) => {
     switch (plan.toLowerCase()) {
@@ -155,7 +157,7 @@ export default function SubscriptionsPage() {
   const columns = [
     {
       key: "customer",
-      label: "CUSTOMER",
+      label: t("table.customer"),
       render: (value: unknown) => {
         const customer = value as { name: string; email: string };
         return (
@@ -172,7 +174,7 @@ export default function SubscriptionsPage() {
     },
     {
       key: "plan",
-      label: "PLAN",
+      label: t("table.plan"),
       render: (value: unknown) => {
         const plan = value as string;
         return (
@@ -183,14 +185,14 @@ export default function SubscriptionsPage() {
               getPlanBadgeColor(plan)
             )}
           >
-            {plan}
+            {t(`plan.${plan.toLowerCase()}`)}
           </Badge>
         );
       },
     },
     {
       key: "amount",
-      label: "AMOUNT",
+      label: t("table.amount"),
       render: (value: unknown) => (
         <span className="font-medium text-sm text-foreground">
           {value as string}
@@ -199,7 +201,7 @@ export default function SubscriptionsPage() {
     },
     {
       key: "status",
-      label: "STATUS",
+      label: t("table.status"),
       render: (value: unknown) => {
         const status = value as string;
         return (
@@ -211,21 +213,21 @@ export default function SubscriptionsPage() {
                 : "bg-red-900/40 text-red-500 hover:bg-red-900/60 border border-red-900/50"
             )}
           >
-            {status}
+            {t(`status.${status.toLowerCase()}`)}
           </Badge>
         );
       },
     },
     {
       key: "nextBilling",
-      label: "NEXT BILLING",
+      label: t("table.next_billing"),
       render: (value: unknown) => (
         <span className="text-muted-foreground text-sm">{value as string}</span>
       ),
     },
     {
       key: "actions",
-      label: "ACTIONS",
+      label: t("table.actions"),
       render: () => {
         return (
           <div className="text-right">
@@ -240,16 +242,16 @@ export default function SubscriptionsPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuLabel>{t("table.actions")}</DropdownMenuLabel>
                 <DropdownMenuItem className="cursor-pointer">
-                  Permissions
+                  {t("action.permissions")}
                 </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-pointer">
-                  Change Plan
+                  {t("action.change_plan")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-red-500 cursor-pointer">
-                  Cancel Subscription
+                  {t("action.cancel_subscription")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -273,12 +275,12 @@ export default function SubscriptionsPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Subscriptions
+          {t("subscriptions.title")}
         </h1>
         <div className="flex items-center gap-3">
           <div className="relative">
             <Input
-              placeholder="Search subscriptions..."
+              placeholder={t("subscriptions.search")}
               className="pr-10 w-64 bg-background border-border"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}

@@ -14,46 +14,57 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "@/lib/i18n";
 
 export default function SettingsDashboardPage() {
+  const { t } = useTranslation();
+
   const systemStatus = [
-    { name: "Email Service", status: "Active", icon: CheckCircle },
-    { name: "Payment Gateway", status: "Active", icon: CheckCircle },
-    { name: "Storage", status: "Active", icon: CheckCircle },
-    { name: "API Rate Limit", status: "Warning", icon: AlertTriangle },
+    { name: t("settings.service_email"), status: "Active", icon: CheckCircle },
+    {
+      name: t("settings.service_payment"),
+      status: "Active",
+      icon: CheckCircle,
+    },
+    {
+      name: t("settings.service_storage"),
+      status: "Active",
+      icon: CheckCircle,
+    },
+    { name: t("settings.service_api"), status: "Warning", icon: AlertTriangle },
   ];
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-foreground">
-          Settings Dashboard
+          {t("settings.title")}
         </h1>
         <p className="mt-1 text-muted-foreground">
-          System configuration and preferences
+          {t("settings.description")}
         </p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <StatCard
-          title="Profile Completion"
+          title={t("settings.profile_completion")}
           value="85%"
-          change="Update profile"
+          change={t("settings.update_profile")}
           changeType="neutral"
           icon={User}
         />
         <StatCard
-          title="Security Score"
+          title={t("settings.security_score")}
           value="Good"
-          change="2FA enabled"
+          change={t("settings.2fa_enabled")}
           changeType="increase"
           icon={Shield}
         />
         <StatCard
-          title="System Health"
+          title={t("settings.system_health")}
           value="98%"
-          change="All systems operational"
+          change={t("settings.all_operational")}
           changeType="increase"
           icon={Settings}
         />
@@ -62,7 +73,9 @@ export default function SettingsDashboardPage() {
       {/* System Status */}
       <Card className="border-border bg-card">
         <CardHeader>
-          <CardTitle className="text-foreground">System Status</CardTitle>
+          <CardTitle className="text-foreground">
+            {t("settings.system_status")}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2">
@@ -94,7 +107,9 @@ export default function SettingsDashboardPage() {
                         : "bg-[var(--warning)]/20 text-[var(--warning)] border-[var(--warning)]/30"
                     }
                   >
-                    {item.status}
+                    {item.status === "Active"
+                      ? t("stats.active")
+                      : t("settings.status.warning") || item.status}
                   </Badge>
                 </div>
               );
@@ -106,25 +121,25 @@ export default function SettingsDashboardPage() {
       {/* Quick Access */}
       <div>
         <SectionHeader
-          title="Settings Modules"
-          description="Configure your system"
+          title={t("settings.modules_title")}
+          description={t("settings.modules_desc")}
         />
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <ActionCard
-            title="Profile Settings"
-            description="Update your profile information"
+            title={t("settings.profile")}
+            description={t("settings.profile_desc")}
             href="/settings/profile"
             icon={User}
           />
           <ActionCard
-            title="Appearance"
-            description="Customize the appearance of the app"
+            title={t("settings.appearance")}
+            description={t("settings.appearance_desc")}
             href="/appearance"
             icon={Palette}
           />
           <ActionCard
-            title="Security Settings"
-            description="Manage security and authentication"
+            title={t("settings.security")}
+            description={t("settings.security_desc")}
             href="/settings/security"
             icon={Shield}
           />

@@ -31,6 +31,8 @@ import {
   permanentDeleteUserAction,
   type DeletedUser,
 } from "./actions";
+import { useTranslation } from "@/lib/i18n";
+import { id as idLocale } from "date-fns/locale";
 
 interface TrashUserTableProps {
   initialData: DeletedUser[];
@@ -47,9 +49,9 @@ function getDaysUntilPermanentDelete(deletedAt: string): number {
   return Math.max(0, diffDays);
 }
 
-function formatDeletedDate(dateStr: string): string {
+function formatDeletedDate(dateStr: string, localeCode: string): string {
   const date = new Date(dateStr);
-  return date.toLocaleDateString("en-US", {
+  return date.toLocaleDateString(localeCode === "id" ? "id-ID" : "en-US", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -73,6 +75,7 @@ const roleColors: Record<string, string> = {
 export function TrashUserTable({ initialData }: TrashUserTableProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { t, locale } = useTranslation();
   const [isPending, startTransition] = useTransition();
   const [restoreDialog, setRestoreDialog] = useState<{
     open: boolean;
@@ -100,7 +103,7 @@ export function TrashUserTable({ initialData }: TrashUserTableProps) {
       toast({ title: "Error", description: error, variant: "destructive" });
     } else {
       toast({
-        title: "User restored",
+        title: t("trash.restore_success"),
         description: `"${
           restoreDialog.item.fullname || restoreDialog.item.username
         }" has been restored.`,
@@ -111,7 +114,10 @@ export function TrashUserTable({ initialData }: TrashUserTableProps) {
   };
 
   const handlePermanentDelete = async () => {
-    if (!deleteDialog.item || deleteDialog.confirmText !== "Delete Permanently")
+    if (
+      !deleteDialog.item ||
+      deleteDialog.confirmText !== t("trash.delete_confirm_text")
+    )
       return;
 
     const { error } = await permanentDeleteUserAction(deleteDialog.item.id);
@@ -120,7 +126,7 @@ export function TrashUserTable({ initialData }: TrashUserTableProps) {
       toast({ title: "Error", description: error, variant: "destructive" });
     } else {
       toast({
-        title: "User permanently deleted",
+        title: t("trash.delete_success"),
         description: `"${
           deleteDialog.item.fullname || deleteDialog.item.username
         }" has been permanently deleted.`,
@@ -137,9 +143,9 @@ export function TrashUserTable({ initialData }: TrashUserTableProps) {
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
           <User className="h-6 w-6 text-muted-foreground" />
         </div>
-        <h3 className="mt-4 text-lg font-medium">No users in trash</h3>
+        <h3 className="mt-4 text-lg font-medium">{t("trash.no_users")}</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          Deleted users will appear here
+          {t("trash.users_desc")}
         </p>
       </div>
     );
@@ -148,7 +154,7 @@ export function TrashUserTable({ initialData }: TrashUserTableProps) {
   const columns = [
     {
       key: "user",
-      label: "User",
+      label: t("nav.users"),
       render: (_: unknown, row: Record<string, unknown>) => {
         const name =
           (row.fullname as string) || (row.username as string) || "Unknown";
@@ -170,7 +176,7 @@ export function TrashUserTable({ initialData }: TrashUserTableProps) {
     },
     {
       key: "role",
-      label: "Role",
+      label: t("table.role"),
       render: (value: unknown) => {
         const role = (value as string) || "user";
         return (
@@ -185,16 +191,16 @@ export function TrashUserTable({ initialData }: TrashUserTableProps) {
     },
     {
       key: "deleted_at",
-      label: "Deleted",
+      label: t("trash.deleted_at"),
       render: (value: unknown) => (
         <span className="text-sm text-muted-foreground">
-          {formatDeletedDate(value as string)}
+          {formatDeletedDate(value as string, locale)}
         </span>
       ),
     },
     {
       key: "time_left",
-      label: "Time Left",
+      label: t("trash.time_left"),
       render: (_: unknown, row: Record<string, unknown>) => {
         const daysLeft = getDaysUntilPermanentDelete(row.deleted_at as string);
         return (
@@ -207,14 +213,14 @@ export function TrashUserTable({ initialData }: TrashUserTableProps) {
             }
           >
             <Clock className="mr-1 h-3 w-3" />
-            {daysLeft} days left
+            {daysLeft} {t("trash.days_left")}
           </Badge>
         );
       },
     },
     {
       key: "action",
-      label: "Action",
+      label: t("table.actions"),
       render: (_: unknown, row: Record<string, unknown>) => {
         const item = initialData.find((i) => i.id === row.id);
         return (
@@ -230,7 +236,7 @@ export function TrashUserTable({ initialData }: TrashUserTableProps) {
                 className="cursor-pointer"
               >
                 <RotateCcw className="h-4 w-4 mr-2" />
-                Restore
+                {t("action.restore")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -240,7 +246,7 @@ export function TrashUserTable({ initialData }: TrashUserTableProps) {
                 className="cursor-pointer text-destructive focus:text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Delete Permanently
+                {t("trash.delete_permanent_title")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -277,11 +283,10 @@ export function TrashUserTable({ initialData }: TrashUserTableProps) {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Restore User</DialogTitle>
+            <DialogTitle>{t("trash.restore_title")}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to restore "
+              {t("trash.restore_desc")} "
               {restoreDialog.item?.fullname || restoreDialog.item?.username}"?
-              The user will be able to login again.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -289,11 +294,11 @@ export function TrashUserTable({ initialData }: TrashUserTableProps) {
               variant="outline"
               onClick={() => setRestoreDialog({ open: false, item: null })}
             >
-              Cancel
+              {t("action.cancel")}
             </Button>
             <Button onClick={handleRestore} disabled={isPending}>
               <RotateCcw className="mr-2 h-4 w-4" />
-              Restore
+              {t("action.restore")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -309,20 +314,19 @@ export function TrashUserTable({ initialData }: TrashUserTableProps) {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-destructive">
-              Permanent Delete
+              {t("trash.delete_permanent_title")}
             </DialogTitle>
             <DialogDescription>
-              Are you sure you want to permanently delete "
-              {deleteDialog.item?.fullname || deleteDialog.item?.username}"? All
-              user data including created quizzes will be deleted. This action
-              cannot be undone.
+              {t("trash.delete_permanent_desc")}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-4">
             <Label htmlFor="confirmDelete">
-              Type{" "}
-              <strong className="text-destructive">Delete Permanently</strong>{" "}
-              to confirm
+              {t("trash.type_confirm")}{" "}
+              <strong className="text-destructive">
+                {t("trash.delete_confirm_text")}
+              </strong>{" "}
+              {t("trash.to_confirm")}
             </Label>
             <Input
               id="confirmDelete"
@@ -333,7 +337,7 @@ export function TrashUserTable({ initialData }: TrashUserTableProps) {
                   confirmText: e.target.value,
                 }))
               }
-              placeholder="Type 'Delete Permanently' here"
+              placeholder={t("trash.delete_confirm_text")}
             />
           </div>
           <DialogFooter>
@@ -347,16 +351,17 @@ export function TrashUserTable({ initialData }: TrashUserTableProps) {
                 }))
               }
             >
-              Cancel
+              {t("action.cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={handlePermanentDelete}
               disabled={
-                deleteDialog.confirmText !== "Delete Permanently" || isPending
+                deleteDialog.confirmText !== t("trash.delete_confirm_text") ||
+                isPending
               }
             >
-              Delete Permanently
+              {t("trash.delete_permanent_title")}
             </Button>
           </DialogFooter>
         </DialogContent>

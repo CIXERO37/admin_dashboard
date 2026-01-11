@@ -6,6 +6,7 @@ import { SectionHeader } from "@/components/dashboard/section-header";
 import { DataTable } from "@/components/dashboard/data-table";
 import { revenueData } from "@/lib/dummy-data";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
+import { useTranslation } from "@/lib/i18n";
 import {
   Users,
   ShieldCheck,
@@ -30,13 +31,14 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function GlobalDashboardPage() {
+  const { t } = useTranslation();
   const { stats, recentActivity, userGrowthData, loading } =
     useDashboardStats();
 
   const activityColumns = [
-    { key: "action", label: "Action" },
-    { key: "user", label: "User" },
-    { key: "time", label: "Time" },
+    { key: "action", label: t("table.actions") },
+    { key: "user", label: t("stats.users") },
+    { key: "time", label: t("table.created") },
     {
       key: "type",
       label: "Type",
@@ -64,7 +66,9 @@ export default function GlobalDashboardPage() {
     <div className="space-y-8">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Global Dashboard</h1>
+        <h1 className="text-3xl font-bold text-foreground">
+          {t("page.global_dashboard")}
+        </h1>
       </div>
 
       {/* Stats Grid */}
@@ -79,24 +83,24 @@ export default function GlobalDashboardPage() {
         ) : (
           <>
             <StatCard
-              title="Users"
+              title={t("stats.users")}
               value={stats.totalUsers.toLocaleString("id-ID")}
               icon={Users}
             />
             <StatCard
-              title="Admins"
+              title={t("stats.admins")}
               value={stats.totalAdmins.toLocaleString("id-ID")}
               icon={ShieldCheck}
             />
             <StatCard
-              title="Quizzes"
+              title={t("stats.quizzes")}
               value={stats.totalQuizzes.toLocaleString("id-ID")}
               icon={FileQuestion}
             />
             <StatCard
-              title="Reports"
+              title={t("stats.reports")}
               value={stats.pendingReports.toLocaleString("id-ID")}
-              description="pending"
+              description={t("stats.pending")}
               icon={AlertTriangle}
             />
           </>
@@ -107,7 +111,9 @@ export default function GlobalDashboardPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="border-border bg-card">
           <CardHeader>
-            <CardTitle className="text-foreground">Revenue Overview</CardTitle>
+            <CardTitle className="text-foreground">
+              {t("dashboard.revenue_overview")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -154,7 +160,9 @@ export default function GlobalDashboardPage() {
 
         <Card className="border-border bg-card">
           <CardHeader>
-            <CardTitle className="text-foreground">User Activity</CardTitle>
+            <CardTitle className="text-foreground">
+              {t("dashboard.user_activity")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -191,42 +199,48 @@ export default function GlobalDashboardPage() {
       {/* Quick Access Cards */}
       <div>
         <SectionHeader
-          title="Quick Access"
-          description="Navigate to different modules"
+          title={t("dashboard.quick_access")}
+          description={t("dashboard.quick_access_desc")}
         />
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <ActionCard
-            title="Support Center"
-            description="Manage user reports and quiz issues"
+            title={t("dashboard.support_center")}
+            description={t("dashboard.support_center_desc")}
             href="/support"
             icon={Headphones}
-            stats={loading ? "..." : `${stats.pendingReports} pending`}
+            stats={
+              loading ? "..." : `${stats.pendingReports} ${t("stats.pending")}`
+            }
           />
           <ActionCard
-            title="Users"
-            description="Manage users and admins"
+            title={t("stats.users")}
+            description={t("dashboard.users_desc")}
             href="/administrator/user"
             icon={Users}
             stats={
               loading
                 ? "..."
-                : `${stats.totalUsers.toLocaleString("id-ID")} users`
+                : `${stats.totalUsers.toLocaleString("id-ID")} ${t(
+                    "stats.users"
+                  ).toLowerCase()}`
             }
           />
           <ActionCard
-            title="Master Data"
-            description="Manage quizzes, countries, and provinces"
+            title={t("nav.master_data")}
+            description={t("dashboard.master_data_desc")}
             href="/master"
             icon={Database}
             stats={
               loading
                 ? "..."
-                : `${stats.totalQuizzes.toLocaleString("id-ID")} quizzes`
+                : `${stats.totalQuizzes.toLocaleString("id-ID")} ${t(
+                    "stats.quizzes"
+                  ).toLowerCase()}`
             }
           />
           <ActionCard
-            title="Settings"
-            description="Configure system preferences"
+            title={t("nav.settings")}
+            description={t("dashboard.settings_desc")}
             href="/settings"
             icon={Settings}
           />
@@ -236,8 +250,8 @@ export default function GlobalDashboardPage() {
       {/* Recent Activity */}
       <div>
         <SectionHeader
-          title="Recent Activity"
-          description="Latest actions across the platform"
+          title={t("dashboard.recent_activity")}
+          description={t("dashboard.recent_activity_desc")}
         />
         <div className="mt-4">
           {loading ? (

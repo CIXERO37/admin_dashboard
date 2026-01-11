@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/chart";
 
 import { isSameYear, subYears } from "date-fns";
+import { useTranslation } from "@/lib/i18n";
 
 interface LocationChartProps {
   profiles: Profile[];
@@ -27,13 +28,6 @@ interface ProfileWithLocation extends Profile {
   country?: { name: string } | null;
   created_at?: string | null;
 }
-
-const chartConfig = {
-  count: {
-    label: "Users",
-    color: "var(--chart-1)",
-  },
-} satisfies ChartConfig;
 
 const filterProfiles = (profiles: ProfileWithLocation[], range: string) => {
   if (!profiles) return [];
@@ -61,6 +55,15 @@ export function LocationChart({
   loading,
   timeRange,
 }: LocationChartProps) {
+  const { t } = useTranslation();
+
+  const chartConfig = {
+    count: {
+      label: t("stats.user"),
+      color: "var(--chart-1)",
+    },
+  } satisfies ChartConfig;
+
   const filteredData = useMemo(() => {
     return filterProfiles(profiles as ProfileWithLocation[], timeRange);
   }, [profiles, timeRange]);
@@ -122,7 +125,7 @@ export function LocationChart({
       {/* Top Countries Chart */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle>Top Countries</CardTitle>
+          <CardTitle>{t("admin.top_countries")}</CardTitle>
         </CardHeader>
         <CardContent>
           {topCountries.length > 0 ? (
@@ -164,7 +167,7 @@ export function LocationChart({
           ) : (
             <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
               <MapPinOff className="h-10 w-10 opacity-20" />
-              <p className="text-sm">No country data available</p>
+              <p className="text-sm">{t("admin.no_data_country")}</p>
             </div>
           )}
         </CardContent>
@@ -173,7 +176,7 @@ export function LocationChart({
       {/* Top States Chart */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle>Top States</CardTitle>
+          <CardTitle>{t("admin.top_states")}</CardTitle>
         </CardHeader>
         <CardContent>
           {topStates.length > 0 ? (
@@ -215,7 +218,7 @@ export function LocationChart({
           ) : (
             <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
               <MapPinOff className="h-10 w-10 opacity-20" />
-              <p className="text-sm">No state data available</p>
+              <p className="text-sm">{t("admin.no_data_state")}</p>
             </div>
           )}
         </CardContent>
@@ -224,7 +227,7 @@ export function LocationChart({
       {/* Top Cities Chart */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle>Top Cities</CardTitle>
+          <CardTitle>{t("admin.top_cities")}</CardTitle>
         </CardHeader>
         <CardContent>
           {topCities.length > 0 ? (
@@ -266,7 +269,7 @@ export function LocationChart({
           ) : (
             <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
               <MapPinOff className="h-10 w-10 opacity-20" />
-              <p className="text-sm">No city data available</p>
+              <p className="text-sm">{t("admin.no_data_city")}</p>
             </div>
           )}
         </CardContent>

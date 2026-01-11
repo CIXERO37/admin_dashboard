@@ -10,6 +10,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { useTranslation } from "@/lib/i18n";
 
 interface DemographicChartProps {
   profiles: Profile[];
@@ -23,33 +24,6 @@ interface ProfileWithDemographics extends Profile {
   birthdate?: string | null;
 }
 
-const genderConfig = {
-  male: {
-    label: "Male",
-    color: "var(--chart-1)",
-  },
-  female: {
-    label: "Female",
-    color: "var(--chart-2)",
-  },
-  other: {
-    label: "Other",
-    color: "var(--chart-3)",
-  },
-} satisfies ChartConfig;
-
-const gradeConfig = {
-  count: {
-    label: "Students",
-  },
-  // We will dynamically assign colors for grades if needed, or use a palette
-  "grade-1": { label: "1", color: "var(--chart-1)" },
-  "grade-2": { label: "2", color: "var(--chart-2)" },
-  "grade-3": { label: "3", color: "var(--chart-3)" },
-  "grade-4": { label: "4", color: "var(--chart-4)" },
-  "grade-5": { label: "5", color: "var(--chart-5)" },
-} satisfies ChartConfig; // Simplified config, will map dynamically in render if needed
-
 const COLORS = [
   "var(--chart-1)",
   "var(--chart-2)",
@@ -58,18 +32,47 @@ const COLORS = [
   "var(--chart-5)",
 ];
 
-const ageConfig = {
-  count: { label: "Age" },
-  "0-12": { label: "0-12", color: "var(--chart-1)" },
-  "13-18": { label: "13-18", color: "var(--chart-2)" },
-  "19-24": { label: "19-24", color: "var(--chart-3)" },
-  "25-40": { label: "25-40", color: "var(--chart-4)" },
-  "41-60": { label: "41-60", color: "var(--chart-5)" },
-  "61+": { label: "61+", color: "var(--chart-1)" }, // Reuse color 1
-  Unknown: { label: "Unknown", color: "var(--muted)" },
-} satisfies ChartConfig;
-
 export function DemographicChart({ profiles, loading }: DemographicChartProps) {
+  const { t } = useTranslation();
+
+  const genderConfig = {
+    male: {
+      label: t("admin.male"),
+      color: "var(--chart-1)",
+    },
+    female: {
+      label: t("admin.female"),
+      color: "var(--chart-2)",
+    },
+    other: {
+      label: t("admin.other"),
+      color: "var(--chart-3)",
+    },
+  } satisfies ChartConfig;
+
+  const gradeConfig = {
+    count: {
+      label: t("admin.students"),
+    },
+    // We will dynamically assign colors for grades if needed, or use a palette
+    "grade-1": { label: "1", color: "var(--chart-1)" },
+    "grade-2": { label: "2", color: "var(--chart-2)" },
+    "grade-3": { label: "3", color: "var(--chart-3)" },
+    "grade-4": { label: "4", color: "var(--chart-4)" },
+    "grade-5": { label: "5", color: "var(--chart-5)" },
+  } satisfies ChartConfig;
+
+  const ageConfig = {
+    count: { label: t("admin.chart_age") },
+    "0-12": { label: "0-12", color: "var(--chart-1)" },
+    "13-18": { label: "13-18", color: "var(--chart-2)" },
+    "19-24": { label: "19-24", color: "var(--chart-3)" },
+    "25-40": { label: "25-40", color: "var(--chart-4)" },
+    "41-60": { label: "41-60", color: "var(--chart-5)" },
+    "61+": { label: "61+", color: "var(--chart-1)" }, // Reuse color 1
+    Unknown: { label: t("admin.unknown"), color: "var(--muted)" },
+  } satisfies ChartConfig;
+
   if (loading) {
     return (
       <div className="grid gap-4 md:grid-cols-3">
@@ -120,15 +123,28 @@ export function DemographicChart({ profiles, loading }: DemographicChartProps) {
   }
 
   const genderData = Object.entries(genderCounts).map(
-    ([name, value], index) => ({
-      name: name.charAt(0).toUpperCase() + name.slice(1),
-      value,
-      fill: COLORS[index % COLORS.length],
-    })
+    ([name, value], index) => {
+      // Translate gender names if they match keys
+      let displayName = name;
+      if (name.toLowerCase() === "male") displayName = t("admin.male");
+      else if (name.toLowerCase() === "female") displayName = t("admin.female");
+      else if (name.toLowerCase() === "other") displayName = t("admin.other");
+      else if (name === "Unknown") displayName = t("admin.unknown");
+      else displayName = name.charAt(0).toUpperCase() + name.slice(1);
+
+      return {
+        name: displayName,
+        value,
+        fill: COLORS[index % COLORS.length],
+      };
+    }
   );
 
   const gradeData = Object.entries(gradeCounts).map(([name, value], index) => ({
-    name: name.charAt(0).toUpperCase() + name.slice(1),
+    name:
+      name === "Unknown"
+        ? t("admin.unknown")
+        : name.charAt(0).toUpperCase() + name.slice(1),
     value,
     fill: COLORS[index % COLORS.length],
   }));
@@ -141,7 +157,7 @@ export function DemographicChart({ profiles, loading }: DemographicChartProps) {
       return a[0].localeCompare(b[0]);
     })
     .map(([name, value], index) => ({
-      name,
+      name: name === "Unknown" ? t("admin.unknown") : name,
       value,
       fill: COLORS[index % COLORS.length],
     }));
@@ -151,7 +167,7 @@ export function DemographicChart({ profiles, loading }: DemographicChartProps) {
       {/* Age Chart */}
       <Card>
         <CardHeader>
-          <CardTitle>Age</CardTitle>
+          <CardTitle>{t("admin.chart_age")}</CardTitle>
         </CardHeader>
         <CardContent>
           {ageData.length > 0 ? (
@@ -195,7 +211,7 @@ export function DemographicChart({ profiles, loading }: DemographicChartProps) {
           ) : (
             <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
               <UserX className="h-10 w-10 opacity-20" />
-              <p className="text-sm">No age data available</p>
+              <p className="text-sm">{t("admin.no_data_age")}</p>
             </div>
           )}
         </CardContent>
@@ -204,7 +220,7 @@ export function DemographicChart({ profiles, loading }: DemographicChartProps) {
       {/* Gender Chart */}
       <Card>
         <CardHeader>
-          <CardTitle>Gender</CardTitle>
+          <CardTitle>{t("admin.chart_gender")}</CardTitle>
         </CardHeader>
         <CardContent>
           {genderData.length > 0 ? (
@@ -248,7 +264,7 @@ export function DemographicChart({ profiles, loading }: DemographicChartProps) {
           ) : (
             <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
               <UserX className="h-10 w-10 opacity-20" />
-              <p className="text-sm">No gender data available</p>
+              <p className="text-sm">{t("admin.no_data_gender")}</p>
             </div>
           )}
         </CardContent>
@@ -257,7 +273,7 @@ export function DemographicChart({ profiles, loading }: DemographicChartProps) {
       {/* Education Chart */}
       <Card>
         <CardHeader>
-          <CardTitle>Education</CardTitle>
+          <CardTitle>{t("admin.chart_education")}</CardTitle>
         </CardHeader>
         <CardContent>
           {gradeData.length > 0 ? (
@@ -301,7 +317,7 @@ export function DemographicChart({ profiles, loading }: DemographicChartProps) {
           ) : (
             <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
               <UserX className="h-10 w-10 opacity-20" />
-              <p className="text-sm">No education data available</p>
+              <p className="text-sm">{t("admin.no_data_education")}</p>
             </div>
           )}
         </CardContent>

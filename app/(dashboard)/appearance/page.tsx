@@ -7,9 +7,11 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 export default function AppearancePage() {
   const { setTheme, theme } = useTheme();
+  const { t } = useTranslation();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -24,16 +26,16 @@ export default function AppearancePage() {
     <div className="space-y-6">
       <div>
         <h3 className="text-3xl font-bold tracking-tight text-foreground">
-          Appearance
+          {t("appearance.title")}
         </h3>
       </div>
       <Separator />
 
       <div className="space-y-8">
         <div className="space-y-1">
-          <div className="font-medium">Theme</div>
+          <div className="font-medium">{t("appearance.theme")}</div>
           <div className="text-sm text-muted-foreground">
-            Select the theme for the dashboard.
+            {t("appearance.theme_desc")}
           </div>
         </div>
 
@@ -65,7 +67,7 @@ export default function AppearancePage() {
               </div>
             </div>
             <span className="block w-full p-2 text-center font-normal">
-              Light
+              {t("appearance.light")}
             </span>
             {theme === "light" && (
               <div className="absolute top-2 right-2 rounded-full bg-primary p-1 text-primary-foreground">
@@ -101,7 +103,7 @@ export default function AppearancePage() {
               </div>
             </div>
             <span className="block w-full p-2 text-center font-normal">
-              Dark
+              {t("appearance.dark")}
             </span>
             {theme === "dark" && (
               <div className="absolute top-2 right-2 rounded-full bg-primary p-1 text-primary-foreground">
