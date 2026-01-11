@@ -11,19 +11,13 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import type { Quiz, Profile } from "@/types/supabase";
+import { useTranslation } from "@/lib/i18n";
 
 interface MasterStatsChartsProps {
   quizzes: Quiz[];
   profiles: Profile[];
   sessionCounts: Record<string, number>;
 }
-
-const chartConfig = {
-  value: {
-    label: "Count",
-    color: "var(--chart-1)",
-  },
-} satisfies ChartConfig;
 
 // Helper for truncated Y-axis labels with wrapping
 const CustomYAxisTick = (props: any) => {
@@ -80,6 +74,15 @@ export function MasterStatsCharts({
   profiles,
   sessionCounts,
 }: MasterStatsChartsProps) {
+  const { t } = useTranslation();
+
+  const chartConfig = {
+    value: {
+      label: t("stats.count"),
+      color: "var(--chart-1)",
+    },
+  } satisfies ChartConfig;
+
   // 1. Top Quiz Categories
   const categoryData = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -163,7 +166,7 @@ export function MasterStatsCharts({
       {/* Category Chart */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle>Top Categories</CardTitle>
+          <CardTitle>{t("master.top_categories")}</CardTitle>
         </CardHeader>
         <CardContent>
           {categoryData.length > 0 ? (
@@ -203,7 +206,7 @@ export function MasterStatsCharts({
           ) : (
             <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
               <BarChart2 className="h-10 w-10 opacity-20" />
-              <p className="text-sm">No category data available</p>
+              <p className="text-sm">{t("master.no_data_category")}</p>
             </div>
           )}
         </CardContent>
@@ -212,7 +215,7 @@ export function MasterStatsCharts({
       {/* Popular Quiz Chart */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle>Most Played</CardTitle>
+          <CardTitle>{t("master.most_played")}</CardTitle>
         </CardHeader>
         <CardContent>
           {popularData.length > 0 ? (
@@ -252,7 +255,7 @@ export function MasterStatsCharts({
           ) : (
             <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
               <BarChart2 className="h-10 w-10 opacity-20" />
-              <p className="text-sm">No play data available</p>
+              <p className="text-sm">{t("master.no_data_play")}</p>
             </div>
           )}
         </CardContent>
@@ -261,7 +264,7 @@ export function MasterStatsCharts({
       {/* Favorite Quiz Chart */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle>Most Favorited</CardTitle>
+          <CardTitle>{t("master.most_favorited")}</CardTitle>
         </CardHeader>
         <CardContent>
           {favoriteData.length > 0 ? (
@@ -301,7 +304,7 @@ export function MasterStatsCharts({
           ) : (
             <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
               <BarChart2 className="h-10 w-10 opacity-20" />
-              <p className="text-sm">No favorite data available</p>
+              <p className="text-sm">{t("master.no_data_favorite")}</p>
             </div>
           )}
         </CardContent>
@@ -310,7 +313,7 @@ export function MasterStatsCharts({
       {/* Top Creators Chart */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle>Top Creators</CardTitle>
+          <CardTitle>{t("master.top_creators")}</CardTitle>
         </CardHeader>
         <CardContent>
           {creatorData.length > 0 ? (
@@ -350,7 +353,7 @@ export function MasterStatsCharts({
           ) : (
             <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
               <BarChart2 className="h-10 w-10 opacity-20" />
-              <p className="text-sm">No creator data available</p>
+              <p className="text-sm">{t("master.no_data_creator")}</p>
             </div>
           )}
         </CardContent>

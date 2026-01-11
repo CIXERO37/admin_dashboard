@@ -29,6 +29,8 @@ import {
   permanentDeleteQuizAction,
   type DeletedQuiz,
 } from "./actions";
+import { useTranslation } from "@/lib/i18n";
+import { id as idLocale } from "date-fns/locale";
 
 interface TrashQuizTableProps {
   initialData: DeletedQuiz[];
@@ -45,9 +47,9 @@ function getDaysUntilPermanentDelete(deletedAt: string): number {
   return Math.max(0, diffDays);
 }
 
-function formatDeletedDate(dateStr: string): string {
+function formatDeletedDate(dateStr: string, localeCode: string): string {
   const date = new Date(dateStr);
-  return date.toLocaleDateString("en-US", {
+  return date.toLocaleDateString(localeCode === "id" ? "id-ID" : "en-US", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -57,6 +59,7 @@ function formatDeletedDate(dateStr: string): string {
 export function TrashQuizTable({ initialData }: TrashQuizTableProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { t, locale } = useTranslation();
   const [isPending, startTransition] = useTransition();
   const [restoreDialog, setRestoreDialog] = useState<{
     open: boolean;
@@ -84,7 +87,7 @@ export function TrashQuizTable({ initialData }: TrashQuizTableProps) {
       toast({ title: "Error", description: error, variant: "destructive" });
     } else {
       toast({
-        title: "Quiz restored",
+        title: t("trash.restore_success"),
         description: `"${restoreDialog.item.title}" has been restored to Master Data.`,
       });
       startTransition(() => router.refresh());
@@ -93,7 +96,10 @@ export function TrashQuizTable({ initialData }: TrashQuizTableProps) {
   };
 
   const handlePermanentDelete = async () => {
-    if (!deleteDialog.item || deleteDialog.confirmText !== "Delete Permanently")
+    if (
+      !deleteDialog.item ||
+      deleteDialog.confirmText !== t("trash.delete_confirm_text")
+    )
       return;
 
     const { error } = await permanentDeleteQuizAction(deleteDialog.item.id);
@@ -102,7 +108,7 @@ export function TrashQuizTable({ initialData }: TrashQuizTableProps) {
       toast({ title: "Error", description: error, variant: "destructive" });
     } else {
       toast({
-        title: "Quiz permanently deleted",
+        title: t("trash.delete_success"),
         description: `"${deleteDialog.item.title}" has been permanently deleted.`,
         variant: "destructive",
       });
@@ -117,9 +123,9 @@ export function TrashQuizTable({ initialData }: TrashQuizTableProps) {
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
           <BookOpen className="h-6 w-6 text-muted-foreground" />
         </div>
-        <h3 className="mt-4 text-lg font-medium">No quizzes in trash</h3>
+        <h3 className="mt-4 text-lg font-medium">{t("trash.no_quizzes")}</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          Deleted quizzes will appear here
+          {t("trash.quizzes_desc")}
         </p>
       </div>
     );
@@ -128,7 +134,7 @@ export function TrashQuizTable({ initialData }: TrashQuizTableProps) {
   const columns = [
     {
       key: "quiz",
-      label: "Quiz",
+      label: t("nav.quizzes"),
       render: (_: unknown, row: Record<string, unknown>) => {
         const title = row.title as string;
         const category = row.category as string;
@@ -137,7 +143,8 @@ export function TrashQuizTable({ initialData }: TrashQuizTableProps) {
           <div className="flex flex-col">
             <span className="font-medium">{title}</span>
             <span className="text-xs text-muted-foreground">
-              {category || "No category"} - {questionsCount} questions
+              {category || t("groups.no_category")} - {questionsCount}{" "}
+              {t("table.questions")}
             </span>
           </div>
         );
@@ -145,7 +152,7 @@ export function TrashQuizTable({ initialData }: TrashQuizTableProps) {
     },
     {
       key: "creator",
-      label: "Creator",
+      label: t("table.creator"),
       render: (_: unknown, row: Record<string, unknown>) => {
         const creator = row.creator as {
           fullname: string | null;
@@ -163,16 +170,16 @@ export function TrashQuizTable({ initialData }: TrashQuizTableProps) {
     },
     {
       key: "deleted_at",
-      label: "Deleted",
+      label: t("trash.deleted_at"),
       render: (value: unknown) => (
         <span className="text-sm text-muted-foreground">
-          {formatDeletedDate(value as string)}
+          {formatDeletedDate(value as string, locale)}
         </span>
       ),
     },
     {
       key: "time_left",
-      label: "Time Left",
+      label: t("trash.time_left"),
       render: (_: unknown, row: Record<string, unknown>) => {
         const daysLeft = getDaysUntilPermanentDelete(row.deleted_at as string);
         return (
@@ -185,14 +192,14 @@ export function TrashQuizTable({ initialData }: TrashQuizTableProps) {
             }
           >
             <Clock className="mr-1 h-3 w-3" />
-            {daysLeft} days left
+            {daysLeft} {t("trash.days_left")}
           </Badge>
         );
       },
     },
     {
       key: "action",
-      label: "Action",
+      label: t("table.actions"),
       render: (_: unknown, row: Record<string, unknown>) => {
         const item = initialData.find((i) => i.id === row.id);
         return (
@@ -208,7 +215,7 @@ export function TrashQuizTable({ initialData }: TrashQuizTableProps) {
                 className="cursor-pointer"
               >
                 <RotateCcw className="h-4 w-4 mr-2" />
-                Restore
+                {t("action.restore")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -218,7 +225,7 @@ export function TrashQuizTable({ initialData }: TrashQuizTableProps) {
                 className="cursor-pointer text-destructive focus:text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Delete Permanently
+                {t("trash.delete_permanent_title")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -254,10 +261,9 @@ export function TrashQuizTable({ initialData }: TrashQuizTableProps) {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Restore Quiz</DialogTitle>
+            <DialogTitle>{t("trash.restore_title")}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to restore "{restoreDialog.item?.title}"?
-              The quiz will be returned to Master Data.
+              {t("trash.restore_desc")} "{restoreDialog.item?.title}"?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -265,11 +271,11 @@ export function TrashQuizTable({ initialData }: TrashQuizTableProps) {
               variant="outline"
               onClick={() => setRestoreDialog({ open: false, item: null })}
             >
-              Cancel
+              {t("action.cancel")}
             </Button>
             <Button onClick={handleRestore} disabled={isPending}>
               <RotateCcw className="mr-2 h-4 w-4" />
-              Restore
+              {t("action.restore")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -285,18 +291,19 @@ export function TrashQuizTable({ initialData }: TrashQuizTableProps) {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-destructive">
-              Permanent Delete
+              {t("trash.delete_permanent_title")}
             </DialogTitle>
             <DialogDescription>
-              Are you sure you want to permanently delete "
-              {deleteDialog.item?.title}"? This action cannot be undone.
+              {t("trash.delete_permanent_desc")}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-4">
             <Label htmlFor="confirmDelete">
-              Type{" "}
-              <strong className="text-destructive">Delete Permanently</strong>{" "}
-              to confirm
+              {t("trash.type_confirm")}{" "}
+              <strong className="text-destructive">
+                {t("trash.delete_confirm_text")}
+              </strong>{" "}
+              {t("trash.to_confirm")}
             </Label>
             <Input
               id="confirmDelete"
@@ -307,7 +314,7 @@ export function TrashQuizTable({ initialData }: TrashQuizTableProps) {
                   confirmText: e.target.value,
                 }))
               }
-              placeholder="Type 'Delete Permanently' here"
+              placeholder={t("trash.delete_confirm_text")}
             />
           </div>
           <DialogFooter>
@@ -321,16 +328,17 @@ export function TrashQuizTable({ initialData }: TrashQuizTableProps) {
                 }))
               }
             >
-              Cancel
+              {t("action.cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={handlePermanentDelete}
               disabled={
-                deleteDialog.confirmText !== "Delete Permanently" || isPending
+                deleteDialog.confirmText !== t("trash.delete_confirm_text") ||
+                isPending
               }
             >
-              Delete Permanently
+              {t("trash.delete_permanent_title")}
             </Button>
           </DialogFooter>
         </DialogContent>

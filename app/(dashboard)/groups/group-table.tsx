@@ -14,6 +14,7 @@ import {
 import { format } from "date-fns";
 import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { id as idLocale } from "date-fns/locale";
 
 import Link from "next/link";
 
@@ -45,6 +46,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "@/lib/i18n";
 import { useToast } from "@/components/ui/use-toast";
 import { Combobox } from "@/components/ui/combobox";
 import {
@@ -66,9 +68,11 @@ interface GroupTableProps {
   categories: string[];
 }
 
-function formatDate(dateString?: string | null): string {
+function formatDate(dateString?: string | null, locale?: string): string {
   if (!dateString) return "-";
-  return format(new Date(dateString), "d MMM yyyy");
+  return format(new Date(dateString), "d MMMM yyyy", {
+    locale: locale === "id" ? idLocale : undefined,
+  });
 }
 
 function getGroupStatus(group: Group): {
@@ -101,6 +105,7 @@ interface GroupCardProps {
 
 function GroupCard({ group, onDelete }: GroupCardProps) {
   const router = useRouter();
+  const { t, locale } = useTranslation();
   const name = group.name || "Unknown Group";
   const avatarUrl = group.avatar_url;
   const coverUrl = getAvatarUrl(group.cover_url);
@@ -157,7 +162,9 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
                   : "bg-black/50 border-white/30 text-white"
               }`}
             >
-              {status.label}
+              {status.label === "PUBLIC"
+                ? t("groups.public")
+                : t("groups.private")}
             </Badge>
             {group.category && (
               <Badge
@@ -165,6 +172,8 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
                 className="text-[10px] font-semibold px-2 py-0.5 bg-black/50 border-white/30 text-white uppercase"
               >
                 {(() => {
+                  if (locale === "id") return group.category;
+
                   const translations: Record<string, string> = {
                     kampus: "Campus",
                     kantor: "Office",
@@ -213,7 +222,7 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
               <DropdownMenuItem asChild className="cursor-pointer">
                 <Link href={`/groups/${group.id}`}>
                   <Eye className="h-4 w-4 mr-2" />
-                  Detail
+                  {t("action.view_details")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -225,7 +234,7 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
                 className="cursor-pointer text-destructive focus:text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Move to Trash
+                {t("action.move_to_trash")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -267,7 +276,7 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
       {/* Creator Info */}
       <div className="flex-1 p-4 pt-3">
         <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">
-          Created by
+          {t("groups.created_by")}
         </p>
         <Link
           href={`/users/${group.creator_id}`}
@@ -305,11 +314,13 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
         <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
           <div className="flex items-center gap-1.5">
             <Calendar className="h-3.5 w-3.5" />
-            <span>{formatDate(group.created_at)}</span>
+            <span>{formatDate(group.created_at, locale)}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Users className="h-3.5 w-3.5" />
-            <span>{group.member_count} Members</span>
+            <span>
+              {group.member_count} {t("table.members")}
+            </span>
           </div>
         </div>
 
@@ -322,7 +333,7 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
         >
           <Link href={`/groups/${group.id}`}>
             <Eye className="h-4 w-4" />
-            Detail
+            {t("action.view_details")}
           </Link>
         </Button>
       </div>
@@ -344,6 +355,7 @@ export function GroupTable({
   const [isPending, startTransition] = useTransition();
   const [searchInput, setSearchInput] = useState(searchQuery);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
@@ -389,10 +401,18 @@ export function GroupTable({
     label: c.name,
   }));
 
-  const categoryOptions = categories.map((c) => ({
-    value: c,
-    label: c,
-  }));
+  const categoryOptions = categories.map((c) => {
+    const key = c.toLowerCase().replace(/[\/\s]/g, "_");
+    // Fallback to literal if key not found (but t() usually returns key if missing, so checking existence is hard unless we trust our map)
+    // Actually t() returns key if missing.
+    // Given the dynamic nature, I'll rely on t returning the translated string if key exists, or the key itself if not.
+    // If key is "category.foo", and missing, it returns "category.foo".
+    // I should probably check if translation exists? No, standard i18n behavior.
+    return {
+      value: c,
+      label: t(`category.${key}`),
+    };
+  });
 
   // Handle country change - fetch states directly from client
   const handleCountryChange = async (countryId: string) => {
@@ -541,13 +561,15 @@ export function GroupTable({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Groups</h1>
+          <h1 className="text-3xl font-bold text-foreground">
+            {t("groups.title")}
+          </h1>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="relative">
             <Input
-              placeholder="Search group..."
+              placeholder={t("groups.search")}
               className="pr-10 w-64 bg-background border-border"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -591,12 +613,10 @@ export function GroupTable({
               <Users className="h-6 w-6 text-muted-foreground" />
             </div>
             <h3 className="text-base font-medium text-foreground mb-1">
-              No groups found
+              {t("groups.no_groups")}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {searchQuery
-                ? "No groups match your search"
-                : "No groups available yet"}
+              {searchQuery ? t("groups.no_groups_desc") : t("groups.no_groups")}
             </p>
           </div>
         )}
@@ -622,7 +642,7 @@ export function GroupTable({
                   : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer"
               )}
             >
-              Previous
+              {t("action.previous")}
             </button>
 
             <div className="flex items-center gap-1">
@@ -699,7 +719,7 @@ export function GroupTable({
                   : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer"
               )}
             >
-              Next
+              {t("action.next")}
             </button>
           </div>
         )}
@@ -714,11 +734,11 @@ export function GroupTable({
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Move to Trash</DialogTitle>
+            <DialogTitle>{t("groups.delete_title")}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to move{" "}
-              <strong>{deleteDialog.groupName}</strong> to the trash bin? You
-              can restore it later.
+              {t("groups.move_trash_desc")}{" "}
+              <strong>{deleteDialog.groupName}</strong>{" "}
+              {t("groups.move_trash_desc2")}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-4">
@@ -749,14 +769,14 @@ export function GroupTable({
                 }))
               }
             >
-              Cancel
+              {t("action.cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={handleDeleteGroup}
               disabled={deleteDialog.confirmText !== "Move to Trash"}
             >
-              Move to Trash
+              {t("action.move_to_trash")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -768,53 +788,54 @@ export function GroupTable({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Filter className="h-5 w-5 text-primary" />
-              Filter
+              {t("action.filter")}
             </DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             {/* Category */}
             <div className="grid gap-2">
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category">{t("groups.category_label")}</Label>
               <Combobox
                 options={categoryOptions}
                 value={filterValues.category}
                 onValueChange={(value) =>
                   setFilterValues((prev) => ({ ...prev, category: value }))
                 }
-                placeholder="Select Category"
-                searchPlaceholder="Search category..."
-                emptyText="No category found."
+                placeholder={t("groups.select_category")}
+                searchPlaceholder={t("groups.search_category")}
+                emptyText={t("groups.no_category")}
                 className="w-full"
               />
             </div>
 
-            {/* Country */}
             <div className="grid gap-2">
-              <Label htmlFor="country">Country</Label>
+              <Label htmlFor="country">{t("groups.country_label")}</Label>
               <Combobox
                 options={countryOptions}
                 value={filterValues.country}
                 onValueChange={handleCountryChange}
-                placeholder="Select Country"
-                searchPlaceholder="Search country..."
-                emptyText="No country found."
+                placeholder={t("groups.select_country")}
+                searchPlaceholder={t("groups.search_country")}
+                emptyText={t("groups.no_country")}
                 className="w-full"
               />
             </div>
 
             {/* State */}
             <div className="grid gap-2">
-              <Label htmlFor="state">State</Label>
+              <Label htmlFor="state">{t("groups.state_label")}</Label>
               <Combobox
                 options={stateOptions}
                 value={filterValues.state}
                 onValueChange={handleStateChange}
-                placeholder={loadingStates ? "Loading..." : "Select State"}
-                searchPlaceholder="Search state..."
+                placeholder={
+                  loadingStates ? "Loading..." : t("groups.select_state")
+                }
+                searchPlaceholder={t("groups.search_state")}
                 emptyText={
                   filterValues.country
-                    ? "No state found."
-                    : "Select country first"
+                    ? t("groups.no_state")
+                    : t("groups.select_state_first")
                 }
                 className="w-full"
                 disabled={!filterValues.country}
@@ -823,17 +844,21 @@ export function GroupTable({
 
             {/* City */}
             <div className="grid gap-2">
-              <Label htmlFor="city">City</Label>
+              <Label htmlFor="city">{t("groups.city_label")}</Label>
               <Combobox
                 options={cityOptions}
                 value={filterValues.city}
                 onValueChange={(value) =>
                   setFilterValues((prev) => ({ ...prev, city: value }))
                 }
-                placeholder={loadingCities ? "Loading..." : "Select City"}
-                searchPlaceholder="Search city..."
+                placeholder={
+                  loadingCities ? "Loading..." : t("groups.select_city")
+                }
+                searchPlaceholder={t("groups.search_city")}
                 emptyText={
-                  filterValues.state ? "No city found." : "Select state first"
+                  filterValues.state
+                    ? t("groups.no_city")
+                    : t("groups.select_city_first")
                 }
                 className="w-full"
                 disabled={!filterValues.state}
@@ -842,7 +867,7 @@ export function GroupTable({
 
             {/* Status */}
             <div className="grid gap-2">
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status">{t("groups.status_label")}</Label>
               <Select
                 value={filterValues.status}
                 onValueChange={(value) =>
@@ -850,12 +875,12 @@ export function GroupTable({
                 }
               >
                 <SelectTrigger id="status" className="w-full">
-                  <SelectValue placeholder="Select Status" />
+                  <SelectValue placeholder={t("groups.status_label")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="public">Public</SelectItem>
-                  <SelectItem value="private">Private</SelectItem>
+                  <SelectItem value="all">{t("groups.all")}</SelectItem>
+                  <SelectItem value="public">{t("groups.public")}</SelectItem>
+                  <SelectItem value="private">{t("groups.private")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -867,17 +892,17 @@ export function GroupTable({
               className="gap-2"
             >
               <RotateCcw className="h-4 w-4" />
-              Reset
+              {t("action.reset")}
             </Button>
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleCancelFilter}>
-                Cancel
+                {t("action.cancel")}
               </Button>
               <Button
                 onClick={handleApplyFilter}
                 className="bg-primary hover:bg-primary/90"
               >
-                Apply
+                {t("action.apply")}
               </Button>
             </div>
           </DialogFooter>

@@ -14,6 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Search } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 interface Column {
   key: string;
@@ -41,6 +42,7 @@ export function DataTable({
   onPageChange,
   onRowClick,
 }: DataTableProps) {
+  const { t } = useTranslation();
   const showPagination = totalPages >= 1 && !!onPageChange;
   const [editingEllipsis, setEditingEllipsis] = useState<string | null>(null);
   const [jumpPage, setJumpPage] = useState("");
@@ -82,7 +84,7 @@ export function DataTable({
                 colSpan={columns.length}
                 className="text-center py-8 text-muted-foreground"
               >
-                No data available
+                {t("table.no_data")}
               </TableCell>
             </TableRow>
           ) : (
@@ -111,9 +113,10 @@ export function DataTable({
       {showPagination && (
         <div className="flex items-center justify-between border-t border-border bg-secondary/30 px-6 py-4">
           <div className="text-sm text-muted-foreground">
-            Page{" "}
+            {t("table.page")}{" "}
             <span className="font-medium text-foreground">{currentPage}</span>{" "}
-            of <span className="font-medium text-foreground">{totalPages}</span>
+            {t("table.of")}{" "}
+            <span className="font-medium text-foreground">{totalPages}</span>
           </div>
 
           {totalPages > 1 && (
@@ -128,7 +131,7 @@ export function DataTable({
                     : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer"
                 )}
               >
-                Previous
+                {t("action.previous")}
               </button>
 
               <div className="flex items-center gap-1">
@@ -233,7 +236,7 @@ export function DataTable({
                     : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer"
                 )}
               >
-                Next
+                {t("action.next")}
               </button>
             </div>
           )}
@@ -244,7 +247,13 @@ export function DataTable({
 }
 
 // Status badge helper
-export function StatusBadge({ status }: { status: string }) {
+export function StatusBadge({
+  status,
+  label,
+}: {
+  status: string;
+  label?: string;
+}) {
   const variants: Record<string, string> = {
     Active:
       "bg-[var(--success)]/20 text-[var(--success)] border-[var(--success)]/30",
@@ -266,7 +275,7 @@ export function StatusBadge({ status }: { status: string }) {
       variant="outline"
       className={cn("font-medium", variants[status] || variants["Inactive"])}
     >
-      {status}
+      {label || status}
     </Badge>
   );
 }

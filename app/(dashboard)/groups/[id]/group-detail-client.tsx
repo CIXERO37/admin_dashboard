@@ -22,6 +22,7 @@ import {
   Settings,
 } from "lucide-react";
 import { format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
 
 import { cn, getAvatarUrl } from "@/lib/utils";
 import {
@@ -72,6 +73,7 @@ import {
   removeGroupMember,
   updateMemberRole,
 } from "../actions";
+import { useTranslation } from "@/lib/i18n";
 
 interface GroupDetailClientProps {
   group: GroupDetail;
@@ -127,6 +129,7 @@ export function GroupDetailClient({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const { t, locale } = useTranslation();
 
   const [searchInput, setSearchInput] = useState(searchQuery);
   const [activeTab, setActiveTab] = useState<"members" | "activity">("members");
@@ -140,30 +143,76 @@ export function GroupDetailClient({
   const status = getGroupStatus(group);
   const location = getLocation(group);
 
-  // ... (existing handlers)
-
   const updateUrl = (params: Record<string, string | number>) => {
-    // ...
+    const newParams = new URLSearchParams(searchParams.toString());
+    Object.entries(params).forEach(([key, value]) => {
+      newParams.set(key, String(value));
+    });
+    router.push(`?${newParams.toString()}`);
   };
 
   const handleSearch = () => {
-    // ...
+    updateUrl({ search: searchInput, page: 1 });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // ...
+    if (e.key === "Enter") {
+      handleSearch();
+    }
   };
 
   const handlePageChange = (page: number) => {
-    // ...
+    updateUrl({ page });
   };
 
   const handleRemoveMember = async () => {
-    // ...
+    if (!removeMemberDialog.memberId) return;
+
+    startTransition(async () => {
+      const result = await removeGroupMember(
+        group.id,
+        removeMemberDialog.memberId
+      );
+
+      if (!result.error) {
+        toast({
+          title: "Success",
+          description: "Member removed successfully",
+        });
+        setRemoveMemberDialog({
+          open: false,
+          memberId: "",
+          memberName: "",
+        });
+        router.refresh();
+      } else {
+        toast({
+          title: "Error",
+          description: result.error,
+          variant: "destructive",
+        });
+      }
+    });
   };
 
   const handleRoleChange = async (userId: string, newRole: string) => {
-    // ...
+    startTransition(async () => {
+      const result = await updateMemberRole(group.id, userId, newRole);
+
+      if (!result.error) {
+        toast({
+          title: "Success",
+          description: "Member role updated successfully",
+        });
+        router.refresh();
+      } else {
+        toast({
+          title: "Error",
+          description: result.error,
+          variant: "destructive",
+        });
+      }
+    });
   };
 
   const getActivityIcon = (type: string) => {
@@ -184,32 +233,38 @@ export function GroupDetailClient({
 
   const getActivityDescription = (activity: any) => {
     const username = activity.nama || "Unknown User";
-    let action = activity.type.replace(/_/g, " ");
+    let actionKey = "";
 
     switch (activity.type) {
       case "member_joined":
-        action = "joined the group";
+        actionKey = "activity.joined_group";
         break;
       case "member_left":
-        action = "left the group";
+        actionKey = "activity.left_group";
         break;
       case "member_removed":
-        action = "was kicked from the group";
+      case "member_kicked":
+        actionKey = "activity.kicked_group";
         break;
       case "member_promoted":
-        action = "was promoted to admin";
+        actionKey = "activity.promoted_admin";
         break;
       case "member_demoted":
-        action = "was demoted to member";
+        actionKey = "activity.demoted_member";
         break;
-      case "member_kicked":
-        action = "was kicked from the group";
-        break;
+      default:
+        return (
+          <span>
+            <span className="text-emerald-500 font-bold">{username}</span>{" "}
+            {activity.type.replace(/_/g, " ")}
+          </span>
+        );
     }
 
     return (
       <span>
-        <span className="text-emerald-500 font-bold">{username}</span> {action}
+        <span className="text-emerald-500 font-bold">{username}</span>{" "}
+        {t(actionKey)}
       </span>
     );
   };
@@ -217,12 +272,11 @@ export function GroupDetailClient({
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        {/* Breadcrumb ... (keep as is) */}
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/groups">Groups</Link>
+                <Link href="/groups">{t("groups.title")}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -232,7 +286,6 @@ export function GroupDetailClient({
           </BreadcrumbList>
         </Breadcrumb>
 
-        {/* Header Profile Card */}
         <Card className="overflow-hidden border-border bg-card p-0 gap-0">
           <div className="relative h-32 md:h-48 w-full bg-muted">
             {group.cover_url ? (
@@ -270,11 +323,10 @@ export function GroupDetailClient({
 
             <h1 className="text-2xl font-bold text-foreground">{group.name}</h1>
             <p className="max-w-2xl text-muted-foreground mt-1 text-sm">
-              {group.description || "No description available for this group."}
+              {group.description || t("group_detail.description_empty")}
             </p>
 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
-              {/* ... Metadata Row ... */}
               <div className="flex items-center gap-1.5">
                 <Shield className="h-4 w-4" />
                 <Badge
@@ -285,7 +337,9 @@ export function GroupDetailClient({
                       "bg-emerald-500/10 text-emerald-600 border-emerald-200 dark:border-emerald-900"
                   )}
                 >
-                  {status.label}
+                  {status.label === "PUBLIC"
+                    ? t("groups.public")
+                    : t("groups.private")}
                 </Badge>
               </div>
 
@@ -298,13 +352,14 @@ export function GroupDetailClient({
                 <Calendar className="h-4 w-4" />
                 <span>
                   {group.created_at
-                    ? format(new Date(group.created_at), "d MMMM yyyy")
+                    ? format(new Date(group.created_at), "d MMMM yyyy", {
+                        locale: locale === "id" ? idLocale : undefined,
+                      })
                     : "-"}
                 </span>
               </div>
             </div>
 
-            {/* Tabs Navigation (Functional) */}
             <div className="mt-8 flex w-full max-w-lg items-center justify-center border-b border-border">
               <button
                 onClick={() => setActiveTab("members")}
@@ -315,7 +370,7 @@ export function GroupDetailClient({
                     : "border-transparent text-muted-foreground hover:text-foreground"
                 )}
               >
-                Members
+                {t("group_detail.members")}
               </button>
 
               <button
@@ -327,21 +382,20 @@ export function GroupDetailClient({
                     : "border-transparent text-muted-foreground hover:text-foreground"
                 )}
               >
-                Activity
+                {t("group_detail.activity")}
               </button>
             </div>
           </div>
         </Card>
 
-        {/* Main Content Grid */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-12 pb-6 pt-0">
-          {/* Left Sidebar (About/Creator) - ALways Visible */}
           <div className="md:col-span-4 lg:col-span-3 space-y-6">
             <Card>
               <CardContent className="space-y-4 pt-2">
-                {/* ... (keep existing About content) ... */}
                 <div>
-                  <p className="text-sm font-medium text-foreground">Creator</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {t("group_detail.creator")}
+                  </p>
                   <Link
                     href={`/users/${group.creator_id}`}
                     className="flex items-center gap-3 mt-2 hover:bg-muted p-2 -mx-2 rounded-lg transition-colors group"
@@ -372,35 +426,36 @@ export function GroupDetailClient({
                 <div className="grid grid-cols-2 gap-4">
                   <div className="rounded-lg bg-muted p-3 text-center">
                     <p className="text-2xl font-bold">{group.member_count}</p>
-                    <p className="text-xs text-muted-foreground">Members</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t("group_detail.members")}
+                    </p>
                   </div>
                   <div className="rounded-lg bg-muted p-3 text-center">
                     <p className="text-2xl font-bold">
                       {members.filter((m) => m.role === "admin").length}
                     </p>
-                    <p className="text-xs text-muted-foreground">Admins</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t("group_detail.admins")}
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Right Content - CONDITIONAL */}
           <div className="md:col-span-8 lg:col-span-9">
             {activeTab === "members" && (
               <Card>
-                {/* ... (Existing Members List content) ... */}
                 <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex flex-col gap-1">
                     <CardTitle className="text-lg flex items-center gap-2">
-                      Members List
+                      {t("group_detail.members_list")}
                     </CardTitle>
                   </div>
                   <div className="flex items-center gap-2">
-                    {/* ... Search & Filter ... */}
                     <div className="relative">
                       <Input
-                        placeholder="Search member..."
+                        placeholder={t("group_detail.search_member")}
                         className="pr-10 bg-background border-border w-48 lg:w-64"
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
@@ -421,20 +476,29 @@ export function GroupDetailClient({
                         updateUrl({ role: value, page: 1 })
                       }
                     >
-                      <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Role" />
+                      <SelectTrigger className="w-40">
+                        <SelectValue
+                          placeholder={t("group_detail.role_placeholder")}
+                        />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Roles</SelectItem>
-                        <SelectItem value="owner">Owner</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="member">Member</SelectItem>
+                        <SelectItem value="all">
+                          {t("group_detail.role_all")}
+                        </SelectItem>
+                        <SelectItem value="owner">
+                          {t("group_detail.role_owner")}
+                        </SelectItem>
+                        <SelectItem value="admin">
+                          {t("group_detail.role_admin")}
+                        </SelectItem>
+                        <SelectItem value="member">
+                          {t("group_detail.role_member")}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {/* ... (Existing Members List Map) ... */}
                   {members.length > 0 ? (
                     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                       {members.map((member, index) => {
@@ -474,7 +538,11 @@ export function GroupDetailClient({
                                     " text-[10px] px-1.5 py-0 h-5 shrink-0"
                                   }
                                 >
-                                  {member.role}
+                                  {member.role === "owner"
+                                    ? t("group_detail.role_owner")
+                                    : member.role === "admin"
+                                    ? t("group_detail.role_admin")
+                                    : t("group_detail.role_member")}
                                 </Badge>
                               </div>
                               <p className="text-xs text-muted-foreground truncate mb-2">
@@ -504,7 +572,7 @@ export function GroupDetailClient({
                                           }
                                         >
                                           <Shield className="h-4 w-4 mr-2" />{" "}
-                                          Make Admin
+                                          {t("group_detail.make_admin")}
                                         </DropdownMenuItem>
                                       )}
                                       {member.role === "admin" && (
@@ -517,7 +585,7 @@ export function GroupDetailClient({
                                           }
                                         >
                                           <UserMinus className="h-4 w-4 mr-2" />{" "}
-                                          Remove Admin
+                                          {t("group_detail.remove_admin")}
                                         </DropdownMenuItem>
                                       )}
                                       <DropdownMenuSeparator />
@@ -532,7 +600,7 @@ export function GroupDetailClient({
                                         className="text-destructive focus:text-destructive"
                                       >
                                         <Trash2 className="h-4 w-4 mr-2" />{" "}
-                                        Remove
+                                        {t("group_detail.remove_member")}
                                       </DropdownMenuItem>
                                     </DropdownMenuContent>
                                   </DropdownMenu>
@@ -546,15 +614,15 @@ export function GroupDetailClient({
                   ) : (
                     <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-muted rounded-xl bg-muted/20">
                       <Users className="h-12 w-12 text-muted-foreground/50 mb-3" />
-                      <p className="text-lg font-medium">No members found</p>
+                      <p className="text-lg font-medium">
+                        {t("group_detail.no_members")}
+                      </p>
                       <p className="text-sm text-muted-foreground max-w-sm mt-1">
-                        Try adjusting your filters or search query to find who
-                        you're looking for.
+                        {t("group_detail.no_members_desc")}
                       </p>
                     </div>
                   )}
 
-                  {/* Pagination */}
                   {totalPages > 1 && (
                     <div className="flex items-center justify-center gap-2 mt-6">
                       <Button
@@ -563,7 +631,7 @@ export function GroupDetailClient({
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={currentPage === 1 || isPending}
                       >
-                        Previous
+                        {t("action.previous")}
                       </Button>
                       <div className="text-sm font-medium">
                         Page {currentPage} of {totalPages}
@@ -574,7 +642,7 @@ export function GroupDetailClient({
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage === totalPages || isPending}
                       >
-                        Next
+                        {t("action.next")}
                       </Button>
                     </div>
                   )}
@@ -587,7 +655,7 @@ export function GroupDetailClient({
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Activity className="h-5 w-5 text-primary" />
-                    Recent Activity
+                    {t("group_detail.recent_activity")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -616,7 +684,11 @@ export function GroupDetailClient({
                                 <span className="text-xs text-muted-foreground whitespace-nowrap">
                                   {format(
                                     new Date(activity.created),
-                                    "d MMM yyyy, HH:mm"
+                                    "d MMM yyyy, HH:mm",
+                                    {
+                                      locale:
+                                        locale === "id" ? idLocale : undefined,
+                                    }
                                   )}
                                 </span>
                               </div>
@@ -628,11 +700,10 @@ export function GroupDetailClient({
                     <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-muted rounded-xl bg-muted/20">
                       <Activity className="h-12 w-12 text-muted-foreground/50 mb-3" />
                       <p className="text-lg font-medium">
-                        No activity recorded
+                        {t("group_detail.no_activity")}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        Activities will appear here when actions are taken in
-                        this group.
+                        {t("group_detail.no_activity_desc")}
                       </p>
                     </div>
                   )}
@@ -642,7 +713,6 @@ export function GroupDetailClient({
           </div>
         </div>
 
-        {/* ... Dialog ... */}
         <Dialog
           open={removeMemberDialog.open}
           onOpenChange={(open) =>
@@ -651,11 +721,11 @@ export function GroupDetailClient({
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Remove Member</DialogTitle>
+              <DialogTitle>{t("group_detail.remove_member_title")}</DialogTitle>
               <DialogDescription>
-                Are you sure you want to remove{" "}
-                <strong>{removeMemberDialog.memberName}</strong> from this
-                group?
+                {t("group_detail.remove_member_confirm")}{" "}
+                <strong>{removeMemberDialog.memberName}</strong>{" "}
+                {t("group_detail.remove_member_confirm_suffix")}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -669,10 +739,10 @@ export function GroupDetailClient({
                   })
                 }
               >
-                Cancel
+                {t("action.cancel")}
               </Button>
               <Button variant="destructive" onClick={handleRemoveMember}>
-                Remove Member
+                {t("group_detail.remove_member_title")}
               </Button>
             </DialogFooter>
           </DialogContent>

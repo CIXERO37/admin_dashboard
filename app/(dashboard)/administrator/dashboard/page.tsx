@@ -16,10 +16,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useProfiles } from "@/hooks/useProfiles";
 import { Users, Shield, UserCheck, UserX } from "lucide-react";
 import { isSameYear, subYears } from "date-fns";
+import { useTranslation } from "@/lib/i18n";
 
 export default function AdministratorDashboardPage() {
   const [timeRange, setTimeRange] = useState("this-year");
   const { data: profiles, loading } = useProfiles();
+  const { t } = useTranslation();
 
   const checkDate = (dateStr: string | null | undefined, range: string) => {
     if (range === "all") return true;
@@ -59,24 +61,24 @@ export default function AdministratorDashboardPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">
-          Administrator Dashboard
+          {t("admin.dashboard_title")}
         </h1>
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger
             className="w-[130px] rounded-lg"
             aria-label="Select a value"
           >
-            <SelectValue placeholder="This Year" />
+            <SelectValue placeholder={t("master.this_year")} />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
             <SelectItem value="this-year" className="rounded-lg">
-              This Year
+              {t("master.this_year")}
             </SelectItem>
             <SelectItem value="last-year" className="rounded-lg">
-              Last Year
+              {t("master.last_year")}
             </SelectItem>
             <SelectItem value="all" className="rounded-lg">
-              All Time
+              {t("master.all_time")}
             </SelectItem>
           </SelectContent>
         </Select>
@@ -94,25 +96,25 @@ export default function AdministratorDashboardPage() {
         ) : (
           <>
             <StatCard
-              title="User"
+              title={t("stats.user")}
               value={userCount}
               icon={Users}
               href="/users?role=user"
             />
             <StatCard
-              title="Admin"
+              title={t("stats.admin")}
               value={adminCount}
               icon={Shield}
               href="/users?role=admin"
             />
             <StatCard
-              title="Active"
+              title={t("stats.active")}
               value={activeCount}
               icon={UserCheck}
               href="/users?status=active"
             />
             <StatCard
-              title="Blocked"
+              title={t("stats.blocked")}
               value={blockedCount}
               icon={UserX}
               href="/users?status=blocked"
