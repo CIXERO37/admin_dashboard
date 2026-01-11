@@ -47,6 +47,7 @@ import {
   updateProfileAction,
   deleteProfileAction,
 } from "./actions";
+import { useTranslation } from "@/lib/i18n";
 
 const roleColors: Record<string, string> = {
   admin: "bg-primary/20 text-primary border-primary/30",
@@ -78,6 +79,7 @@ export function UserTable({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [searchInput, setSearchInput] = useState(searchQuery);
 
@@ -191,12 +193,15 @@ export function UserTable({
       });
       if (error) {
         toast({
-          title: "Error",
-          description: "Failed to update role",
+          title: t("msg.error"),
+          description: t("users.failed_update_role"),
           variant: "destructive",
         });
       } else {
-        toast({ title: "Success", description: "Role updated successfully" });
+        toast({
+          title: t("msg.success"),
+          description: t("users.role_updated"),
+        });
         router.refresh();
       }
     } else {
@@ -207,12 +212,15 @@ export function UserTable({
       });
       if (error) {
         toast({
-          title: "Error",
-          description: "Failed to update status",
+          title: t("msg.error"),
+          description: t("users.failed_update_status"),
           variant: "destructive",
         });
       } else {
-        toast({ title: "Success", description: "Status updated successfully" });
+        toast({
+          title: t("msg.success"),
+          description: t("users.status_updated"),
+        });
         router.refresh();
       }
     }
@@ -262,14 +270,14 @@ export function UserTable({
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Gagal menyimpan perubahan",
+        title: t("msg.error"),
+        description: t("users.failed_save"),
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Berhasil",
-        description: "Data pengguna berhasil diperbarui",
+        title: t("msg.success"),
+        description: t("users.user_updated"),
       });
       router.refresh();
     }
@@ -281,19 +289,19 @@ export function UserTable({
   };
 
   const handleDeleteUser = async () => {
-    if (deleteDialog.confirmText !== "Move to Trash") return;
+    if (deleteDialog.confirmText !== t("users.move_to_trash")) return;
 
     const { error } = await deleteProfileAction(deleteDialog.id);
     if (error) {
       toast({
-        title: "Error",
-        description: "Gagal menghapus pengguna",
+        title: t("msg.error"),
+        description: t("users.failed_delete"),
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Success",
-        description: "User moved to trash successfully",
+        title: t("msg.success"),
+        description: t("users.user_deleted"),
       });
       router.refresh();
     }
@@ -303,7 +311,7 @@ export function UserTable({
   const columns = [
     {
       key: "account",
-      label: "Account",
+      label: t("users.account"),
       render: (_: unknown, row: Record<string, unknown>) => {
         const id = row.id as string;
         const name =
@@ -337,7 +345,7 @@ export function UserTable({
     },
     {
       key: "role",
-      label: "Role",
+      label: t("users.role"),
       render: (value: unknown, row: Record<string, unknown>) => {
         const role = (value as string) || "user";
         const id = row.id as string;
@@ -356,25 +364,32 @@ export function UserTable({
                     "bg-secondary text-secondary-foreground border-border"
                   }
                 >
-                  {formatRole(role)}
+                  {role === "admin" ? t("users.admin") : t("users.user")}
                 </Badge>
                 <ChevronDown className="ml-1.5 h-3 w-3 text-muted-foreground/50" />
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-              {["user", "admin"]
-                .filter((r) => r !== role.toLowerCase())
-                .map((r) => (
-                  <DropdownMenuItem
-                    key={r}
-                    onClick={() =>
-                      openConfirmDialog("role", id, role, r, userName)
-                    }
-                    className="cursor-pointer"
-                  >
-                    {formatRole(r)}
-                  </DropdownMenuItem>
-                ))}
+              {role !== "user" && (
+                <DropdownMenuItem
+                  onClick={() =>
+                    openConfirmDialog("role", id, role, "user", userName)
+                  }
+                  className="cursor-pointer"
+                >
+                  {t("users.user")}
+                </DropdownMenuItem>
+              )}
+              {role !== "admin" && (
+                <DropdownMenuItem
+                  onClick={() =>
+                    openConfirmDialog("role", id, role, "admin", userName)
+                  }
+                  className="cursor-pointer"
+                >
+                  {t("users.admin")}
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         );
@@ -382,7 +397,7 @@ export function UserTable({
     },
     {
       key: "status",
-      label: "Status",
+      label: t("table.status"),
       render: (value: unknown, row: Record<string, unknown>) => {
         const status = value as string;
         const id = row.id as string;
@@ -390,11 +405,28 @@ export function UserTable({
           (row.fullname as string) ||
           (row.username as string) ||
           "Unknown user";
+
+        const statusStyles: Record<string, string> = {
+          Active:
+            "bg-[var(--success)]/20 text-[var(--success)] border-[var(--success)]/30",
+          Blocked: "bg-destructive/20 text-destructive border-destructive/30",
+        };
+
         return (
           <DropdownMenu>
             <DropdownMenuTrigger className="focus:outline-none">
               <div className="cursor-pointer hover:opacity-80 flex items-center">
-                <StatusBadge status={status} />
+                <Badge
+                  variant="outline"
+                  className={
+                    statusStyles[status] ||
+                    "bg-secondary text-secondary-foreground border-border"
+                  }
+                >
+                  {status === "Active"
+                    ? t("status.active")
+                    : t("status.blocked")}
+                </Badge>
                 <ChevronDown className="ml-1.5 h-3 w-3 text-muted-foreground/50" />
               </div>
             </DropdownMenuTrigger>
@@ -406,7 +438,7 @@ export function UserTable({
                   }
                   className="cursor-pointer"
                 >
-                  Active
+                  {t("status.active")}
                 </DropdownMenuItem>
               )}
               {status !== "Blocked" && (
@@ -416,7 +448,7 @@ export function UserTable({
                   }
                   className="cursor-pointer"
                 >
-                  Blocked
+                  {t("status.blocked")}
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -426,7 +458,7 @@ export function UserTable({
     },
     {
       key: "location",
-      label: "Locations",
+      label: t("users.location"),
       render: (_: unknown, row: Record<string, unknown>) => {
         const state = (row.state as string) || "";
         const city = (row.city as string) || "";
@@ -453,7 +485,7 @@ export function UserTable({
     },
     {
       key: "action",
-      label: "Action",
+      label: t("table.actions"),
       render: (_: unknown, row: Record<string, unknown>) => {
         const userName =
           (row.fullname as string) ||
@@ -473,7 +505,7 @@ export function UserTable({
                 className="cursor-pointer"
               >
                 <UserPen className="h-4 w-4 mr-2" />
-                Edit User
+                {t("users.edit_user")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -481,7 +513,7 @@ export function UserTable({
                 className="cursor-pointer text-destructive focus:text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Move to Trash
+                {t("users.move_to_trash")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -507,13 +539,15 @@ export function UserTable({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Users</h1>
+          <h1 className="text-3xl font-bold text-foreground">
+            {t("users.title")}
+          </h1>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="relative">
             <Input
-              placeholder="Search users..."
+              placeholder={t("users.search")}
               className="pr-10 w-64 bg-background border-border"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -535,13 +569,13 @@ export function UserTable({
             <SelectTrigger className="w-32">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4" />
-                <SelectValue placeholder="Role" />
+                <SelectValue placeholder={t("users.role")} />
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Roles</SelectItem>
-              <SelectItem value="user">User</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="all">{t("users.all_roles")}</SelectItem>
+              <SelectItem value="user">{t("users.user")}</SelectItem>
+              <SelectItem value="admin">{t("users.admin")}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -552,13 +586,13 @@ export function UserTable({
             <SelectTrigger className="w-32">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4" />
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t("table.status")} />
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="blocked">Blocked</SelectItem>
+              <SelectItem value="all">{t("users.all_status")}</SelectItem>
+              <SelectItem value="active">{t("status.active")}</SelectItem>
+              <SelectItem value="blocked">{t("status.blocked")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -581,13 +615,15 @@ export function UserTable({
       >
         <DialogContent showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle>Confirm Change</DialogTitle>
+            <DialogTitle>{t("users.confirm_change")}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to change the{" "}
-              {confirmDialog.type === "role" ? "role" : "status"} of{" "}
-              <strong>{confirmDialog.userName}</strong> from{" "}
-              <strong>{confirmDialog.currentValue}</strong> to{" "}
-              <strong>{confirmDialog.newValue}</strong>?
+              {t("users.confirm_change_desc")}{" "}
+              {confirmDialog.type === "role"
+                ? t("users.role").toLowerCase()
+                : t("table.status").toLowerCase()}{" "}
+              {t("users.from")} <strong>{confirmDialog.userName}</strong>{" "}
+              {t("users.from")} <strong>{confirmDialog.currentValue}</strong>{" "}
+              {t("users.to")} <strong>{confirmDialog.newValue}</strong>?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -597,9 +633,9 @@ export function UserTable({
                 setConfirmDialog((prev) => ({ ...prev, open: false }))
               }
             >
-              Cancel
+              {t("action.cancel")}
             </Button>
-            <Button onClick={handleConfirm}>Yes, Change</Button>
+            <Button onClick={handleConfirm}>{t("users.yes_change")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -614,18 +650,20 @@ export function UserTable({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editDialog.showConfirm ? "Confirm Changes" : "Edit User"}
+              {editDialog.showConfirm
+                ? t("users.confirm_changes")
+                : t("users.edit_user")}
             </DialogTitle>
             {editDialog.showConfirm && (
               <DialogDescription>
-                Are you sure you want to save these changes?
+                {t("users.confirm_save_desc")}
               </DialogDescription>
             )}
           </DialogHeader>
           {!editDialog.showConfirm ? (
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="fullname">Full Name</Label>
+                <Label htmlFor="fullname">{t("users.full_name")}</Label>
                 <Input
                   id="fullname"
                   value={editDialog.fullname}
@@ -638,7 +676,7 @@ export function UserTable({
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="username">{t("users.username")}</Label>
                 <Input
                   id="username"
                   value={editDialog.username}
@@ -652,7 +690,7 @@ export function UserTable({
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="role">Role</Label>
+                  <Label htmlFor="role">{t("users.role")}</Label>
                   <Select
                     value={editDialog.role}
                     onValueChange={(value) =>
@@ -663,13 +701,13 @@ export function UserTable({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="user">User</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="user">{t("users.user")}</SelectItem>
+                      <SelectItem value="admin">{t("users.admin")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="status">Status</Label>
+                  <Label htmlFor="status">{t("table.status")}</Label>
                   <Select
                     value={editDialog.status}
                     onValueChange={(value) =>
@@ -680,8 +718,12 @@ export function UserTable({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="blocked">Blocked</SelectItem>
+                      <SelectItem value="active">
+                        {t("status.active")}
+                      </SelectItem>
+                      <SelectItem value="blocked">
+                        {t("status.blocked")}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -699,10 +741,10 @@ export function UserTable({
                 }))
               }
             >
-              Cancel
+              {t("action.cancel")}
             </Button>
             <Button onClick={handleEditSave}>
-              {editDialog.showConfirm ? "Yes, Save" : "Save"}
+              {editDialog.showConfirm ? t("users.yes_save") : t("action.save")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -718,18 +760,21 @@ export function UserTable({
         <DialogContent showCloseButton={false}>
           <DialogHeader>
             <DialogTitle className="text-destructive">
-              Move to Trash
+              {t("users.move_trash_title")}
             </DialogTitle>
             <DialogDescription>
-              Are you sure you want to move{" "}
-              <strong>{deleteDialog.userName}</strong> to the trash? You can
-              restore it later.
+              {t("users.move_trash_desc")}{" "}
+              <strong>{deleteDialog.userName}</strong>{" "}
+              {t("users.move_trash_desc2")}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-4">
             <Label htmlFor="confirmDelete">
-              Type <strong className="text-destructive">Move to Trash</strong>{" "}
-              to confirm
+              {t("users.type_confirm")}{" "}
+              <strong className="text-destructive">
+                {t("users.move_to_trash")}
+              </strong>{" "}
+              {t("users.to_confirm")}
             </Label>
             <Input
               id="confirmDelete"
@@ -740,7 +785,9 @@ export function UserTable({
                   confirmText: e.target.value,
                 }))
               }
-              placeholder="Type 'Move to Trash' here"
+              placeholder={`${t("users.type_confirm")} '${t(
+                "users.move_to_trash"
+              )}'`}
             />
           </div>
           <DialogFooter>
@@ -754,14 +801,14 @@ export function UserTable({
                 }))
               }
             >
-              Cancel
+              {t("action.cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={handleDeleteUser}
-              disabled={deleteDialog.confirmText !== "Move to Trash"}
+              disabled={deleteDialog.confirmText !== t("users.move_to_trash")}
             >
-              Move to Trash
+              {t("users.move_to_trash")}
             </Button>
           </DialogFooter>
         </DialogContent>

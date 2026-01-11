@@ -16,12 +16,14 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { getAvatarUrl } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface ProfileBreadcrumbProps {
   name: string;
 }
 
 export function ProfileBreadcrumb({ name }: ProfileBreadcrumbProps) {
+  const { t } = useTranslation();
   return (
     <Breadcrumb>
       <BreadcrumbList>
@@ -31,7 +33,7 @@ export function ProfileBreadcrumb({ name }: ProfileBreadcrumbProps) {
               href="/users"
               className="hover:text-foreground transition-colors"
             >
-              Users
+              {t("nav.users")}
             </Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
@@ -159,6 +161,7 @@ interface TopQuizzesListProps {
 }
 
 export function TopQuizzesList({ quizzes }: TopQuizzesListProps) {
+  const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
   const INITIAL_COUNT = 3;
 
@@ -178,10 +181,14 @@ export function TopQuizzesList({ quizzes }: TopQuizzesListProps) {
           <div className="flex-1 min-w-0">
             <p className="font-medium truncate">{quiz.title}</p>
             <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-              <span>Average: {quiz.avg_score}</span>
+              <span>
+                {t("stats.average")}: {quiz.avg_score}
+              </span>
               <div className="flex items-center gap-1">
                 <Play className="h-3 w-3" />
-                <span>{quiz.play_count.toLocaleString()}x played</span>
+                <span>
+                  {quiz.play_count.toLocaleString()}x {t("stats.played")}
+                </span>
               </div>
             </div>
           </div>
@@ -197,12 +204,12 @@ export function TopQuizzesList({ quizzes }: TopQuizzesListProps) {
           {showAll ? (
             <>
               <ChevronUp className="h-4 w-4 mr-2" />
-              Show Less
+              {t("action.show_less")}
             </>
           ) : (
             <>
               <ChevronDown className="h-4 w-4 mr-2" />
-              Show All ({quizzes.length})
+              {t("action.show_all")} ({quizzes.length})
             </>
           )}
         </Button>

@@ -1,31 +1,36 @@
-"use client"
+"use client";
+import { useTranslation } from "@/lib/i18n";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { ArrowLeft, Maximize2, X, Play, ChevronDown, ChevronUp } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  ArrowLeft,
+  Maximize2,
+  X,
+  Play,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { getAvatarUrl } from "@/lib/utils"
+} from "@/components/ui/breadcrumb";
+import { getAvatarUrl } from "@/lib/utils";
 
 interface ProfileBreadcrumbProps {
-  name: string
+  name: string;
 }
 
 export function ProfileBreadcrumb({ name }: ProfileBreadcrumbProps) {
-  const router = useRouter()
+  const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <Breadcrumb>
@@ -36,7 +41,7 @@ export function ProfileBreadcrumb({ name }: ProfileBreadcrumbProps) {
             className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors cursor-pointer"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Back
+            {t("action.back") || "Back"}
           </button>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
@@ -45,25 +50,27 @@ export function ProfileBreadcrumb({ name }: ProfileBreadcrumbProps) {
         </BreadcrumbItem>
       </BreadcrumbList>
     </Breadcrumb>
-  )
+  );
 }
 
 interface AvatarDialogProps {
-  avatarUrl?: string | null
-  fullname?: string | null
+  avatarUrl?: string | null;
+  fullname?: string | null;
 }
 
 export function AvatarDialog({ avatarUrl, fullname }: AvatarDialogProps) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
   return (
     <>
-      <Avatar 
+      <Avatar
         className="h-16 w-16 cursor-pointer hover:ring-2 hover:ring-primary transition-all"
         onClick={() => setOpen(true)}
       >
         <AvatarImage src={getAvatarUrl(avatarUrl)} />
-        <AvatarFallback className="text-xl">{fullname?.[0] ?? "?"}</AvatarFallback>
+        <AvatarFallback className="text-xl">
+          {fullname?.[0] ?? "?"}
+        </AvatarFallback>
       </Avatar>
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -85,19 +92,27 @@ export function AvatarDialog({ avatarUrl, fullname }: AvatarDialogProps) {
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }
 
 interface MapDialogProps {
-  latitude: number
-  longitude: number
-  locationName: string
+  latitude: number;
+  longitude: number;
+  locationName: string;
 }
 
-export function MapDialog({ latitude, longitude, locationName }: MapDialogProps) {
-  const [open, setOpen] = useState(false)
+export function MapDialog({
+  latitude,
+  longitude,
+  locationName,
+}: MapDialogProps) {
+  const [open, setOpen] = useState(false);
 
-  const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${longitude - 0.5}%2C${latitude - 0.5}%2C${longitude + 0.5}%2C${latitude + 0.5}&layer=mapnik&marker=${latitude}%2C${longitude}`
+  const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${
+    longitude - 0.5
+  }%2C${latitude - 0.5}%2C${longitude + 0.5}%2C${
+    latitude + 0.5
+  }&layer=mapnik&marker=${latitude}%2C${longitude}`;
 
   return (
     <>
@@ -120,7 +135,9 @@ export function MapDialog({ latitude, longitude, locationName }: MapDialogProps)
             </button>
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[calc(50%+40px)] z-10 pointer-events-none">
               <div className="bg-card/95 backdrop-blur-sm rounded-lg px-4 py-2 border border-border shadow-lg">
-                <p className="text-sm font-medium text-foreground whitespace-nowrap">{locationName}</p>
+                <p className="text-sm font-medium text-foreground whitespace-nowrap">
+                  {locationName}
+                </p>
               </div>
             </div>
             <iframe
@@ -136,41 +153,49 @@ export function MapDialog({ latitude, longitude, locationName }: MapDialogProps)
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }
 
 interface UserQuiz {
-  id: string
-  title: string
-  play_count: number
-  avg_score: number
+  id: string;
+  title: string;
+  play_count: number;
+  avg_score: number;
 }
 
 interface TopQuizzesListProps {
-  quizzes: UserQuiz[]
+  quizzes: UserQuiz[];
 }
 
 export function TopQuizzesList({ quizzes }: TopQuizzesListProps) {
-  const [showAll, setShowAll] = useState(false)
-  const INITIAL_COUNT = 3
+  const [showAll, setShowAll] = useState(false);
+  const { t } = useTranslation();
+  const INITIAL_COUNT = 3;
 
-  const displayedQuizzes = showAll ? quizzes : quizzes.slice(0, INITIAL_COUNT)
-  const hasMore = quizzes.length > INITIAL_COUNT
+  const displayedQuizzes = showAll ? quizzes : quizzes.slice(0, INITIAL_COUNT);
+  const hasMore = quizzes.length > INITIAL_COUNT;
 
   return (
     <div className="space-y-3">
       {displayedQuizzes.map((quiz, index) => (
-        <div key={quiz.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50">
+        <div
+          key={quiz.id}
+          className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50"
+        >
           <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm">
             {index + 1}
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-medium truncate">{quiz.title}</p>
             <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-              <span>Rata-rata: {quiz.avg_score}</span>
+              <span>
+                {t("profile.average")}: {quiz.avg_score}
+              </span>
               <div className="flex items-center gap-1">
                 <Play className="h-3 w-3" />
-                <span>{quiz.play_count.toLocaleString()}x dimainkan</span>
+                <span>
+                  {quiz.play_count.toLocaleString()}x {t("profile.played")}
+                </span>
               </div>
             </div>
           </div>
@@ -186,16 +211,16 @@ export function TopQuizzesList({ quizzes }: TopQuizzesListProps) {
           {showAll ? (
             <>
               <ChevronUp className="h-4 w-4 mr-2" />
-              Tampilkan Lebih Sedikit
+              {t("profile.show_less")}
             </>
           ) : (
             <>
               <ChevronDown className="h-4 w-4 mr-2" />
-              Tampilkan Semua ({quizzes.length})
+              {t("profile.show_more")} ({quizzes.length})
             </>
           )}
         </Button>
       )}
     </div>
-  )
+  );
 }
