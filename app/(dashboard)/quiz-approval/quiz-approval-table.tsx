@@ -40,6 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "@/lib/i18n";
 
 interface QuizApprovalTableProps {
   initialData: QuizApproval[];
@@ -65,6 +66,7 @@ export function QuizApprovalTable({
   const [isPending, startTransition] = useTransition();
   const [searchInput, setSearchInput] = useState(searchQuery);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [rejectDialog, setRejectDialog] = useState<{
     open: boolean;
@@ -98,14 +100,14 @@ export function QuizApprovalTable({
     const { error } = await approveQuizAction(id);
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to approve quiz",
+        title: t("msg.error"),
+        description: t("approval.failed_approve"),
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Success",
-        description: `Quiz "${title}" has been approved successfully`,
+        title: t("msg.success"),
+        description: t("approval.approve_success"),
       });
       router.refresh();
     }
@@ -124,8 +126,8 @@ export function QuizApprovalTable({
 
     if (!rejectionReason.trim()) {
       toast({
-        title: "Error",
-        description: "Please provide a rejection reason",
+        title: t("msg.error"),
+        description: t("approval.reject_desc"),
         variant: "destructive",
       });
       return;
@@ -134,14 +136,14 @@ export function QuizApprovalTable({
     const { error } = await rejectQuizAction(id, rejectionReason);
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to reject quiz",
+        title: t("msg.error"),
+        description: t("approval.failed_reject"),
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Success",
-        description: `Quiz "${title}" has been rejected`,
+        title: t("msg.success"),
+        description: t("approval.reject_success"),
       });
       router.refresh();
     }
@@ -183,7 +185,7 @@ export function QuizApprovalTable({
   const columns = [
     {
       key: "title",
-      label: "Title",
+      label: t("table.title"),
       render: (value: unknown) => (
         <span
           className="block max-w-[250px] truncate font-medium"
@@ -195,7 +197,7 @@ export function QuizApprovalTable({
     },
     {
       key: "creator",
-      label: "Creator",
+      label: t("table.creator"),
       render: (value: unknown) => {
         const creator = value as {
           id: string;
@@ -228,7 +230,7 @@ export function QuizApprovalTable({
     },
     {
       key: "category",
-      label: "Category",
+      label: t("table.category"),
       render: (value: unknown) => {
         const category = capitalizeFirst(value as string);
         return (
@@ -238,20 +240,20 @@ export function QuizApprovalTable({
         );
       },
     },
-    { key: "questions", label: "Questions" },
+    { key: "questions", label: t("table.questions") },
     {
       key: "language",
-      label: "Language",
+      label: t("table.language"),
       render: (value: unknown) => (
         <span className="uppercase text-xs font-medium">
           {(value as string) || "ID"}
         </span>
       ),
     },
-    { key: "createdAt", label: "Created" },
+    { key: "createdAt", label: t("table.created") },
     {
       key: "actions",
-      label: "Actions",
+      label: t("table.actions"),
       render: (_value: unknown, row: Record<string, unknown>) => {
         const id = row.id as string;
         const title = row.title as string;
@@ -266,7 +268,7 @@ export function QuizApprovalTable({
               onClick={() => handleApprove(id, title)}
             >
               <Check className="h-3.5 w-3.5" />
-              Approve
+              {t("action.approve")}
             </Button>
             <Button
               size="sm"
@@ -275,7 +277,7 @@ export function QuizApprovalTable({
               onClick={() => handleReject(id, title)}
             >
               <X className="h-3.5 w-3.5" />
-              Reject
+              {t("action.reject")}
             </Button>
           </div>
         );
@@ -329,11 +331,11 @@ export function QuizApprovalTable({
             <SelectTrigger className="w-36">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4" />
-                <SelectValue placeholder="Category" />
+                <SelectValue placeholder={t("table.category")} />
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Category</SelectItem>
+              <SelectItem value="all">{t("quiz.all_category")}</SelectItem>
               {categories.map((cat) => (
                 <SelectItem key={cat} value={cat}>
                   {capitalizeFirst(cat)}
@@ -379,9 +381,10 @@ export function QuizApprovalTable({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Approve Quiz</DialogTitle>
+            <DialogTitle>{t("approval.approve_title")}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to approve this quiz?
+              {t("approval.approve_desc")}{" "}
+              <strong>{approveDialog.title}</strong>?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -391,13 +394,13 @@ export function QuizApprovalTable({
                 setApproveDialog((prev) => ({ ...prev, open: false }))
               }
             >
-              Cancel
+              {t("action.cancel")}
             </Button>
             <Button
               className="bg-emerald-500 hover:bg-emerald-600 text-white"
               onClick={executeApprove}
             >
-              Approve
+              {t("action.approve")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -410,13 +413,13 @@ export function QuizApprovalTable({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reject Quiz</DialogTitle>
+            <DialogTitle>{t("approval.reject_title")}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-2 py-2">
-            <Label htmlFor="reason">Reason for Rejection</Label>
+            <Label htmlFor="reason">{t("approval.reason")}</Label>
             <Textarea
               id="reason"
-              placeholder="e.g., Inappropriate content, Low image quality, etc."
+              placeholder={t("approval.reject_reason_placeholder")}
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
               className="h-24 resize-none"
@@ -429,14 +432,14 @@ export function QuizApprovalTable({
                 setRejectDialog((prev) => ({ ...prev, open: false }))
               }
             >
-              Cancel
+              {t("action.cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={executeReject}
               disabled={!rejectionReason.trim()}
             >
-              Reject
+              {t("action.reject")}
             </Button>
           </DialogFooter>
         </DialogContent>

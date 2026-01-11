@@ -36,6 +36,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { Label } from "@/components/ui/label";
 import { type Quiz, updateQuizVisibility, blockQuizAction } from "./actions";
+import { useTranslation } from "@/lib/i18n";
 
 const visibilityColors: Record<string, string> = {
   Public:
@@ -74,6 +75,7 @@ export function QuizTable({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [searchInput, setSearchInput] = useState(searchQuery);
 
@@ -156,14 +158,14 @@ export function QuizTable({
     );
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to change visibility",
+        title: t("msg.error"),
+        description: t("quiz.visibility_change_error"),
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Success",
-        description: "Visibility changed successfully",
+        title: t("msg.success"),
+        description: t("quiz.visibility_change_success"),
       });
       router.refresh();
     }
@@ -180,12 +182,12 @@ export function QuizTable({
     const { error } = await blockQuizAction(blockDialog.id);
     if (error) {
       toast({
-        title: "Error",
-        description: "Gagal memblokir quiz",
+        title: t("msg.error"),
+        description: t("quiz.block_error"),
         variant: "destructive",
       });
     } else {
-      toast({ title: "Berhasil", description: "Quiz berhasil diblokir" });
+      toast({ title: t("msg.success"), description: t("quiz.block_success") });
       router.refresh();
     }
     setBlockDialog((prev) => ({ ...prev, open: false, confirmText: "" }));
@@ -194,7 +196,7 @@ export function QuizTable({
   const columns = [
     {
       key: "title",
-      label: "Title",
+      label: t("table.title"),
       render: (value: unknown) => (
         <span className="block max-w-[200px] truncate" title={value as string}>
           {value as string}
@@ -203,7 +205,7 @@ export function QuizTable({
     },
     {
       key: "creator",
-      label: "Creator",
+      label: t("table.creator"),
       render: (value: unknown, row: Record<string, unknown>) => {
         const creator = value as {
           id: string;
@@ -238,9 +240,12 @@ export function QuizTable({
     },
     {
       key: "category",
-      label: "Category",
+      label: t("table.category"),
       render: (value: unknown) => {
-        const category = capitalizeFirst(value as string);
+        const catValue = value as string;
+        const category =
+          t(`category.${catValue?.toLowerCase()?.replace(" ", "_")}`) ||
+          capitalizeFirst(catValue);
         return (
           <span className="block max-w-[120px] truncate" title={category}>
             {category}
@@ -248,15 +253,15 @@ export function QuizTable({
         );
       },
     },
-    { key: "questions", label: "Questions" },
+    { key: "questions", label: t("table.questions") },
     {
       key: "language",
-      label: "Language",
+      label: t("table.language"),
       render: (value: unknown) => capitalizeFirst(value as string),
     },
     {
       key: "difficulty",
-      label: "Visibility",
+      label: t("table.visibility"),
       render: (value: unknown, row: Record<string, unknown>) => {
         const visibility = value as string;
         const id = row.id as string;
@@ -272,40 +277,39 @@ export function QuizTable({
                     "bg-secondary text-secondary-foreground"
                   }
                 >
-                  {visibility}
+                  {visibility === "Public"
+                    ? t("status.public")
+                    : t("status.private")}
                 </Badge>
                 <ChevronDown className="ml-1.5 h-3 w-3 text-muted-foreground/50" />
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-              {visibility === "Public" ? (
-                <DropdownMenuItem
-                  onClick={() =>
-                    openConfirmDialog(id, visibility, "Private", quizTitle)
-                  }
-                  className="cursor-pointer"
-                >
-                  Private
-                </DropdownMenuItem>
-              ) : (
-                <DropdownMenuItem
-                  onClick={() =>
-                    openConfirmDialog(id, visibility, "Public", quizTitle)
-                  }
-                  className="cursor-pointer"
-                >
-                  Public
-                </DropdownMenuItem>
-              )}
+              <DropdownMenuItem
+                onClick={() =>
+                  openConfirmDialog(id, visibility, "Public", quizTitle)
+                }
+                className="cursor-pointer"
+              >
+                {t("status.public")}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() =>
+                  openConfirmDialog(id, visibility, "Private", quizTitle)
+                }
+                className="cursor-pointer"
+              >
+                {t("status.private")}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         );
       },
     },
-    { key: "createdAt", label: "Created" },
+    { key: "createdAt", label: t("table.created") },
     {
       key: "status",
-      label: "Status",
+      label: t("table.status"),
       render: (value: unknown, row: Record<string, unknown>) => {
         const status = value as string;
         const id = row.id as string;
@@ -321,7 +325,9 @@ export function QuizTable({
                     "bg-secondary text-secondary-foreground"
                   }
                 >
-                  {status}
+                  {status === "Active"
+                    ? t("status.active")
+                    : t("status.blocked")}
                 </Badge>
                 <ChevronDown className="ml-1.5 h-3 w-3 text-muted-foreground/50" />
               </div>
@@ -332,7 +338,7 @@ export function QuizTable({
                   onClick={() => openBlockDialog(id, quizTitle)}
                   className="cursor-pointer text-red-500 focus:text-red-500"
                 >
-                  Block
+                  {t("action.block")}
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -360,13 +366,15 @@ export function QuizTable({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Quiz Data</h1>
+          <h1 className="text-3xl font-bold text-foreground">
+            {t("quiz.title")}
+          </h1>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
           <div className="relative">
             <Input
-              placeholder="Search quiz..."
+              placeholder={t("quiz.search")}
               className="pr-10 w-64 bg-background border-border"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -385,17 +393,18 @@ export function QuizTable({
             value={categoryFilter}
             onValueChange={(value) => updateUrl({ category: value, page: 1 })}
           >
-            <SelectTrigger className="w-36">
+            <SelectTrigger className="w-[190px]">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4" />
-                <SelectValue placeholder="Category" />
+                <SelectValue placeholder={t("table.category")} />
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Category</SelectItem>
+              <SelectItem value="all">{t("quiz.all_category")}</SelectItem>
               {categories.map((cat) => (
                 <SelectItem key={cat} value={cat}>
-                  {capitalizeFirst(cat)}
+                  {t(`category.${cat?.toLowerCase()?.replace(" ", "_")}`) ||
+                    capitalizeFirst(cat)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -405,16 +414,16 @@ export function QuizTable({
             value={visibilityFilter}
             onValueChange={(value) => updateUrl({ visibility: value, page: 1 })}
           >
-            <SelectTrigger className="w-36">
+            <SelectTrigger className="w-[190px]">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4" />
-                <SelectValue placeholder="Visibility" />
+                <SelectValue placeholder={t("table.visibility")} />
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Visibility</SelectItem>
-              <SelectItem value="publik">Public</SelectItem>
-              <SelectItem value="private">Private</SelectItem>
+              <SelectItem value="all">{t("filter.all_visibility")}</SelectItem>
+              <SelectItem value="publik">{t("status.public")}</SelectItem>
+              <SelectItem value="private">{t("status.private")}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -422,16 +431,16 @@ export function QuizTable({
             value={statusFilter}
             onValueChange={(value) => updateUrl({ status: value, page: 1 })}
           >
-            <SelectTrigger className="w-36">
+            <SelectTrigger className="w-[190px]">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4" />
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t("table.status")} />
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="block">Block</SelectItem>
+              <SelectItem value="all">{t("filter.all_status")}</SelectItem>
+              <SelectItem value="active">{t("status.active")}</SelectItem>
+              <SelectItem value="block">{t("status.blocked")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -454,12 +463,22 @@ export function QuizTable({
       >
         <DialogContent showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle>Change Quiz Visibility</DialogTitle>
+            <DialogTitle>{t("quiz.change_visibility")}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to change the visibility of quiz{" "}
-              <strong>{confirmDialog.quizTitle}</strong> from{" "}
-              <strong>{confirmDialog.currentValue}</strong> to{" "}
-              <strong>{confirmDialog.newValue}</strong>?
+              {t("quiz.change_visibility_desc")}{" "}
+              <strong>{confirmDialog.quizTitle}</strong> {t("users.from")}{" "}
+              <strong>
+                {confirmDialog.currentValue === "Public"
+                  ? t("status.public")
+                  : t("status.private")}
+              </strong>{" "}
+              {t("users.to")}{" "}
+              <strong>
+                {confirmDialog.newValue === "Public"
+                  ? t("status.public")
+                  : t("status.private")}
+              </strong>
+              ?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -469,9 +488,9 @@ export function QuizTable({
                 setConfirmDialog((prev) => ({ ...prev, open: false }))
               }
             >
-              Cancel
+              {t("action.cancel")}
             </Button>
-            <Button onClick={handleConfirm}>Yes, Change</Button>
+            <Button onClick={handleConfirm}>{t("users.yes_change")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -484,17 +503,21 @@ export function QuizTable({
       >
         <DialogContent showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle className="text-destructive">Block Quiz</DialogTitle>
+            <DialogTitle className="text-destructive">
+              {t("quiz.block_title")}
+            </DialogTitle>
             <DialogDescription>
-              You are about to block quiz{" "}
-              <strong>{blockDialog.quizTitle}</strong>. The quiz status will be
-              changed to blocked.
+              {t("quiz.block_desc")} <strong>{blockDialog.quizTitle}</strong>.{" "}
+              {t("quiz.block_desc2")}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-4">
             <Label htmlFor="confirmBlock">
-              Type <strong className="text-destructive">Block</strong> to
-              confirm
+              {t("users.type_confirm")}{" "}
+              <strong className="text-destructive">
+                {t("quiz.block_confirm_text")}
+              </strong>{" "}
+              {t("users.to_confirm")}
             </Label>
             <Input
               id="confirmBlock"
@@ -505,7 +528,9 @@ export function QuizTable({
                   confirmText: e.target.value,
                 }))
               }
-              placeholder="Type 'Block' here"
+              placeholder={`${t("users.type_confirm")} '${t(
+                "quiz.block_confirm_text"
+              )}'`}
             />
           </div>
           <DialogFooter>
@@ -519,14 +544,16 @@ export function QuizTable({
                 }))
               }
             >
-              Cancel
+              {t("action.cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={handleBlockQuiz}
-              disabled={blockDialog.confirmText !== "Block"}
+              disabled={
+                blockDialog.confirmText !== t("quiz.block_confirm_text")
+              }
             >
-              Block Quiz
+              {t("quiz.block_btn")}
             </Button>
           </DialogFooter>
         </DialogContent>

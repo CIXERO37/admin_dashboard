@@ -1,28 +1,29 @@
-"use client"
+"use client";
 
-import { Search } from "lucide-react"
-import { useState, useTransition } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { Search } from "lucide-react";
+import { useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
-import { DataTable } from "@/components/dashboard/data-table"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Combobox } from "@/components/ui/combobox"
+import { DataTable } from "@/components/dashboard/data-table";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Combobox } from "@/components/ui/combobox";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { type Country, fetchCountryById } from "./actions"
+} from "@/components/ui/dialog";
+import { type Country, fetchCountryById } from "./actions";
+import { useTranslation } from "@/lib/i18n";
 
 interface CountryTableProps {
-  initialData: Country[]
-  totalPages: number
-  currentPage: number
-  regions: string[]
-  searchQuery: string
-  regionFilter: string
+  initialData: Country[];
+  totalPages: number;
+  currentPage: number;
+  regions: string[];
+  searchQuery: string;
+  regionFilter: string;
 }
 
 export function CountryTable({
@@ -33,64 +34,65 @@ export function CountryTable({
   searchQuery,
   regionFilter,
 }: CountryTableProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [isPending, startTransition] = useTransition()
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+  const { t } = useTranslation();
 
-  const [searchInput, setSearchInput] = useState(searchQuery)
-  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null)
-  const [loadingCountry, setLoadingCountry] = useState(false)
+  const [searchInput, setSearchInput] = useState(searchQuery);
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+  const [loadingCountry, setLoadingCountry] = useState(false);
 
   const regionOptions = [
-    { value: "all", label: "All Regions" },
+    { value: "all", label: t("master.all_regions") },
     ...regions.map((region) => ({ value: region, label: region })),
-  ]
+  ];
 
   const updateUrl = (params: Record<string, string | number>) => {
-    const newParams = new URLSearchParams(searchParams.toString())
-    
+    const newParams = new URLSearchParams(searchParams.toString());
+
     Object.entries(params).forEach(([key, value]) => {
       if (value && value !== "all" && value !== "") {
-        newParams.set(key, String(value))
+        newParams.set(key, String(value));
       } else {
-        newParams.delete(key)
+        newParams.delete(key);
       }
-    })
+    });
 
     startTransition(() => {
-      router.push(`?${newParams.toString()}`)
-    })
-  }
+      router.push(`?${newParams.toString()}`);
+    });
+  };
 
   const handleSearch = () => {
-    updateUrl({ search: searchInput, page: 1 })
-  }
+    updateUrl({ search: searchInput, page: 1 });
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      handleSearch()
+      handleSearch();
     }
-  }
+  };
 
   const handleRegionChange = (value: string) => {
-    updateUrl({ region: value, page: 1 })
-  }
+    updateUrl({ region: value, page: 1 });
+  };
 
   const handlePageChange = (page: number) => {
-    updateUrl({ page, search: searchQuery, region: regionFilter })
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
+    updateUrl({ page, search: searchQuery, region: regionFilter });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const handleIdClick = (countryCode: string) => {
-    router.push(`/master/address/state?country=${countryCode}`)
-  }
+    router.push(`/master/address/state?country=${countryCode}`);
+  };
 
   const handleNameClick = async (id: number) => {
-    setLoadingCountry(true)
-    const country = await fetchCountryById(id)
-    setSelectedCountry(country)
-    setLoadingCountry(false)
-  }
+    setLoadingCountry(true);
+    const country = await fetchCountryById(id);
+    setSelectedCountry(country);
+    setLoadingCountry(false);
+  };
 
   const columns = [
     {
@@ -107,7 +109,7 @@ export function CountryTable({
     },
     {
       key: "name",
-      label: "Name",
+      label: t("table.name"),
       render: (value: unknown, row: Record<string, unknown>) => (
         <button
           onClick={() => handleNameClick(row.id as number)}
@@ -120,28 +122,30 @@ export function CountryTable({
     },
     {
       key: "native",
-      label: "Native Name",
+      label: t("master.native_name"),
       render: (value: unknown) => (
-        <span className="text-muted-foreground">{(value as string) || "—"}</span>
+        <span className="text-muted-foreground">
+          {(value as string) || "—"}
+        </span>
       ),
     },
     {
       key: "region",
-      label: "Region",
+      label: t("table.region"),
       render: (value: unknown) => (
         <span className="text-sm">{(value as string) || "—"}</span>
       ),
     },
     {
       key: "iso2",
-      label: "Code",
+      label: t("table.code"),
       render: (value: unknown) => (
         <span className="font-mono text-sm font-medium">
           {(value as string) || "—"}
         </span>
       ),
     },
-  ]
+  ];
 
   const tableData = initialData.map((country) => ({
     id: country.id,
@@ -149,19 +153,21 @@ export function CountryTable({
     native: country.native,
     region: country.region,
     iso2: country.iso2,
-  }))
+  }));
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Countries</h1>
+          <h1 className="text-3xl font-bold text-foreground">
+            {t("master.countries")}
+          </h1>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="relative">
             <Input
-              placeholder="Search country..."
+              placeholder={t("groups.search_country")}
               className="pr-10 w-64 bg-background border-border"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -180,9 +186,9 @@ export function CountryTable({
             options={regionOptions}
             value={regionFilter}
             onValueChange={handleRegionChange}
-            placeholder="Region"
-            searchPlaceholder="Search region..."
-            emptyText="No region found."
+            placeholder={t("table.region")}
+            searchPlaceholder={t("master.search_region")}
+            emptyText={t("master.no_region")}
           />
         </div>
       </div>
@@ -197,42 +203,84 @@ export function CountryTable({
         />
       </div>
 
-      <Dialog open={!!selectedCountry} onOpenChange={() => setSelectedCountry(null)}>
+      <Dialog
+        open={!!selectedCountry}
+        onOpenChange={() => setSelectedCountry(null)}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
-              {selectedCountry?.emoji && <span className="text-2xl">{selectedCountry.emoji}</span>}
+              {selectedCountry?.emoji && (
+                <span className="text-2xl">{selectedCountry.emoji}</span>
+              )}
               {selectedCountry?.name}
             </DialogTitle>
           </DialogHeader>
           {selectedCountry && (
             <div className="grid grid-cols-2 gap-4 py-4">
-              <DetailItem label="Native Name" value={selectedCountry.native} />
-              <DetailItem label="ISO Code" value={`${selectedCountry.iso2} / ${selectedCountry.iso3}`} />
-              <DetailItem label="Capital" value={selectedCountry.capital} />
-              <DetailItem label="Phone Code" value={selectedCountry.phonecode ? `+${selectedCountry.phonecode}` : null} />
-              <DetailItem label="Region" value={selectedCountry.region} />
-              <DetailItem label="Subregion" value={selectedCountry.subregion} />
-              <DetailItem label="Currency" value={selectedCountry.currency ? `${selectedCountry.currency} (${selectedCountry.currency_symbol})` : null} />
-              <DetailItem 
-                label="Coordinates" 
-                value={selectedCountry.latitude && selectedCountry.longitude 
-                  ? `${selectedCountry.latitude}, ${selectedCountry.longitude}` 
-                  : null} 
+              <DetailItem
+                label={t("master.native_name")}
+                value={selectedCountry.native}
+              />
+              <DetailItem
+                label={t("master.iso_code")}
+                value={`${selectedCountry.iso2} / ${selectedCountry.iso3}`}
+              />
+              <DetailItem
+                label={t("master.capital")}
+                value={selectedCountry.capital}
+              />
+              <DetailItem
+                label={t("master.phone_code")}
+                value={
+                  selectedCountry.phonecode
+                    ? `+${selectedCountry.phonecode}`
+                    : null
+                }
+              />
+              <DetailItem
+                label={t("table.region")}
+                value={selectedCountry.region}
+              />
+              <DetailItem
+                label={t("master.subregion")}
+                value={selectedCountry.subregion}
+              />
+              <DetailItem
+                label={t("master.currency")}
+                value={
+                  selectedCountry.currency
+                    ? `${selectedCountry.currency} (${selectedCountry.currency_symbol})`
+                    : null
+                }
+              />
+              <DetailItem
+                label={t("master.coordinates")}
+                value={
+                  selectedCountry.latitude && selectedCountry.longitude
+                    ? `${selectedCountry.latitude}, ${selectedCountry.longitude}`
+                    : null
+                }
               />
             </div>
           )}
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
 
-function DetailItem({ label, value }: { label: string; value: string | null | undefined }) {
+function DetailItem({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | null | undefined;
+}) {
   return (
     <div>
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="font-medium">{value || "—"}</p>
     </div>
-  )
+  );
 }

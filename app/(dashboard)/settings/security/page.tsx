@@ -1,24 +1,53 @@
-"use client"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Shield, Key, Smartphone, Clock } from "lucide-react"
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Shield, Key, Smartphone, Clock } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 export default function SettingsSecurityPage() {
+  const { t } = useTranslation();
+
   const loginHistory = [
-    { device: "Chrome on Windows", location: "New York, US", time: "2 hours ago", current: true },
-    { device: "Safari on iPhone", location: "New York, US", time: "1 day ago", current: false },
-    { device: "Firefox on macOS", location: "Los Angeles, US", time: "3 days ago", current: false },
-  ]
+    {
+      device: "Chrome on Windows",
+      location: "New York, US",
+      time: "2 hours ago",
+      current: true,
+    },
+    {
+      device: "Safari on iPhone",
+      location: "New York, US",
+      time: "1 day ago",
+      current: false,
+    },
+    {
+      device: "Firefox on macOS",
+      location: "Los Angeles, US",
+      time: "3 days ago",
+      current: false,
+    },
+  ];
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Security Settings</h1>
-        <p className="mt-1 text-muted-foreground">Manage your account security and authentication</p>
+        <h1 className="text-3xl font-bold text-foreground">
+          {t("settings.security")}
+        </h1>
+        <p className="mt-1 text-muted-foreground">
+          {t("settings.security_desc")}
+        </p>
       </div>
 
       <div className="grid gap-6">
@@ -27,30 +56,42 @@ export default function SettingsSecurityPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-foreground">
               <Key className="h-5 w-5" />
-              Change Password
+              {t("settings.change_password")}
             </CardTitle>
-            <CardDescription>Update your account password</CardDescription>
+            <CardDescription>{t("settings.update_password")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="currentPassword" className="text-foreground">
-                Current Password
+                {t("settings.current_password")}
               </Label>
-              <Input id="currentPassword" type="password" className="bg-background border-border" />
+              <Input
+                id="currentPassword"
+                type="password"
+                className="bg-background border-border"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="newPassword" className="text-foreground">
-                New Password
+                {t("settings.new_password")}
               </Label>
-              <Input id="newPassword" type="password" className="bg-background border-border" />
+              <Input
+                id="newPassword"
+                type="password"
+                className="bg-background border-border"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword" className="text-foreground">
-                Confirm New Password
+                {t("settings.confirm_password")}
               </Label>
-              <Input id="confirmPassword" type="password" className="bg-background border-border" />
+              <Input
+                id="confirmPassword"
+                type="password"
+                className="bg-background border-border"
+              />
             </div>
-            <Button>Update Password</Button>
+            <Button>{t("settings.update_password")}</Button>
           </CardContent>
         </Card>
 
@@ -59,18 +100,20 @@ export default function SettingsSecurityPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-foreground">
               <Smartphone className="h-5 w-5" />
-              Two-Factor Authentication
+              {t("settings.two_factor")}
             </CardTitle>
-            <CardDescription>Add an extra layer of security</CardDescription>
+            <CardDescription>{t("settings.add_layer")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Shield className="h-10 w-10 text-[var(--success)]" />
                 <div>
-                  <p className="font-medium text-foreground">2FA is enabled</p>
+                  <p className="font-medium text-foreground">
+                    {t("settings.2fa_enabled")}
+                  </p>
                   <p className="text-sm text-muted-foreground">
-                    Your account is protected with two-factor authentication
+                    {t("settings.2fa_enabled_msg")}
                   </p>
                 </div>
               </div>
@@ -84,9 +127,9 @@ export default function SettingsSecurityPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-foreground">
               <Clock className="h-5 w-5" />
-              Login History
+              {t("settings.login_history")}
             </CardTitle>
-            <CardDescription>Recent login activity on your account</CardDescription>
+            <CardDescription>{t("settings.recent_activity")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -97,7 +140,9 @@ export default function SettingsSecurityPage() {
                 >
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="font-medium text-foreground">{login.device}</p>
+                      <p className="font-medium text-foreground">
+                        {login.device}
+                      </p>
                       {login.current && (
                         <Badge className="bg-[var(--success)]/20 text-[var(--success)] border-[var(--success)]/30">
                           Current
@@ -110,7 +155,7 @@ export default function SettingsSecurityPage() {
                   </div>
                   {!login.current && (
                     <Button variant="outline" size="sm">
-                      Revoke
+                      {t("settings.revoke")}
                     </Button>
                   )}
                 </div>
@@ -120,5 +165,5 @@ export default function SettingsSecurityPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

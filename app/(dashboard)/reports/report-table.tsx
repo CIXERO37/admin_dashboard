@@ -48,6 +48,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { type Report, updateReportAction, deleteReportAction } from "./actions";
+import { useTranslation } from "@/lib/i18n";
 
 const reportTypeColors: Record<string, string> = {
   bug: "bg-destructive/20 text-destructive border-destructive/30",
@@ -85,6 +86,7 @@ export function ReportTable({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [searchInput, setSearchInput] = useState(searchQuery);
 
@@ -219,7 +221,7 @@ export function ReportTable({
   const columns = [
     {
       key: "reporter",
-      label: "Reporter",
+      label: t("reports.reporter"),
       render: (_: unknown, row: Record<string, unknown>) => {
         const reporter = row.reporterData as Report["reporter"];
         if (!reporter) {
@@ -246,7 +248,7 @@ export function ReportTable({
     },
     {
       key: "title",
-      label: "Title",
+      label: t("reports.report"),
       render: (value: unknown) => {
         // Remove "Laporan " prefix if exists
         const title = ((value as string) || "Untitled").replace(
@@ -264,7 +266,7 @@ export function ReportTable({
     },
     {
       key: "description",
-      label: "Description",
+      label: t("reports.description"),
       render: (value: unknown) => {
         const description = (value as string) || "";
         return (
@@ -278,7 +280,7 @@ export function ReportTable({
     },
     {
       key: "reported",
-      label: "Type",
+      label: t("reports.type"),
       render: (_: unknown, row: Record<string, unknown>) => {
         const contentType = row.reported_content_type as string;
         const reportedUser = row.reportedUserData as Report["reported_user"];
@@ -306,7 +308,7 @@ export function ReportTable({
             >
               <FileText className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
               <span className="text-sm hover:text-primary transition-colors text-muted-foreground group-hover:text-primary">
-                Quiz
+                {t("stats.quizzes")}
               </span>
             </Link>
           );
@@ -323,16 +325,42 @@ export function ReportTable({
     },
     {
       key: "status",
-      label: "Status",
+      label: t("table.status"),
       render: (value: unknown, row: Record<string, unknown>) => {
         const status = formatStatus(value as string);
         const id = row.id as string;
         const title = row.title as string;
+
+        const statusStyles: Record<string, string> = {
+          Active:
+            "bg-[var(--success)]/20 text-[var(--success)] border-[var(--success)]/30",
+          Pending:
+            "bg-[var(--warning)]/20 text-[var(--warning)] border-[var(--warning)]/30",
+          "In Progress": "bg-primary/20 text-primary border-primary/30",
+          Resolved:
+            "bg-[var(--success)]/20 text-[var(--success)] border-[var(--success)]/30",
+        };
+
+        const getTranslatedStatus = (s: string) => {
+          if (s === "Pending") return t("status.pending");
+          if (s === "In Progress") return t("status.in_progress");
+          if (s === "Resolved") return t("status.resolved");
+          return s;
+        };
+
         return (
           <DropdownMenu>
             <DropdownMenuTrigger className="focus:outline-none">
               <div className="cursor-pointer hover:opacity-80 flex items-center">
-                <StatusBadge status={status} />
+                <Badge
+                  variant="outline"
+                  className={
+                    statusStyles[status] ||
+                    "bg-secondary text-secondary-foreground border-border"
+                  }
+                >
+                  {getTranslatedStatus(status)}
+                </Badge>
                 <ChevronDown className="ml-1.5 h-3 w-3 text-muted-foreground/50" />
               </div>
             </DropdownMenuTrigger>
@@ -352,7 +380,7 @@ export function ReportTable({
                     }
                     className="cursor-pointer"
                   >
-                    {s}
+                    {getTranslatedStatus(s)}
                   </DropdownMenuItem>
                 ))}
             </DropdownMenuContent>
@@ -362,7 +390,7 @@ export function ReportTable({
     },
     {
       key: "date",
-      label: "Date",
+      label: t("table.created"),
       render: (value: unknown) => (
         <span className="text-sm text-muted-foreground">
           {value ? format(new Date(value as string), "dd MMM yyyy") : "—"}
@@ -371,7 +399,7 @@ export function ReportTable({
     },
     {
       key: "action",
-      label: "Action",
+      label: t("table.actions"),
       render: (_: unknown, row: Record<string, unknown>) => {
         const id = row.id as string;
         const title = (row.title as string) || "Untitled";
@@ -388,7 +416,7 @@ export function ReportTable({
               <DropdownMenuItem asChild className="cursor-pointer">
                 <Link href={`/reports/${id}`}>
                   <Eye className="h-4 w-4 mr-2" />
-                  View Details
+                  {t("reports.view_details")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -403,7 +431,7 @@ export function ReportTable({
                 className="cursor-pointer"
               >
                 <MessageSquare className="h-4 w-4 mr-2" />
-                Admin Notes
+                {t("reports.admin_notes")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -418,7 +446,7 @@ export function ReportTable({
                 className="cursor-pointer text-destructive focus:text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Delete Report
+                {t("reports.delete_report")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -446,13 +474,15 @@ export function ReportTable({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Reports</h1>
+          <h1 className="text-3xl font-bold text-foreground">
+            {t("reports.title")}
+          </h1>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="relative">
             <Input
-              placeholder="Search reports..."
+              placeholder={t("reports.search")}
               className="pr-10 w-64 bg-background border-border"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -474,14 +504,16 @@ export function ReportTable({
             <SelectTrigger className="w-36">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4" />
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t("table.status")} />
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="resolved">Resolved</SelectItem>
+              <SelectItem value="all">{t("filter.all_status")}</SelectItem>
+              <SelectItem value="pending">{t("status.pending")}</SelectItem>
+              <SelectItem value="in_progress">
+                {t("status.in_progress")}
+              </SelectItem>
+              <SelectItem value="resolved">{t("status.resolved")}</SelectItem>
             </SelectContent>
           </Select>
         </div>

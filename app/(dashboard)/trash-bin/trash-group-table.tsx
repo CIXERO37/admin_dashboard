@@ -24,16 +24,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { getAvatarUrl } from "@/lib/utils";
 import {
@@ -41,6 +31,8 @@ import {
   permanentDeleteGroupAction,
   type DeletedGroup,
 } from "./actions";
+import { useTranslation } from "@/lib/i18n";
+import { id as idLocale } from "date-fns/locale";
 
 interface TrashGroupTableProps {
   initialData: DeletedGroup[];
@@ -57,9 +49,9 @@ function getDaysUntilPermanentDelete(deletedAt: string): number {
   return Math.max(0, diffDays);
 }
 
-function formatDeletedDate(dateStr: string): string {
+function formatDeletedDate(dateStr: string, localeCode: string): string {
   const date = new Date(dateStr);
-  return date.toLocaleDateString("en-US", {
+  return date.toLocaleDateString(localeCode === "id" ? "id-ID" : "en-US", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -69,6 +61,7 @@ function formatDeletedDate(dateStr: string): string {
 export function TrashGroupTable({ initialData }: TrashGroupTableProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { t, locale } = useTranslation();
   const [isPending, startTransition] = useTransition();
   const [restoreDialog, setRestoreDialog] = useState<{
     open: boolean;
@@ -96,7 +89,7 @@ export function TrashGroupTable({ initialData }: TrashGroupTableProps) {
       toast({ title: "Error", description: error, variant: "destructive" });
     } else {
       toast({
-        title: "Group restored",
+        title: t("trash.restore_success"),
         description: `"${restoreDialog.item.name}" has been restored.`,
       });
       startTransition(() => router.refresh());
@@ -105,7 +98,10 @@ export function TrashGroupTable({ initialData }: TrashGroupTableProps) {
   };
 
   const handlePermanentDelete = async () => {
-    if (!deleteDialog.item || deleteDialog.confirmText !== "Delete Permanently")
+    if (
+      !deleteDialog.item ||
+      deleteDialog.confirmText !== t("trash.delete_confirm_text")
+    )
       return;
 
     const { error } = await permanentDeleteGroupAction(deleteDialog.item.id);
@@ -114,7 +110,7 @@ export function TrashGroupTable({ initialData }: TrashGroupTableProps) {
       toast({ title: "Error", description: error, variant: "destructive" });
     } else {
       toast({
-        title: "Group permanently deleted",
+        title: t("trash.delete_success"),
         description: `"${deleteDialog.item.name}" has been permanently deleted.`,
         variant: "destructive",
       });
@@ -129,9 +125,9 @@ export function TrashGroupTable({ initialData }: TrashGroupTableProps) {
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
           <Users className="h-6 w-6 text-muted-foreground" />
         </div>
-        <h3 className="mt-4 text-lg font-medium">No groups in trash</h3>
+        <h3 className="mt-4 text-lg font-medium">{t("trash.no_groups")}</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          Deleted groups will appear here
+          {t("trash.groups_desc")}
         </p>
       </div>
     );
@@ -140,7 +136,7 @@ export function TrashGroupTable({ initialData }: TrashGroupTableProps) {
   const columns = [
     {
       key: "group",
-      label: "Group",
+      label: t("nav.groups"),
       render: (_: unknown, row: Record<string, unknown>) => {
         const name = row.name as string;
         const description = row.description as string | null;
@@ -154,7 +150,7 @@ export function TrashGroupTable({ initialData }: TrashGroupTableProps) {
             <div className="flex flex-col">
               <span className="font-medium">{name}</span>
               <span className="text-xs text-muted-foreground line-clamp-1">
-                {description || "No description"}
+                {description || t("groups.description_empty")}
               </span>
             </div>
           </div>
@@ -163,7 +159,7 @@ export function TrashGroupTable({ initialData }: TrashGroupTableProps) {
     },
     {
       key: "creator",
-      label: "Creator",
+      label: t("table.creator"),
       render: (_: unknown, row: Record<string, unknown>) => {
         const creator = row.creator as {
           fullname: string | null;
@@ -181,7 +177,7 @@ export function TrashGroupTable({ initialData }: TrashGroupTableProps) {
     },
     {
       key: "member_count",
-      label: "Members",
+      label: t("table.members"),
       render: (value: unknown) => (
         <Badge variant="secondary">
           <Users className="mr-1 h-3 w-3" />
@@ -191,16 +187,16 @@ export function TrashGroupTable({ initialData }: TrashGroupTableProps) {
     },
     {
       key: "deleted_at",
-      label: "Deleted",
+      label: t("trash.deleted_at"),
       render: (value: unknown) => (
         <span className="text-sm text-muted-foreground">
-          {formatDeletedDate(value as string)}
+          {formatDeletedDate(value as string, locale)}
         </span>
       ),
     },
     {
       key: "time_left",
-      label: "Time Left",
+      label: t("trash.time_left"),
       render: (_: unknown, row: Record<string, unknown>) => {
         const daysLeft = getDaysUntilPermanentDelete(row.deleted_at as string);
         return (
@@ -213,14 +209,14 @@ export function TrashGroupTable({ initialData }: TrashGroupTableProps) {
             }
           >
             <Clock className="mr-1 h-3 w-3" />
-            {daysLeft} days left
+            {daysLeft} {t("trash.days_left")}
           </Badge>
         );
       },
     },
     {
       key: "action",
-      label: "Action",
+      label: t("table.actions"),
       render: (_: unknown, row: Record<string, unknown>) => {
         const item = initialData.find((i) => i.id === row.id);
         return (
@@ -236,7 +232,7 @@ export function TrashGroupTable({ initialData }: TrashGroupTableProps) {
                 className="cursor-pointer"
               >
                 <RotateCcw className="h-4 w-4 mr-2" />
-                Restore
+                {t("action.restore")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -246,7 +242,7 @@ export function TrashGroupTable({ initialData }: TrashGroupTableProps) {
                 className="cursor-pointer text-destructive focus:text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Delete Permanently
+                {t("trash.delete_permanent_title")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -283,10 +279,9 @@ export function TrashGroupTable({ initialData }: TrashGroupTableProps) {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Restore Group</DialogTitle>
+            <DialogTitle>{t("trash.restore_title")}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to restore "{restoreDialog.item?.name}"? The
-              group and all its members will be restored.
+              {t("trash.restore_desc")} "{restoreDialog.item?.name}"?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -294,11 +289,11 @@ export function TrashGroupTable({ initialData }: TrashGroupTableProps) {
               variant="outline"
               onClick={() => setRestoreDialog({ open: false, item: null })}
             >
-              Cancel
+              {t("action.cancel")}
             </Button>
             <Button onClick={handleRestore} disabled={isPending}>
               <RotateCcw className="mr-2 h-4 w-4" />
-              Restore
+              {t("action.restore")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -314,19 +309,19 @@ export function TrashGroupTable({ initialData }: TrashGroupTableProps) {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-destructive">
-              Permanent Delete
+              {t("trash.delete_permanent_title")}
             </DialogTitle>
             <DialogDescription>
-              Are you sure you want to permanently delete "
-              {deleteDialog.item?.name}"? All group data including members and
-              activities will be deleted. This action cannot be undone.
+              {t("trash.delete_permanent_desc")}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-4">
             <Label htmlFor="confirmDelete">
-              Type{" "}
-              <strong className="text-destructive">Delete Permanently</strong>{" "}
-              to confirm
+              {t("trash.type_confirm")}{" "}
+              <strong className="text-destructive">
+                {t("trash.delete_confirm_text")}
+              </strong>{" "}
+              {t("trash.to_confirm")}
             </Label>
             <Input
               id="confirmDelete"
@@ -337,7 +332,7 @@ export function TrashGroupTable({ initialData }: TrashGroupTableProps) {
                   confirmText: e.target.value,
                 }))
               }
-              placeholder="Type 'Delete Permanently' here"
+              placeholder={t("trash.delete_confirm_text")}
             />
           </div>
           <DialogFooter>
@@ -351,16 +346,17 @@ export function TrashGroupTable({ initialData }: TrashGroupTableProps) {
                 }))
               }
             >
-              Cancel
+              {t("action.cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={handlePermanentDelete}
               disabled={
-                deleteDialog.confirmText !== "Delete Permanently" || isPending
+                deleteDialog.confirmText !== t("trash.delete_confirm_text") ||
+                isPending
               }
             >
-              Delete Permanently
+              {t("trash.delete_permanent_title")}
             </Button>
           </DialogFooter>
         </DialogContent>

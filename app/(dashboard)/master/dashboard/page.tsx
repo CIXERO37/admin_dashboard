@@ -18,8 +18,10 @@ import { useQuizzes } from "@/hooks/useQuizzes";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useGameStats } from "@/hooks/useGameStats";
 import { MasterStatsCharts } from "@/components/dashboard/master-stats-charts";
+import { useTranslation } from "@/lib/i18n";
 
 export default function MasterDashboardPage() {
+  const { t } = useTranslation();
   const { data: quizzes, loading: quizzesLoading } = useQuizzes();
   const {
     data: profiles,
@@ -61,16 +63,16 @@ export default function MasterDashboardPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">
-          Master Data Dashboard
+          {t("master.title")}
         </h1>
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger className="w-[130px]" aria-label="Select a value">
-            <SelectValue placeholder="This Year" />
+            <SelectValue placeholder={t("master.this_year")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="this-year">This Year</SelectItem>
-            <SelectItem value="last-year">Last Year</SelectItem>
-            <SelectItem value="all">All Time</SelectItem>
+            <SelectItem value="this-year">{t("master.this_year")}</SelectItem>
+            <SelectItem value="last-year">{t("master.last_year")}</SelectItem>
+            <SelectItem value="all">{t("master.all_time")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -87,21 +89,25 @@ export default function MasterDashboardPage() {
         ) : (
           <>
             <StatCard
-              title="Quizzes"
+              title={t("stats.quizzes")}
               value={filteredQuizzes.length}
               icon={BookOpen}
             />
             <StatCard
-              title="Categories"
+              title={t("stats.categories")}
               value={categoriesCount}
               icon={Layers}
             />
             <StatCard
-              title="Public"
+              title={t("stats.public")}
               value={publicQuizzes.length}
               icon={Globe}
             />
-            <StatCard title="Private" value={privateCount} icon={Lock} />
+            <StatCard
+              title={t("stats.private")}
+              value={privateCount}
+              icon={Lock}
+            />
           </>
         )}
       </div>
