@@ -18,23 +18,40 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { revenueData } from "@/lib/dummy-data";
+import { useTranslation } from "@/lib/i18n";
 
 const chartConfig = {
   revenue: {
-    label: "Revenue",
+    label: "Revenue", // This label might be used internally by chart lib, hard to translate dynamically in config const if outside component.
+    // Usually ChartConfig label is just for display key. If we want it translated, we might need to move config inside component or handle translation in Tooltip/Legend.
+    // However, looking at usage: <ChartTooltip ... /> and <Area ... />
+    // The "Revenue" label typically shows up in the tooltip.
+    // I can try to make chartConfig specific to the component or see if I can translate it elsewhere.
     color: "#2dd4bf",
   },
 } satisfies ChartConfig;
 
 export function RevenueChart() {
+  const { t } = useTranslation();
+
+  const dynamicChartConfig = {
+    revenue: {
+      label: t("revenue.label"),
+      color: "#2dd4bf",
+    },
+  } satisfies ChartConfig;
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Revenue Over Time</CardTitle>
-        <CardDescription>Monthly revenue for the current year</CardDescription>
+        <CardTitle>{t("revenue.title")}</CardTitle>
+        <CardDescription>{t("revenue.description")}</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-[300px] w-full">
+        <ChartContainer
+          config={dynamicChartConfig}
+          className="h-[300px] w-full"
+        >
           <AreaChart
             accessibilityLayer
             data={revenueData}
@@ -88,10 +105,11 @@ export function RevenueChart() {
         <div className="flex w-full items-start gap-2 text-sm">
           <div className="grid gap-2">
             <div className="flex items-center gap-2 font-medium leading-none">
-              Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+              {t("revenue.trending_up")} 5.2% {t("revenue.this_month")}{" "}
+              <TrendingUp className="h-4 w-4" />
             </div>
             <div className="flex items-center gap-2 leading-none text-muted-foreground">
-              January - June 2024
+              {t("revenue.period")}
             </div>
           </div>
         </div>

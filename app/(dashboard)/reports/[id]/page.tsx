@@ -38,6 +38,7 @@ import {
   sendMessageAction,
   deleteMessageAction,
 } from "../actions";
+import { useTranslation } from "@/lib/i18n";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -46,6 +47,7 @@ interface PageProps {
 export default function ReportDetailPage({ params }: PageProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [report, setReport] = useState<ReportWithMessages | null>(null);
   const [loading, setLoading] = useState(true);
   const [reportId, setReportId] = useState<string>("");
@@ -60,8 +62,8 @@ export default function ReportDetailPage({ params }: PageProps) {
       const { data, error } = await fetchReportById(id);
       if (error || !data) {
         toast({
-          title: "Error",
-          description: "Report not found",
+          title: t("msg.error"),
+          description: t("reports.not_found"),
           variant: "destructive",
         });
         router.push("/reports");
@@ -83,12 +85,15 @@ export default function ReportDetailPage({ params }: PageProps) {
     if (!message.trim() || sending) return;
 
     setSending(true);
-    const { error, message: newMessage } = await sendMessageAction(reportId, message.trim());
-    
+    const { error, message: newMessage } = await sendMessageAction(
+      reportId,
+      message.trim()
+    );
+
     if (error) {
       toast({
-        title: "Error",
-        description: "Gagal mengirim pesan",
+        title: t("msg.error"),
+        description: t("reports.send_error"),
         variant: "destructive",
       });
     } else {
@@ -110,12 +115,19 @@ export default function ReportDetailPage({ params }: PageProps) {
     }
   };
 
-  const handleDeleteMessage = async (messageId: string, senderType: "admin" | "user") => {
-    const { error } = await deleteMessageAction(reportId, messageId, senderType);
-    
+  const handleDeleteMessage = async (
+    messageId: string,
+    senderType: "admin" | "user"
+  ) => {
+    const { error } = await deleteMessageAction(
+      reportId,
+      messageId,
+      senderType
+    );
+
     if (error) {
       toast({
-        title: "Error",
+        title: t("msg.error"),
         description: error,
         variant: "destructive",
       });
@@ -123,12 +135,12 @@ export default function ReportDetailPage({ params }: PageProps) {
       if (report) {
         setReport({
           ...report,
-          messages: (report.messages || []).filter(m => m.id !== messageId),
+          messages: (report.messages || []).filter((m) => m.id !== messageId),
         });
       }
       toast({
-        title: "Berhasil",
-        description: "Pesan berhasil dihapus",
+        title: t("msg.success"),
+        description: t("reports.delete_message_success"),
       });
     }
   };
@@ -136,7 +148,7 @@ export default function ReportDetailPage({ params }: PageProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Loading...</div>
+        <div className="text-muted-foreground">{t("msg.loading")}</div>
       </div>
     );
   }
@@ -153,13 +165,13 @@ export default function ReportDetailPage({ params }: PageProps) {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/reports">Reports</Link>
+                <Link href="/reports">{t("reports.title")}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbPage className="max-w-[200px] truncate">
-                {report.title || "Untitled Report"}
+                {report.title || t("reports.untitled")}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -177,9 +189,11 @@ export default function ReportDetailPage({ params }: PageProps) {
                 {messages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center py-12">
                     <AlertCircle className="h-12 w-12 text-muted-foreground/50 mb-3" />
-                    <p className="text-muted-foreground">Belum ada pesan</p>
+                    <p className="text-muted-foreground">
+                      {t("reports.no_messages")}
+                    </p>
                     <p className="text-sm text-muted-foreground/70">
-                      Kirim pesan pertama untuk memulai percakapan
+                      {t("reports.start_conversation")}
                     </p>
                   </div>
                 ) : (
@@ -189,7 +203,9 @@ export default function ReportDetailPage({ params }: PageProps) {
                         key={msg.id}
                         className={cn(
                           "flex gap-3 group",
-                          msg.sender_type === "admin" ? "flex-row-reverse" : "flex-row"
+                          msg.sender_type === "admin"
+                            ? "flex-row-reverse"
+                            : "flex-row"
                         )}
                       >
                         <Avatar className="h-8 w-8 flex-shrink-0">
@@ -210,10 +226,14 @@ export default function ReportDetailPage({ params }: PageProps) {
                             </>
                           )}
                         </Avatar>
-                        <div className={cn(
-                          "flex items-start gap-1",
-                          msg.sender_type === "admin" ? "flex-row-reverse" : "flex-row"
-                        )}>
+                        <div
+                          className={cn(
+                            "flex items-start gap-1",
+                            msg.sender_type === "admin"
+                              ? "flex-row-reverse"
+                              : "flex-row"
+                          )}
+                        >
                           <div
                             className={cn(
                               "max-w-[70%] rounded-lg px-3 py-2",
@@ -236,7 +256,9 @@ export default function ReportDetailPage({ params }: PageProps) {
                           </div>
                           {msg.sender_type === "admin" && (
                             <button
-                              onClick={() => handleDeleteMessage(msg.id, msg.sender_type)}
+                              onClick={() =>
+                                handleDeleteMessage(msg.id, msg.sender_type)
+                              }
                               className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive"
                               title="Hapus pesan"
                             >
@@ -254,7 +276,7 @@ export default function ReportDetailPage({ params }: PageProps) {
               <div className="p-4 border-t">
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Ketik pesan..."
+                    placeholder={t("reports.type_message")}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyDown={handleKeyDown}
@@ -283,14 +305,16 @@ export default function ReportDetailPage({ params }: PageProps) {
           {/* Report Info Card */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Report Information</CardTitle>
+              <CardTitle className="text-base">
+                {t("reports.report_info")}
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Title */}
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                   <FileText className="h-3.5 w-3.5" />
-                  Title
+                  {t("table.title")}
                 </p>
                 <p className="font-medium">{report.title || "-"}</p>
               </div>
@@ -299,7 +323,9 @@ export default function ReportDetailPage({ params }: PageProps) {
 
               {/* Description */}
               <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Description</p>
+                <p className="text-xs text-muted-foreground">
+                  {t("reports.description")}
+                </p>
                 <p className="text-sm">{report.description || "-"}</p>
               </div>
 
@@ -309,9 +335,11 @@ export default function ReportDetailPage({ params }: PageProps) {
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                   <Tag className="h-3.5 w-3.5" />
-                  Type
+                  {t("reports.type")}
                 </p>
-                <p className="font-medium capitalize">{report.reported_content_type || "-"}</p>
+                <p className="font-medium capitalize">
+                  {report.reported_content_type || "-"}
+                </p>
               </div>
 
               <Separator />
@@ -320,7 +348,7 @@ export default function ReportDetailPage({ params }: PageProps) {
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5" />
-                  Created
+                  {t("quiz.created_at")}
                 </p>
                 <p className="font-medium">
                   {report.created_at
@@ -335,10 +363,13 @@ export default function ReportDetailPage({ params }: PageProps) {
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                       <CheckCircle2 className="h-3.5 w-3.5" />
-                      Resolved
+                      {t("reports.resolved")}
                     </p>
                     <p className="font-medium">
-                      {format(new Date(report.resolved_at), "dd MMM yyyy, HH:mm")}
+                      {format(
+                        new Date(report.resolved_at),
+                        "dd MMM yyyy, HH:mm"
+                      )}
                     </p>
                   </div>
                 </>
@@ -350,10 +381,14 @@ export default function ReportDetailPage({ params }: PageProps) {
           {report.admin_notes && (
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Admin Notes</CardTitle>
+                <CardTitle className="text-base">
+                  {t("reports.admin_notes")}
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm bg-muted p-3 rounded-lg">{report.admin_notes}</p>
+                <p className="text-sm bg-muted p-3 rounded-lg">
+                  {report.admin_notes}
+                </p>
               </CardContent>
             </Card>
           )}

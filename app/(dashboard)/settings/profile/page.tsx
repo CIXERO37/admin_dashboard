@@ -90,7 +90,7 @@ export default function SettingsProfilePage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="email" className="text-foreground">
-                Email
+                {t("settings.email")}
               </Label>
               <Input
                 id="email"

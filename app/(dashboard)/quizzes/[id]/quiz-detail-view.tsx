@@ -35,8 +35,9 @@ interface QuizDetailViewProps {
 export function QuizDetailView({ quiz }: QuizDetailViewProps) {
   const { t } = useTranslation();
 
-  const visibility = quiz.is_public ? "Public" : "Private";
-  const status = quiz.status === "block" ? "Block" : "Active";
+  const visibility = quiz.is_public ? t("status.public") : t("status.private");
+  const status =
+    quiz.status === "block" ? t("status.blocked") : t("status.active");
   const questions = Array.isArray(quiz.questions) ? quiz.questions : [];
 
   return (
@@ -119,18 +120,13 @@ export function QuizDetailView({ quiz }: QuizDetailViewProps) {
               <p className="text-sm text-muted-foreground">
                 {t("table.visibility")}
               </p>
-              <p className="text-foreground font-medium">
-                {t(`filter.visibility.${visibility.toLowerCase()}`) ||
-                  visibility}
-              </p>
+              <p className="text-foreground font-medium">{visibility}</p>
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">
                 {t("table.status")}
               </p>
-              <p className="text-foreground font-medium">
-                {t(`status.${status.toLowerCase()}`) || status}
-              </p>
+              <p className="text-foreground font-medium">{status}</p>
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">
