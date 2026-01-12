@@ -145,7 +145,7 @@ export default function SettingsSecurityPage() {
                       </p>
                       {login.current && (
                         <Badge className="bg-[var(--success)]/20 text-[var(--success)] border-[var(--success)]/30">
-                          Current
+                          {t("settings.current_device")}
                         </Badge>
                       )}
                     </div>

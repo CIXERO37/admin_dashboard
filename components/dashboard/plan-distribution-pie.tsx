@@ -11,18 +11,27 @@ import {
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const planDistribution = [
-  { name: "Enterprise", value: 1, color: "oklch(0.7 0.15 180)" },
-  { name: "Business", value: 1, color: "oklch(0.65 0.18 280)" },
-  { name: "Pro", value: 1, color: "oklch(0.75 0.15 80)" },
-  { name: "Starter", value: 1, color: "oklch(0.6 0.2 30)" },
+import { useTranslation } from "@/lib/i18n";
+
+const rawPlanDistribution = [
+  { key: "enterprise", value: 1, color: "oklch(0.7 0.15 180)" },
+  { key: "business", value: 1, color: "oklch(0.65 0.18 280)" },
+  { key: "pro", value: 1, color: "oklch(0.75 0.15 80)" },
+  { key: "starter", value: 1, color: "oklch(0.6 0.2 30)" },
 ];
 
 export function PlanDistributionPie() {
+  const { t } = useTranslation();
+
+  const planDistribution = rawPlanDistribution.map((item) => ({
+    ...item,
+    name: t(`plan.${item.key}`),
+  }));
+
   return (
     <Card className="col-span-3">
       <CardHeader>
-        <CardTitle>Plan Distribution</CardTitle>
+        <CardTitle>{t("billing.plan_distribution")}</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>

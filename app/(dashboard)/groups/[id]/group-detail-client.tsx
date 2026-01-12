@@ -176,8 +176,8 @@ export function GroupDetailClient({
 
       if (!result.error) {
         toast({
-          title: "Success",
-          description: "Member removed successfully",
+          title: t("msg.success"),
+          description: t("group_detail.remove_success"),
         });
         setRemoveMemberDialog({
           open: false,
@@ -187,7 +187,7 @@ export function GroupDetailClient({
         router.refresh();
       } else {
         toast({
-          title: "Error",
+          title: t("msg.error"),
           description: result.error,
           variant: "destructive",
         });
@@ -201,13 +201,13 @@ export function GroupDetailClient({
 
       if (!result.error) {
         toast({
-          title: "Success",
-          description: "Member role updated successfully",
+          title: t("msg.success"),
+          description: t("group_detail.role_update_success"),
         });
         router.refresh();
       } else {
         toast({
-          title: "Error",
+          title: t("msg.error"),
           description: result.error,
           variant: "destructive",
         });
@@ -232,7 +232,7 @@ export function GroupDetailClient({
   };
 
   const getActivityDescription = (activity: any) => {
-    const username = activity.nama || "Unknown User";
+    const username = activity.nama || t("group_detail.unknown_user");
     let actionKey = "";
 
     switch (activity.type) {
@@ -476,7 +476,7 @@ export function GroupDetailClient({
                         updateUrl({ role: value, page: 1 })
                       }
                     >
-                      <SelectTrigger className="w-40">
+                      <SelectTrigger className="w-[170px]">
                         <SelectValue
                           placeholder={t("group_detail.role_placeholder")}
                         />

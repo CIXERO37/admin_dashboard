@@ -501,7 +501,7 @@ export function ReportTable({
             value={statusFilter}
             onValueChange={(value) => updateUrl({ status: value, page: 1 })}
           >
-            <SelectTrigger className="w-36">
+            <SelectTrigger className="w-[180px]">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4" />
                 <SelectValue placeholder={t("table.status")} />

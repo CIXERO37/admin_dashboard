@@ -65,7 +65,7 @@ export default function AdministratorDashboardPage() {
         </h1>
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger
-            className="w-[130px] rounded-lg"
+            className="w-[160px] rounded-lg"
             aria-label="Select a value"
           >
             <SelectValue placeholder={t("master.this_year")} />

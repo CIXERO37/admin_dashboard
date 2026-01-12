@@ -232,10 +232,17 @@ export function QuizApprovalTable({
       key: "category",
       label: t("table.category"),
       render: (value: unknown) => {
-        const category = capitalizeFirst(value as string);
+        const val = value as string;
+        if (!val || val === "-") {
+          return (
+            <Badge variant="secondary" className="text-xs">
+              -
+            </Badge>
+          );
+        }
         return (
           <Badge variant="secondary" className="text-xs">
-            {category || "-"}
+            {t(`category.${val.toLowerCase().replace(/\s+/g, "_")}`)}
           </Badge>
         );
       },
@@ -303,13 +310,15 @@ export function QuizApprovalTable({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Quiz Approval</h1>
+          <h1 className="text-3xl font-bold text-foreground">
+            {t("page.quiz_approval")}
+          </h1>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="relative">
             <Input
-              placeholder="Search quiz..."
+              placeholder={t("approval.search")}
               className="pr-10 w-64 bg-background border-border"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -328,7 +337,7 @@ export function QuizApprovalTable({
             value={categoryFilter}
             onValueChange={(value) => updateUrl({ category: value, page: 1 })}
           >
-            <SelectTrigger className="w-36">
+            <SelectTrigger className="w-[180px]">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4" />
                 <SelectValue placeholder={t("table.category")} />
@@ -338,7 +347,7 @@ export function QuizApprovalTable({
               <SelectItem value="all">{t("quiz.all_category")}</SelectItem>
               {categories.map((cat) => (
                 <SelectItem key={cat} value={cat}>
-                  {capitalizeFirst(cat)}
+                  {t(`category.${cat.toLowerCase().replace(/\s+/g, "_")}`)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -363,12 +372,12 @@ export function QuizApprovalTable({
               <FileQuestion className="h-6 w-6 text-muted-foreground" />
             </div>
             <h3 className="text-base font-medium text-foreground mb-1">
-              No quizzes pending approval
+              {t("approval.no_pending")}
             </h3>
             <p className="text-sm text-muted-foreground">
               {searchQuery
-                ? "No quizzes match your search"
-                : "All quizzes have been reviewed"}
+                ? t("approval.no_match")
+                : t("approval.all_reviewed")}
             </p>
           </div>
         )}

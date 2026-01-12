@@ -19,6 +19,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { useTranslation } from "@/lib/i18n";
 
 interface SupportChartsProps {
   reports: any[];
@@ -26,10 +27,12 @@ interface SupportChartsProps {
 }
 
 export function SupportCharts({ reports, groupStats }: SupportChartsProps) {
+  const { t } = useTranslation();
+
   const typeData = React.useMemo(() => {
     const counts: Record<string, number> = {};
     reports.forEach((r) => {
-      let type = r.report_type || "Unknown";
+      let type = r.report_type || t("admin.unknown");
       // Format readable
       type = type
         .replace(/_/g, " ")
@@ -40,7 +43,7 @@ export function SupportCharts({ reports, groupStats }: SupportChartsProps) {
       .map(([type, count]) => ({ type, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5); // Top 5
-  }, [reports]);
+  }, [reports, t]);
 
   const monthlyData = React.useMemo(() => {
     const counts: Record<number, number> = {};
@@ -73,7 +76,7 @@ export function SupportCharts({ reports, groupStats }: SupportChartsProps) {
 
   const chartConfig = {
     count: {
-      label: "Reports",
+      label: t("stats.reports"),
       color: "var(--chart-1)",
     },
   } satisfies ChartConfig;
@@ -82,7 +85,7 @@ export function SupportCharts({ reports, groupStats }: SupportChartsProps) {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Reports by Type</CardTitle>
+          <CardTitle>{t("stats.reports_by_type")}</CardTitle>
         </CardHeader>
         <CardContent>
           {typeData.length > 0 ? (
@@ -131,7 +134,7 @@ export function SupportCharts({ reports, groupStats }: SupportChartsProps) {
           ) : (
             <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
               <FileX className="h-10 w-10 opacity-20" />
-              <p className="text-sm">No reports found for this period</p>
+              <p className="text-sm">{t("msg.no_reports")}</p>
             </div>
           )}
         </CardContent>
@@ -139,7 +142,7 @@ export function SupportCharts({ reports, groupStats }: SupportChartsProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Top Group Categories</CardTitle>
+          <CardTitle>{t("stats.top_group_categories")}</CardTitle>
         </CardHeader>
         <CardContent>
           {groupStats && groupStats.length > 0 ? (
@@ -188,7 +191,7 @@ export function SupportCharts({ reports, groupStats }: SupportChartsProps) {
           ) : (
             <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
               <BarChart2 className="h-10 w-10 opacity-20" />
-              <p className="text-sm">No group data available</p>
+              <p className="text-sm">{t("msg.no_groups_data")}</p>
             </div>
           )}
         </CardContent>
@@ -196,7 +199,7 @@ export function SupportCharts({ reports, groupStats }: SupportChartsProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Activity</CardTitle>
+          <CardTitle>{t("stats.activity")}</CardTitle>
         </CardHeader>
         <CardContent>
           {monthlyData.some((d) => d.count > 0) ? (
@@ -240,7 +243,7 @@ export function SupportCharts({ reports, groupStats }: SupportChartsProps) {
           ) : (
             <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
               <TrendingUp className="h-10 w-10 opacity-20" />
-              <p className="text-sm">No activity trend available</p>
+              <p className="text-sm">{t("msg.no_activity_trend")}</p>
             </div>
           )}
         </CardContent>

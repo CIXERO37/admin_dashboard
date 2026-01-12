@@ -65,25 +65,33 @@ export async function fetchCities({
     return { data: [], totalCount: 0, totalPages: 0, countries: [], states: [] }
   }
 
+  // Optimized: Fetch countries from the 'countries' table instead of 'cities'
+  // This ensures we get ALL countries, not just those in the current 'cities' page/limit
   const { data: allCountries } = await supabase
-    .from("cities")
-    .select("country_code")
-    .not("country_code", "is", null)
+    .from("countries")
+    .select("iso2")
+    .order("iso2", { ascending: true })
 
-  const uniqueCountries = [...new Set(allCountries?.map((c) => c.country_code).filter(Boolean) as string[])].sort()
+  const uniqueCountries = [
+    ...new Set(allCountries?.map((c) => c.iso2).filter(Boolean) as string[]),
+  ]
 
+  // Optimized: Fetch states from 'states' table
+  // Filter by country if selected
   let statesQuery = supabase
-    .from("cities")
-    .select("state_code")
-    .not("state_code", "is", null)
+    .from("states")
+    .select("iso2")
+    .not("iso2", "is", null)
 
   if (country && country !== "all") {
     statesQuery = statesQuery.eq("country_code", country)
   }
 
-  const { data: allStates } = await statesQuery
+  const { data: allStates } = await statesQuery.order("iso2", { ascending: true })
 
-  const uniqueStates = [...new Set(allStates?.map((s) => s.state_code).filter(Boolean) as string[])].sort()
+  const uniqueStates = [
+    ...new Set(allStates?.map((s) => s.iso2).filter(Boolean) as string[]),
+  ]
 
   return {
     data: data ?? [],
