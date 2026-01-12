@@ -76,7 +76,7 @@ export default function BillingDashboardPage() {
         <StatCard
           title={t("billing.subscribers")}
           value={activeSubscribers.length}
-          change="+2 this week"
+          change={`+2 ${t("billing.this_week")}`}
           changeType="increase"
           icon={Users}
         />
@@ -90,14 +90,14 @@ export default function BillingDashboardPage() {
         <StatCard
           title={t("billing.unpaid_invoices")}
           value={unpaidUsers.length}
-          change={`$${unpaidTotal} pending`}
+          change={`$${unpaidTotal} ${t("billing.pending")}`}
           changeType="decrease"
           icon={AlertCircle}
         />
         <StatCard
           title={t("billing.mrr_growth")}
           value="+15.3%"
-          change="vs last month"
+          change={t("billing.vs_last_month")}
           changeType="increase"
           icon={TrendingUp}
         />

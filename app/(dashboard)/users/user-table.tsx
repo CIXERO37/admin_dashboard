@@ -566,7 +566,7 @@ export function UserTable({
             value={roleFilter}
             onValueChange={(value) => updateUrl({ role: value, page: 1 })}
           >
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-[170px]">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4" />
                 <SelectValue placeholder={t("users.role")} />
@@ -583,7 +583,7 @@ export function UserTable({
             value={statusFilter}
             onValueChange={(value) => updateUrl({ status: value, page: 1 })}
           >
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-[170px]">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4" />
                 <SelectValue placeholder={t("table.status")} />

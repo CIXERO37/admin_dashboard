@@ -12,7 +12,6 @@ import {
   FileQuestion,
   Globe,
   Tag,
-  Mail,
 } from "lucide-react";
 
 import { cn, getAvatarUrl } from "@/lib/utils";
@@ -44,6 +43,7 @@ import {
   approveQuizAction,
   rejectQuizAction,
 } from "../actions";
+import { useTranslation } from "@/lib/i18n";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -52,6 +52,7 @@ interface PageProps {
 export default function QuizApprovalDetailPage({ params }: PageProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [quiz, setQuiz] = useState<QuizApproval | null>(null);
   const [loading, setLoading] = useState(true);
   const [quizId, setQuizId] = useState<string>("");
@@ -68,8 +69,8 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
       const { data, error } = await fetchQuizApprovalById(id);
       if (error || !data) {
         toast({
-          title: "Error",
-          description: "Quiz not found",
+          title: t("msg.error"),
+          description: t("approval.quiz_not_found"),
           variant: "destructive",
         });
         router.push("/quiz-approval");
@@ -86,14 +87,14 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
     const { error } = await approveQuizAction(quizId);
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to approve quiz",
+        title: t("msg.error"),
+        description: t("approval.failed_approve"),
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Success",
-        description: "Quiz has been approved and published",
+        title: t("msg.success"),
+        description: t("approval.approved_success"),
       });
       router.push("/quiz-approval");
     }
@@ -106,12 +107,15 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
     const { error } = await rejectQuizAction(quizId, rejectReason);
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to reject quiz",
+        title: t("msg.error"),
+        description: t("approval.failed_reject"),
         variant: "destructive",
       });
     } else {
-      toast({ title: "Success", description: "Quiz has been rejected" });
+      toast({
+        title: t("msg.success"),
+        description: t("approval.rejected_success"),
+      });
       router.push("/quiz-approval");
     }
     setProcessing(false);
@@ -122,7 +126,7 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Loading...</div>
+        <div className="text-muted-foreground">{t("msg.loading")}</div>
       </div>
     );
   }
@@ -140,7 +144,7 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href="/quiz-approval">Quiz Approval</Link>
+                  <Link href="/quiz-approval">{t("page.quiz_approval")}</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -159,20 +163,22 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
               onClick={() => setRejectDialog(true)}
             >
               <XCircle className="h-4 w-4" />
-              Reject
+              {t("action.reject")}
             </Button>
             <Button
               className="gap-2 bg-emerald-500 hover:bg-emerald-600 shadow-sm hover:shadow-md cursor-pointer transition-all duration-200"
               onClick={() => setApproveDialog(true)}
             >
               <CheckCircle className="h-4 w-4" />
-              Approve
+              {t("action.approve")}
             </Button>
           </div>
         </div>
 
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Review Quiz</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            {t("approval.review_quiz")}
+          </h1>
         </div>
       </div>
 
@@ -205,7 +211,7 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
               variant="outline"
               className="bg-yellow-500/10 text-yellow-600 border-yellow-500/30"
             >
-              Pending Approval
+              {t("approval.pending_approval")}
             </Badge>
           </div>
 
@@ -215,7 +221,7 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <User className="h-4 w-4" />
-                Creator
+                {t("approval.creator")}
               </div>
               {quiz.creator ? (
                 <Link
@@ -238,7 +244,7 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
                   </div>
                 </Link>
               ) : (
-                <p className="text-foreground">Unknown</p>
+                <p className="text-foreground">{t("approval.unknown")}</p>
               )}
             </div>
 
@@ -246,16 +252,24 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Tag className="h-4 w-4" />
-                Category
+                {t("table.category")}
               </div>
-              <p className="font-medium capitalize">{quiz.category || "-"}</p>
+              <p className="font-medium capitalize">
+                {quiz.category
+                  ? t(
+                      `category.${quiz.category
+                        .toLowerCase()
+                        .replace(/\s+/g, "_")}`
+                    )
+                  : "-"}
+              </p>
             </div>
 
             {/* Language */}
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Globe className="h-4 w-4" />
-                Language
+                {t("quiz.language")}
               </div>
               <p className="font-medium uppercase">{quiz.language || "ID"}</p>
             </div>
@@ -264,7 +278,7 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
-                Created
+                {t("quiz.created_at")}
               </div>
               <p className="font-medium">
                 {quiz.created_at
@@ -273,17 +287,6 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
               </p>
             </div>
           </div>
-
-          {/* Creator Contact */}
-          {quiz.creator?.email && (
-            <div className="p-4 rounded-lg bg-muted/50 flex items-center gap-3">
-              <Mail className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm text-muted-foreground">Creator Email</p>
-                <p className="font-medium">{quiz.creator.email}</p>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
@@ -293,7 +296,7 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
           <div className="flex items-center gap-2">
             <FileQuestion className="h-5 w-5 text-primary" />
             <h3 className="text-lg font-semibold text-foreground">
-              Questions ({questions.length})
+              {t("quiz.questions_list")} ({questions.length})
             </h3>
           </div>
         </div>
@@ -358,7 +361,7 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
                             <span className="flex-1">{optionText}</span>
                             {isCorrect && (
                               <Badge className="bg-green-500/20 text-green-600 border-green-500/30">
-                                Correct
+                                {t("approval.correct")}
                               </Badge>
                             )}
                           </div>
@@ -372,7 +375,7 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
           </div>
         ) : (
           <div className="p-8 text-center text-muted-foreground">
-            No questions in this quiz
+            {t("approval.no_questions")}
           </div>
         )}
       </div>
@@ -381,9 +384,9 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
       <Dialog open={approveDialog} onOpenChange={setApproveDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Approve Quiz</DialogTitle>
+            <DialogTitle>{t("approval.approve_title")}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to approve this quiz?
+              {t("approval.approve_confirm")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -393,14 +396,14 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
               disabled={processing}
               className="cursor-pointer"
             >
-              Cancel
+              {t("action.cancel")}
             </Button>
             <Button
               onClick={handleApprove}
               disabled={processing}
               className="bg-emerald-500 hover:bg-emerald-600 text-white cursor-pointer"
             >
-              {processing ? "Processing..." : "Approve"}
+              {processing ? t("approval.processing") : t("action.approve")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -410,16 +413,16 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
       <Dialog open={rejectDialog} onOpenChange={setRejectDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reject Quiz</DialogTitle>
+            <DialogTitle>{t("approval.reject_title")}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to reject this quiz?
+              {t("approval.reject_confirm")}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-4">
-            <Label htmlFor="reason">Reason for Rejection</Label>
+            <Label htmlFor="reason">{t("approval.reason_label")}</Label>
             <Textarea
               id="reason"
-              placeholder="e.g., Inappropriate content, Low image quality, etc."
+              placeholder={t("approval.reason_placeholder")}
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               rows={3}
@@ -435,7 +438,7 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
               disabled={processing}
               className="cursor-pointer"
             >
-              Cancel
+              {t("action.cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -443,7 +446,7 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
               disabled={processing || !rejectReason.trim()}
               className="cursor-pointer"
             >
-              {processing ? "Processing..." : "Reject Quiz"}
+              {processing ? t("approval.processing") : t("approval.reject_btn")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -78,6 +78,13 @@ export const id: Record<string, string> = {
     "table.visibility": "Visibilitas",
     "table.members": "Anggota",
     "table.language": "Bahasa",
+    "stats.reports_by_type": "Laporan Berdasarkan Tipe",
+    "stats.top_group_categories": "Kategori Grup Teratas",
+    "stats.activity": "Aktivitas",
+    "stats.pending_reports": "Laporan Tertunda",
+    "msg.no_reports": "Tidak ada laporan ditemukan untuk periode ini",
+    "msg.no_groups_data": "Data grup tidak tersedia",
+    "msg.no_activity_trend": "Tren aktivitas tidak tersedia",
 
     // Status
     "status.active": "Aktif",
@@ -125,10 +132,13 @@ export const id: Record<string, string> = {
     "time.this_month": "Bulan Ini",
     "time.this_year": "Tahun Ini",
     "time.all_time": "Semua Waktu",
+    "time.range": "Rentang Waktu",
 
     // Messages
     "msg.no_data": "Tidak ada data",
     "msg.loading": "Memuat...",
+    "msg.error": "Error",
+    "msg.success": "Berhasil",
 
     // Users Page
     "users.title": "Pengguna",
@@ -209,6 +219,15 @@ export const id: Record<string, string> = {
     "reports.delete_error": "Gagal menghapus laporan",
     "reports.status_update_desc":
       "Apakah Anda yakin ingin mengubah status laporan",
+    "reports.report_info": "Informasi Laporan",
+    "reports.not_found": "Laporan tidak ditemukan",
+    "reports.untitled": "Laporan Tanpa Judul",
+    "reports.no_messages": "Belum ada pesan",
+    "reports.start_conversation": "Kirim pesan pertama untuk memulai percakapan",
+    "reports.type_message": "Ketik pesan...",
+    "reports.send_error": "Gagal mengirim pesan",
+    "reports.delete_message_success": "Pesan berhasil dihapus",
+    "reports.resolved": "Diselesaikan",
 
     // Quiz Approval
     "approval.title": "Permintaan Persetujuan Kuis",
@@ -224,6 +243,24 @@ export const id: Record<string, string> = {
     "approval.failed_approve": "Gagal menyetujui kuis",
     "approval.failed_reject": "Gagal menolak kuis",
     "approval.reason": "Alasan",
+    "approval.no_pending": "Tidak ada kuis menunggu persetujuan",
+    "approval.no_match": "Tidak ada kuis yang cocok dengan pencarian Anda",
+    "approval.all_reviewed": "Semua kuis telah ditinjau",
+    "approval.review_quiz": "Tinjau Kuis",
+    "approval.pending_approval": "Menunggu Persetujuan",
+    "approval.creator": "Pembuat",
+    "approval.creator_email": "Email Pembuat",
+    "approval.unknown": "Tidak Diketahui",
+    "approval.no_questions": "Tidak ada pertanyaan dalam kuis ini",
+    "approval.correct": "Benar",
+    "approval.approve_confirm": "Apakah Anda yakin ingin menyetujui kuis ini?",
+    "approval.reject_confirm": "Apakah Anda yakin ingin menolak kuis ini?",
+    "approval.reason_label": "Alasan Penolakan",
+    "approval.reason_placeholder": "mis., Konten tidak sesuai, Kualitas gambar rendah, dll.",
+    "approval.processing": "Memproses...",
+    "approval.quiz_not_found": "Kuis tidak ditemukan",
+    "approval.approved_success": "Kuis telah disetujui dan dipublikasikan",
+    "approval.rejected_success": "Kuis telah ditolak",
 
     // Groups Page
     "groups.title": "Grup",
@@ -262,6 +299,9 @@ export const id: Record<string, string> = {
     "group_detail.remove_member_title": "Hapus Anggota",
     "group_detail.remove_member_confirm": "Apakah Anda yakin ingin menghapus",
     "group_detail.remove_member_confirm_suffix": "dari grup ini?",
+    "group_detail.remove_success": "Anggota berhasil dihapus",
+    "group_detail.role_update_success": "Peran anggota berhasil diperbarui",
+    "group_detail.unknown_user": "Pengguna Tidak Dikenal",
     "activity.joined_group": "bergabung dengan grup",
     "activity.left_group": "keluar dari grup",
     "activity.kicked_group": "dikeluarkan dari grup",
@@ -338,6 +378,10 @@ export const id: Record<string, string> = {
     "stats.private": "Privat",
     "stats.count": "Jumlah",
     "master.top_categories": "Kategori Terpopuler",
+    "master.top_hosts": "Host Teratas",
+    "master.top_players": "Pemain Teratas",
+    "master.no_data_host": "Data host tidak tersedia",
+    "master.no_data_player": "Data pemain tidak tersedia",
     "master.most_played": "Paling Sering Dimainkan",
     "master.most_favorited": "Paling Disukai",
     "master.top_creators": "Kreator Teratas",
@@ -454,6 +498,9 @@ export const id: Record<string, string> = {
     "settings.phone": "Telepon",
     "settings.save": "Simpan Perubahan",
 
+    "settings.current_device": "Saat Ini",
+    "settings.email": "Email",
+
     // Appearance
     "appearance.title": "Tampilan",
     "appearance.theme": "Tema",
@@ -468,7 +515,19 @@ export const id: Record<string, string> = {
     "billing.unpaid_invoices": "Faktur Belum Dibayar",
     "billing.mrr_growth": "Pertumbuhan MRR",
     "billing.recent_transactions": "Transaksi Terbaru",
-    "billing.recent_desc": "Pembayaran langganan dan faktur terbaru",
+    "billing.recent_desc": "Transaksi terbaru dari pelanggan Anda.",
+    "billing.this_week": "minggu ini",
+    "billing.pending": "tertunda",
+    "billing.vs_last_month": "vs bulan lalu",
+
+    // Revenue Chart
+    "revenue.title": "Pendapatan Seiring Waktu",
+    "revenue.description": "Pendapatan bulanan untuk tahun berjalan",
+    "revenue.label": "Pendapatan",
+    "revenue.trending_up": "Tren naik sebesar",
+    "revenue.this_month": "bulan ini",
+    "revenue.period": "Januari - Juni 2024",
+    "billing.plan_distribution": "Distribusi Paket",
     "table.plan": "Paket",
     "table.amount": "Jumlah",
     "table.customer": "Pelanggan",
@@ -514,6 +573,8 @@ export const id: Record<string, string> = {
     "category.music": "Musik",
     "category.geography": "Geografi",
     "category.general_knowledge": "Pengetahuan Umum",
+    "category.business": "Bisnis",
+    "category.sports": "Olahraga",
 
     "action.move_to_trash": "Pindahkan ke Sampah",
     "action.apply": "Terapkan",
