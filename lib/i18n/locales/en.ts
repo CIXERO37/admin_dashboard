@@ -78,6 +78,13 @@ export const en: Record<string, string> = {
     "table.visibility": "Visibility",
     "table.members": "Members",
     "table.language": "Language",
+    "stats.reports_by_type": "Reports by Type",
+    "stats.top_group_categories": "Top Group Categories",
+    "stats.activity": "Activity",
+    "stats.pending_reports": "Pending Reports",
+    "msg.no_reports": "No reports found for this period",
+    "msg.no_groups_data": "No group data available",
+    "msg.no_activity_trend": "No activity trend available",
 
     // Status
     "status.active": "Active",
@@ -125,10 +132,13 @@ export const en: Record<string, string> = {
     "time.this_month": "This Month",
     "time.this_year": "This Year",
     "time.all_time": "All Time",
+    "time.range": "Time Range",
 
     // Messages
     "msg.no_data": "No data available",
     "msg.loading": "Loading...",
+    "msg.error": "Error",
+    "msg.success": "Success",
 
     // Users Page
     "users.title": "Users",
@@ -206,6 +216,15 @@ export const en: Record<string, string> = {
     "reports.delete_error": "Failed to delete report_table",
     "reports.status_update_desc":
       "Are you sure you want to change the status of report",
+    "reports.report_info": "Report Information",
+    "reports.not_found": "Report not found",
+    "reports.untitled": "Untitled Report",
+    "reports.no_messages": "No messages yet",
+    "reports.start_conversation": "Send the first message to start a conversation",
+    "reports.type_message": "Type a message...",
+    "reports.send_error": "Failed to send message",
+    "reports.delete_message_success": "Message deleted successfully",
+    "reports.resolved": "Resolved",
 
     // Quiz Approval
     "approval.title": "Quiz Approval Requests",
@@ -221,6 +240,24 @@ export const en: Record<string, string> = {
     "approval.failed_approve": "Failed to approve quiz",
     "approval.failed_reject": "Failed to reject quiz",
     "approval.reason": "Reason",
+    "approval.no_pending": "No quizzes pending approval",
+    "approval.no_match": "No quizzes match your search",
+    "approval.all_reviewed": "All quizzes have been reviewed",
+    "approval.review_quiz": "Review Quiz",
+    "approval.pending_approval": "Pending Approval",
+    "approval.creator": "Creator",
+    "approval.creator_email": "Creator Email",
+    "approval.unknown": "Unknown",
+    "approval.no_questions": "No questions in this quiz",
+    "approval.correct": "Correct",
+    "approval.approve_confirm": "Are you sure you want to approve this quiz?",
+    "approval.reject_confirm": "Are you sure you want to reject this quiz?",
+    "approval.reason_label": "Reason for Rejection",
+    "approval.reason_placeholder": "e.g., Inappropriate content, Low image quality, etc.",
+    "approval.processing": "Processing...",
+    "approval.quiz_not_found": "Quiz not found",
+    "approval.approved_success": "Quiz has been approved and published",
+    "approval.rejected_success": "Quiz has been rejected",
 
     // Groups Page
     "groups.title": "Groups",
@@ -260,6 +297,9 @@ export const en: Record<string, string> = {
     "group_detail.remove_member_title": "Remove Member",
     "group_detail.remove_member_confirm": "Are you sure you want to remove",
     "group_detail.remove_member_confirm_suffix": "from this group?",
+    "group_detail.remove_success": "Member removed successfully",
+    "group_detail.role_update_success": "Member role updated successfully",
+    "group_detail.unknown_user": "Unknown User",
     "activity.joined_group": "joined the group",
     "activity.left_group": "left the group",
     "activity.kicked_group": "was kicked from the group",
@@ -336,6 +376,10 @@ export const en: Record<string, string> = {
     "stats.private": "Private",
     "stats.count": "Count",
     "master.top_categories": "Top Categories",
+    "master.top_hosts": "Top Hosts",
+    "master.top_players": "Top Players",
+    "master.no_data_host": "No host data available",
+    "master.no_data_player": "No player data available",
     "master.most_played": "Most Played",
     "master.most_favorited": "Most Favorited",
     "master.top_creators": "Top Creators",
@@ -452,6 +496,9 @@ export const en: Record<string, string> = {
     "settings.phone": "Phone",
     "settings.save": "Save Changes",
 
+    "settings.current_device": "Current",
+    "settings.email": "Email",
+
     // Appearance
     "appearance.title": "Appearance",
     "appearance.theme": "Theme",
@@ -466,7 +513,19 @@ export const en: Record<string, string> = {
     "billing.unpaid_invoices": "Unpaid Invoices",
     "billing.mrr_growth": "MRR Growth",
     "billing.recent_transactions": "Recent Transactions",
+    "billing.this_week": "this week",
+    "billing.pending": "pending",
+    "billing.vs_last_month": "vs last month",
+
+    // Revenue Chart
+    "revenue.title": "Revenue Over Time",
+    "revenue.description": "Monthly revenue for the current year",
+    "revenue.label": "Revenue",
+    "revenue.trending_up": "Trending up by",
+    "revenue.this_month": "this month",
+    "revenue.period": "January - June 2024",
     "billing.recent_desc": "Latest subscription payments and invoices",
+    "billing.plan_distribution": "Plan Distribution",
     "table.plan": "Plan",
     "table.amount": "Amount",
     "table.customer": "Customer",
@@ -512,6 +571,8 @@ export const en: Record<string, string> = {
     "category.music": "Music",
     "category.geography": "Geography",
     "category.general_knowledge": "General Knowledge",
+    "category.business": "Business",
+    "category.sports": "Sports",
 
     "action.move_to_trash": "Move to Trash",
     "action.apply": "Apply",

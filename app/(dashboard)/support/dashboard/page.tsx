@@ -19,8 +19,10 @@ import { fetchQuizApprovals } from "@/app/(dashboard)/quiz-approval/actions";
 import { fetchGroups } from "@/app/(dashboard)/groups/actions";
 import { fetchGroupCategoryCounts } from "@/app/(dashboard)/groups/stats-actions";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "@/lib/i18n";
 
 export default function SupportDashboardPage() {
+  const { t } = useTranslation();
   const { data: reports, loading: reportsLoading } = useReports();
   const [approvalCount, setApprovalCount] = useState(0);
   const [groupCount, setGroupCount] = useState(0);
@@ -108,7 +110,7 @@ export default function SupportDashboardPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">
-          Support Dashboard
+          {t("page.support_dashboard")}
         </h1>
         <Select
           value={timeRange}
@@ -116,13 +118,13 @@ export default function SupportDashboardPage() {
             setTimeRange(val)
           }
         >
-          <SelectTrigger className="w-[130px]">
-            <SelectValue placeholder="Time Range" />
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder={t("time.range")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="this-year">This Year</SelectItem>
-            <SelectItem value="last-year">Last Year</SelectItem>
-            <SelectItem value="all">All Time</SelectItem>
+            <SelectItem value="this-year">{t("master.this_year")}</SelectItem>
+            <SelectItem value="last-year">{t("master.last_year")}</SelectItem>
+            <SelectItem value="all">{t("master.all_time")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -139,21 +141,25 @@ export default function SupportDashboardPage() {
         ) : (
           <>
             <StatCard
-              title="Reports"
+              title={t("stats.reports")}
               value={filteredReports.length}
               icon={FileText}
             />
             <StatCard
-              title="Pending Reports"
+              title={t("stats.pending_reports")}
               value={filteredStats.pending}
               icon={Clock}
             />
             <StatCard
-              title="Pending Approvals"
+              title={t("stats.pending_approvals")}
               value={approvalCount}
               icon={HelpCircle}
             />
-            <StatCard title="Groups" value={groupCount} icon={Users} />
+            <StatCard
+              title={t("groups.title")}
+              value={groupCount}
+              icon={Users}
+            />
           </>
         )}
       </div>

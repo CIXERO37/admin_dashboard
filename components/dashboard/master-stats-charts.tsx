@@ -17,6 +17,8 @@ interface MasterStatsChartsProps {
   quizzes: Quiz[];
   profiles: Profile[];
   sessionCounts: Record<string, number>;
+  topPlayers?: { name: string; value: number }[];
+  topHosts?: { name: string; value: number }[];
 }
 
 // Helper for truncated Y-axis labels with wrapping
@@ -73,6 +75,8 @@ export function MasterStatsCharts({
   quizzes,
   profiles,
   sessionCounts,
+  topPlayers = [],
+  topHosts = [],
 }: MasterStatsChartsProps) {
   const { t } = useTranslation();
 
@@ -354,6 +358,104 @@ export function MasterStatsCharts({
             <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
               <BarChart2 className="h-10 w-10 opacity-20" />
               <p className="text-sm">{t("master.no_data_creator")}</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Top Hosts Chart */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle>{t("master.top_hosts")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {topHosts.length > 0 ? (
+            <ChartContainer
+              config={chartConfig}
+              className="aspect-auto h-[250px] w-full"
+            >
+              <BarChart
+                accessibilityLayer
+                data={topHosts}
+                layout="vertical"
+                margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid horizontal={false} />
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                  width={160}
+                  tick={CustomYAxisTick}
+                />
+                <XAxis dataKey="value" type="number" hide />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel />}
+                />
+                <Bar
+                  dataKey="value"
+                  fill="var(--color-value)"
+                  radius={[0, 4, 4, 0]}
+                  barSize={20}
+                />
+              </BarChart>
+            </ChartContainer>
+          ) : (
+            <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+              <BarChart2 className="h-10 w-10 opacity-20" />
+              <p className="text-sm">{t("master.no_data_host")}</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Top Players Chart */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle>{t("master.top_players")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {topPlayers.length > 0 ? (
+            <ChartContainer
+              config={chartConfig}
+              className="aspect-auto h-[250px] w-full"
+            >
+              <BarChart
+                accessibilityLayer
+                data={topPlayers}
+                layout="vertical"
+                margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid horizontal={false} />
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                  width={160}
+                  tick={CustomYAxisTick}
+                />
+                <XAxis dataKey="value" type="number" hide />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel />}
+                />
+                <Bar
+                  dataKey="value"
+                  fill="var(--color-value)"
+                  radius={[0, 4, 4, 0]}
+                  barSize={20}
+                />
+              </BarChart>
+            </ChartContainer>
+          ) : (
+            <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+              <BarChart2 className="h-10 w-10 opacity-20" />
+              <p className="text-sm">{t("master.no_data_player")}</p>
             </div>
           )}
         </CardContent>

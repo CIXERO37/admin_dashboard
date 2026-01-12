@@ -28,7 +28,12 @@ export default function MasterDashboardPage() {
     aggregates,
     loading: profilesLoading,
   } = useProfiles();
-  const { sessionCounts, loading: gameStatsLoading } = useGameStats();
+  const {
+    sessionCounts,
+    topPlayers,
+    topHosts,
+    loading: gameStatsLoading,
+  } = useGameStats();
   const [timeRange, setTimeRange] = useState("this-year");
 
   const loading = quizzesLoading || profilesLoading;
@@ -66,7 +71,7 @@ export default function MasterDashboardPage() {
           {t("master.title")}
         </h1>
         <Select value={timeRange} onValueChange={setTimeRange}>
-          <SelectTrigger className="w-[130px]" aria-label="Select a value">
+          <SelectTrigger className="w-[160px]" aria-label="Select a value">
             <SelectValue placeholder={t("master.this_year")} />
           </SelectTrigger>
           <SelectContent>
@@ -124,6 +129,8 @@ export default function MasterDashboardPage() {
             quizzes={filteredQuizzes}
             profiles={profiles}
             sessionCounts={sessionCounts}
+            topPlayers={topPlayers}
+            topHosts={topHosts}
           />
         )}
       </div>

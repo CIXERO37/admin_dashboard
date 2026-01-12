@@ -414,7 +414,7 @@ export function QuizTable({
             value={visibilityFilter}
             onValueChange={(value) => updateUrl({ visibility: value, page: 1 })}
           >
-            <SelectTrigger className="w-[190px]">
+            <SelectTrigger className="w-[210px]">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4" />
                 <SelectValue placeholder={t("table.visibility")} />
