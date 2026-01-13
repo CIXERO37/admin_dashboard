@@ -1,45 +1,17 @@
-import { Suspense } from "react"
-import { ReportTable } from "./report-table"
-import { fetchReports } from "./actions"
-import { Skeleton } from "@/components/ui/skeleton"
+"use client";
 
-interface PageProps {
-  searchParams: Promise<{
-    page?: string
-    search?: string
-    status?: string
-    type?: string
-  }>
-}
+import { ReportTable } from "./report-table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useDashboardData } from "@/contexts/dashboard-store";
 
-export default async function SupportReportPage({ searchParams }: PageProps) {
-  const params = await searchParams
-  const page = Number(params.page) || 1
-  const search = params.search || ""
-  const status = params.status || "all"
-  const type = params.type || "all"
+export default function SupportReportPage() {
+  const { reports, isLoading } = useDashboardData();
 
-  const { data, totalPages, stats } = await fetchReports({
-    page,
-    limit: 15,
-    search,
-    status,
-    type,
-  })
+  if (isLoading && reports.length === 0) {
+    return <ReportTableSkeleton />;
+  }
 
-  return (
-    <Suspense fallback={<ReportTableSkeleton />}>
-      <ReportTable
-        initialData={data}
-        totalPages={totalPages}
-        currentPage={page}
-        stats={stats}
-        searchQuery={search}
-        statusFilter={status}
-        typeFilter={type}
-      />
-    </Suspense>
-  )
+  return <ReportTable initialData={reports} />;
 }
 
 function ReportTableSkeleton() {
@@ -58,5 +30,5 @@ function ReportTableSkeleton() {
       </div>
       <Skeleton className="h-[600px] w-full rounded-xl" />
     </div>
-  )
+  );
 }

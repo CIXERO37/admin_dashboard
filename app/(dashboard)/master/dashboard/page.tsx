@@ -14,20 +14,14 @@ import {
 
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useQuizzes } from "@/hooks/useQuizzes";
-import { useProfiles } from "@/hooks/useProfiles";
+import { useDashboardData } from "@/contexts/dashboard-store";
 import { useGameStats } from "@/hooks/useGameStats";
 import { MasterStatsCharts } from "@/components/dashboard/master-stats-charts";
 import { useTranslation } from "@/lib/i18n";
 
 export default function MasterDashboardPage() {
   const { t } = useTranslation();
-  const { data: quizzes, loading: quizzesLoading } = useQuizzes();
-  const {
-    data: profiles,
-    aggregates,
-    loading: profilesLoading,
-  } = useProfiles();
+  const { quizzes, users, isLoading: dashboardLoading } = useDashboardData();
   const {
     sessionCounts,
     topPlayers,
@@ -36,7 +30,7 @@ export default function MasterDashboardPage() {
   } = useGameStats();
   const [timeRange, setTimeRange] = useState("this-year");
 
-  const loading = quizzesLoading || profilesLoading;
+  const loading = dashboardLoading || gameStatsLoading;
 
   const checkDate = (dateStr: string | null | undefined, range: string) => {
     if (range === "all") return true;
@@ -127,7 +121,7 @@ export default function MasterDashboardPage() {
         ) : (
           <MasterStatsCharts
             quizzes={filteredQuizzes}
-            profiles={profiles}
+            profiles={users as any}
             sessionCounts={sessionCounts}
             topPlayers={topPlayers}
             topHosts={topHosts}

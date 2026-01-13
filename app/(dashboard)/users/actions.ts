@@ -324,3 +324,22 @@ export async function deleteProfileAction(id: string) {
   revalidatePath("/trash-bin")
   return { error: null }
 }
+
+export async function getAllProfiles() {
+  const supabase = getSupabaseAdminClient()
+  
+  // Fetch up to 5000 profiles for client-side caching
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*, state:states(name), city:cities(name)")
+    .is("deleted_at", null)
+    .order("last_active", { ascending: false, nullsFirst: false })
+    .limit(5000)
+
+  if (error) {
+    console.error("Error fetching all profiles:", error)
+    return []
+  }
+
+  return data ?? []
+}
