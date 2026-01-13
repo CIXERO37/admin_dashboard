@@ -185,3 +185,26 @@ export async function deleteQuizAction(id: string) {
   revalidatePath("/trash-bin")
   return { error: null }
 }
+
+export async function getAllQuizzes() {
+  const supabase = getSupabaseAdminClient()
+  
+  const { data, error } = await supabase
+    .from("quizzes")
+    .select("id, title, description, category, questions, is_hidden, is_public, created_at, language, status, creator:profiles!creator_id(id, email, username, fullname, avatar_url)")
+    .is("deleted_at", null)
+    .order("created_at", { ascending: false })
+    .limit(5000)
+
+  if (error) {
+    console.error("Error fetching all quizzes:", error)
+    return []
+  }
+
+  const transformedData: Quiz[] = (data ?? []).map((item) => ({
+    ...item,
+    creator: Array.isArray(item.creator) ? item.creator[0] ?? null : item.creator,
+  }))
+
+  return transformedData
+}

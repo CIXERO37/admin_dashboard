@@ -1,42 +1,51 @@
-import { fetchGroups, fetchCountries, fetchGroupCategories } from "./actions";
-import { GroupTable } from "./group-table";
+"use client";
 
-interface PageProps {
-  searchParams: Promise<{
-    page?: string;
-    search?: string;
-    status?: string;
-    category?: string;
-  }>;
+import { GroupTable } from "./group-table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useDashboardData } from "@/contexts/dashboard-store";
+import { useEffect, useState } from "react";
+import { fetchCountries, fetchGroupCategories, Country } from "./actions";
+
+// Placeholder for GroupTableSkeleton, assuming it's defined elsewhere or imported.
+// If not, this would cause a reference error.
+function GroupTableSkeleton() {
+  return (
+    <div className="space-y-4">
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-10 w-full" />
+    </div>
+  );
 }
 
-export default async function GroupPage({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const page = Number(params.page) || 1;
-  const search = params.search || "";
-  const status = params.status || "all";
-  const category = params.category || "";
+export default function GroupsPage() {
+  const { groups, isLoading } = useDashboardData();
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
 
-  // Fetch groups and countries in parallel for faster loading
-  const [{ data, totalPages }, countries, categories] = await Promise.all([
-    fetchGroups({
-      page,
-      limit: 8,
-      search,
-      status,
-      category,
-    }),
-    fetchCountries(),
-    fetchGroupCategories(),
-  ]);
+  useEffect(() => {
+    // Fetch auxiliary filter data
+    const loadFilters = async () => {
+      const [c, cat] = await Promise.all([
+        fetchCountries(),
+        fetchGroupCategories(),
+      ]);
+      setCountries(c);
+      setCategories(cat);
+    };
+    loadFilters();
+  }, []);
+
+  if (isLoading && groups.length === 0) {
+    return <GroupTableSkeleton />;
+  }
 
   return (
     <GroupTable
-      initialData={data}
-      totalPages={totalPages}
-      currentPage={page}
-      searchQuery={search}
-      statusFilter={status}
+      initialData={groups}
       countries={countries}
       categories={categories}
     />

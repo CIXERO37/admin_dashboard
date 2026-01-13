@@ -1,44 +1,17 @@
-import { Suspense } from "react"
-import { UserTable } from "./user-table"
-import { fetchProfiles } from "./actions"
-import { Skeleton } from "@/components/ui/skeleton"
+"use client";
 
-interface PageProps {
-  searchParams: Promise<{
-    page?: string
-    search?: string
-    role?: string
-    status?: string
-  }>
-}
+import { UserTable } from "./user-table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useDashboardData } from "@/contexts/dashboard-store";
 
-export default async function AdministratorUserPage({ searchParams }: PageProps) {
-  const params = await searchParams
-  const page = Number(params.page) || 1
-  const search = params.search || ""
-  const role = params.role || "all"
-  const status = params.status || "all"
+export default function AdministratorUserPage() {
+  const { users, isLoading } = useDashboardData();
 
-  const { data, totalPages } = await fetchProfiles({
-    page,
-    limit: 15,
-    search,
-    role,
-    status,
-  })
+  if (isLoading && users.length === 0) {
+    return <UserTableSkeleton />;
+  }
 
-  return (
-    <Suspense fallback={<UserTableSkeleton />}>
-      <UserTable
-        initialData={data}
-        totalPages={totalPages}
-        currentPage={page}
-        searchQuery={search}
-        roleFilter={role}
-        statusFilter={status}
-      />
-    </Suspense>
-  )
+  return <UserTable initialData={users} />;
 }
 
 function UserTableSkeleton() {
@@ -54,5 +27,5 @@ function UserTableSkeleton() {
       </div>
       <Skeleton className="h-[600px] w-full rounded-xl" />
     </div>
-  )
+  );
 }
