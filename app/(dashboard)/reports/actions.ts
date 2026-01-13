@@ -306,3 +306,48 @@ export async function deleteMessageAction(reportId: string, messageId: string, s
   revalidatePath(`/reports/${reportId}`)
   return { error: null }
 }
+
+export async function getAllReports() {
+  const supabase = await getSupabaseServerClient()
+  
+  const { data, error } = await supabase
+    .from("reports")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(2000)
+
+  if (error) {
+    console.error("Error fetching all reports:", error)
+    return []
+  }
+
+  // Optimized parallel fetch for profiles
+  const profileIds = new Set<string>()
+  data?.forEach(r => {
+    if (r.reporter_id) profileIds.add(r.reporter_id)
+    if (r.reported_user_id) profileIds.add(r.reported_user_id)
+  })
+
+  let profilesMap: Record<string, ReportProfile> = {}
+  if (profileIds.size > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, username, email, fullname, avatar_url")
+      .in("id", Array.from(profileIds))
+    
+    if (profiles) {
+      profilesMap = profiles.reduce((acc, p) => {
+        acc[p.id] = p
+        return acc
+      }, {} as Record<string, ReportProfile>)
+    }
+  }
+
+  const processedData: Report[] = (data ?? []).map(report => ({
+    ...report,
+    reporter: report.reporter_id ? profilesMap[report.reporter_id] || null : null,
+    reported_user: report.reported_user_id ? profilesMap[report.reported_user_id] || null : null,
+  }))
+
+  return processedData
+}

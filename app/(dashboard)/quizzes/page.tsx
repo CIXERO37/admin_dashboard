@@ -1,49 +1,17 @@
-import { Suspense } from "react";
+"use client";
+
 import { QuizTable } from "./quiz-table";
-import { fetchQuizzes } from "./actions";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useDashboardData } from "@/contexts/dashboard-store";
 
-interface PageProps {
-  searchParams: Promise<{
-    page?: string;
-    search?: string;
-    category?: string;
-    visibility?: string;
-    status?: string;
-  }>;
-}
+export default function MasterQuizPage() {
+  const { quizzes, isLoading } = useDashboardData();
 
-export default async function MasterQuizPage({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const page = Number(params.page) || 1;
-  const search = params.search || "";
-  const category = params.category || "all";
-  const visibility = params.visibility || "all";
-  const status = params.status || "all";
+  if (isLoading && quizzes.length === 0) {
+    return <QuizTableSkeleton />;
+  }
 
-  const { data, totalPages, categories } = await fetchQuizzes({
-    page,
-    limit: 15,
-    search,
-    category,
-    visibility,
-    status,
-  });
-
-  return (
-    <Suspense fallback={<QuizTableSkeleton />}>
-      <QuizTable
-        initialData={data}
-        totalPages={totalPages}
-        currentPage={page}
-        categories={categories}
-        searchQuery={search}
-        categoryFilter={category}
-        visibilityFilter={visibility}
-        statusFilter={status}
-      />
-    </Suspense>
-  );
+  return <QuizTable initialData={quizzes} />;
 }
 
 function QuizTableSkeleton() {

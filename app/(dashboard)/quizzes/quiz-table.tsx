@@ -2,7 +2,7 @@
 
 import { Search, SlidersHorizontal, ChevronDown } from "lucide-react";
 import { format } from "date-fns";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useMemo, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -52,33 +52,92 @@ const statusColors: Record<string, string> = {
 
 interface QuizTableProps {
   initialData: Quiz[];
-  totalPages: number;
-  currentPage: number;
-  categories: string[];
-  searchQuery: string;
-  categoryFilter: string;
-  visibilityFilter: string;
-  statusFilter: string;
 }
 
-export function QuizTable({
-  initialData,
-  totalPages,
-  currentPage,
-  categories,
-  searchQuery,
-  categoryFilter,
-  visibilityFilter,
-  statusFilter,
-}: QuizTableProps) {
+export function QuizTable({ initialData }: QuizTableProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams(); // Kept for safety
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const [searchInput, setSearchInput] = useState(searchQuery);
+  // Client-Side State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchInput, setSearchInput] = useState("");
+  const [activeSearchQuery, setActiveSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [visibilityFilter, setVisibilityFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
 
+  const ITEMS_PER_PAGE = 15;
+
+  // Derive Categories from Data
+  const categories = useMemo(() => {
+    const cats = new Set(
+      initialData.map((q) => q.category).filter((c): c is string => !!c)
+    );
+    return Array.from(cats).sort();
+  }, [initialData]);
+
+  // Filter Logic
+  const filteredData = useMemo(() => {
+    let data = [...initialData];
+
+    // 1. Search
+    if (activeSearchQuery) {
+      const lowerQuery = activeSearchQuery.toLowerCase();
+      data = data.filter(
+        (quiz) =>
+          quiz.title?.toLowerCase().includes(lowerQuery) ||
+          quiz.category?.toLowerCase().includes(lowerQuery)
+      );
+    }
+
+    // 2. Category Filter
+    if (categoryFilter && categoryFilter !== "all") {
+      data = data.filter((quiz) => quiz.category === categoryFilter);
+    }
+
+    // 3. Visibility Filter
+    if (visibilityFilter && visibilityFilter !== "all") {
+      if (visibilityFilter === "publik") {
+        data = data.filter((quiz) => quiz.is_public);
+      } else if (visibilityFilter === "private") {
+        data = data.filter((quiz) => !quiz.is_public);
+      }
+    }
+
+    // 4. Status Filter
+    if (statusFilter && statusFilter !== "all") {
+      if (statusFilter === "active") {
+        data = data.filter((quiz) => quiz.status !== "block");
+      } else if (statusFilter === "block") {
+        data = data.filter((quiz) => quiz.status === "block");
+      }
+    }
+
+    return data;
+  }, [
+    initialData,
+    activeSearchQuery,
+    categoryFilter,
+    visibilityFilter,
+    statusFilter,
+  ]);
+
+  // Pagination Logic
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredData.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredData, currentPage]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeSearchQuery, categoryFilter, visibilityFilter, statusFilter]);
+
+  // --- Dialog States ---
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
     id: string;
@@ -105,24 +164,8 @@ export function QuizTable({
     confirmText: "",
   });
 
-  const updateUrl = (params: Record<string, string | number>) => {
-    const newParams = new URLSearchParams(searchParams.toString());
-
-    Object.entries(params).forEach(([key, value]) => {
-      if (value && value !== "all" && value !== "") {
-        newParams.set(key, String(value));
-      } else {
-        newParams.delete(key);
-      }
-    });
-
-    startTransition(() => {
-      router.push(`?${newParams.toString()}`);
-    });
-  };
-
   const handleSearch = () => {
-    updateUrl({ search: searchInput, page: 1 });
+    setActiveSearchQuery(searchInput);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -132,13 +175,7 @@ export function QuizTable({
   };
 
   const handlePageChange = (page: number) => {
-    updateUrl({
-      page,
-      search: searchQuery,
-      category: categoryFilter,
-      visibility: visibilityFilter,
-      status: statusFilter,
-    });
+    setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -348,7 +385,7 @@ export function QuizTable({
     },
   ];
 
-  const tableData = initialData.map((quiz) => ({
+  const tableData = paginatedData.map((quiz) => ({
     id: quiz.id,
     title: quiz.title,
     creator: quiz.creator,
@@ -360,6 +397,7 @@ export function QuizTable({
       ? format(new Date(quiz.created_at), "dd MMM yyyy")
       : "-",
     status: quiz.status === "block" ? "Block" : "Active",
+    // Use original Status from DB? "status" field is string.
   }));
 
   return (
@@ -391,7 +429,7 @@ export function QuizTable({
 
           <Select
             value={categoryFilter}
-            onValueChange={(value) => updateUrl({ category: value, page: 1 })}
+            onValueChange={(value) => setCategoryFilter(value)}
           >
             <SelectTrigger className="w-[190px]">
               <div className="flex items-center gap-2">
@@ -412,7 +450,7 @@ export function QuizTable({
 
           <Select
             value={visibilityFilter}
-            onValueChange={(value) => updateUrl({ visibility: value, page: 1 })}
+            onValueChange={(value) => setVisibilityFilter(value)}
           >
             <SelectTrigger className="w-[210px]">
               <div className="flex items-center gap-2">
@@ -429,7 +467,7 @@ export function QuizTable({
 
           <Select
             value={statusFilter}
-            onValueChange={(value) => updateUrl({ status: value, page: 1 })}
+            onValueChange={(value) => setStatusFilter(value)}
           >
             <SelectTrigger className="w-[190px]">
               <div className="flex items-center gap-2">
