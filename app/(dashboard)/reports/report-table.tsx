@@ -11,7 +11,7 @@ import {
   FileText,
   User,
 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useMemo, useEffect } from "react";
 import { format } from "date-fns";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -60,35 +60,75 @@ const reportTypeColors: Record<string, string> = {
 
 interface ReportTableProps {
   initialData: Report[];
-  totalPages: number;
-  currentPage: number;
-  stats: {
-    total: number;
-    pending: number;
-    inProgress: number;
-    resolved: number;
-  };
-  searchQuery: string;
-  statusFilter: string;
-  typeFilter: string;
 }
 
-export function ReportTable({
-  initialData,
-  totalPages,
-  currentPage,
-  stats,
-  searchQuery,
-  statusFilter,
-  typeFilter,
-}: ReportTableProps) {
+export function ReportTable({ initialData }: ReportTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const [searchInput, setSearchInput] = useState(searchQuery);
+  // Client-Side State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchInput, setSearchInput] = useState("");
+  const [activeSearchQuery, setActiveSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+
+  const ITEMS_PER_PAGE = 15;
+
+  // Filter Logic
+  const filteredData = useMemo(() => {
+    let data = [...initialData];
+
+    // 1. Search
+    if (activeSearchQuery) {
+      const lowerQuery = activeSearchQuery.toLowerCase();
+      data = data.filter((report) => {
+        const title = report.title?.toLowerCase() || "";
+        const description = report.description?.toLowerCase() || "";
+        const reporterName =
+          report.reporter?.fullname?.toLowerCase() ||
+          report.reporter?.username?.toLowerCase() ||
+          "";
+        return (
+          title.includes(lowerQuery) ||
+          description.includes(lowerQuery) ||
+          reporterName.includes(lowerQuery)
+        );
+      });
+    }
+
+    // 2. Status Filter
+    if (statusFilter && statusFilter !== "all") {
+      data = data.filter(
+        (report) => report.status?.toLowerCase() === statusFilter.toLowerCase()
+      );
+    }
+
+    // 3. Type Filter
+    if (typeFilter && typeFilter !== "all") {
+      data = data.filter(
+        (report) =>
+          report.report_type?.toLowerCase() === typeFilter.toLowerCase()
+      );
+    }
+
+    return data;
+  }, [initialData, activeSearchQuery, statusFilter, typeFilter]);
+
+  // Pagination Logic
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredData.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredData, currentPage]);
+
+  // Reset page on filter change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeSearchQuery, statusFilter, typeFilter]);
 
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
@@ -123,22 +163,8 @@ export function ReportTable({
     reportTitle: string;
   }>({ open: false, id: "", notes: "", reportTitle: "" });
 
-  const updateUrl = (params: Record<string, string | number>) => {
-    const newParams = new URLSearchParams(searchParams.toString());
-    Object.entries(params).forEach(([key, value]) => {
-      if (value && value !== "all" && value !== "") {
-        newParams.set(key, String(value));
-      } else {
-        newParams.delete(key);
-      }
-    });
-    startTransition(() => {
-      router.push(`?${newParams.toString()}`);
-    });
-  };
-
   const handleSearch = () => {
-    updateUrl({ search: searchInput, page: 1 });
+    setActiveSearchQuery(searchInput);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -146,12 +172,7 @@ export function ReportTable({
   };
 
   const handlePageChange = (page: number) => {
-    updateUrl({
-      page,
-      search: searchQuery,
-      status: statusFilter,
-      type: typeFilter,
-    });
+    setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -455,7 +476,7 @@ export function ReportTable({
     },
   ];
 
-  const tableData = initialData.map((report) => ({
+  const tableData = paginatedData.map((report) => ({
     id: report.id,
     reporterData: report.reporter,
     title: report.title,
@@ -499,7 +520,7 @@ export function ReportTable({
 
           <Select
             value={statusFilter}
-            onValueChange={(value) => updateUrl({ status: value, page: 1 })}
+            onValueChange={(value) => setStatusFilter(value)}
           >
             <SelectTrigger className="w-[180px]">
               <div className="flex items-center gap-2">

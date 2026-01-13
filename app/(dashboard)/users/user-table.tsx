@@ -8,7 +8,7 @@ import {
   Search,
   SlidersHorizontal,
 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useMemo, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -60,29 +60,71 @@ const roleColors: Record<string, string> = {
 
 interface UserTableProps {
   initialData: Profile[];
-  totalPages: number;
-  currentPage: number;
-  searchQuery: string;
-  roleFilter: string;
-  statusFilter: string;
 }
 
-export function UserTable({
-  initialData,
-  totalPages,
-  currentPage,
-  searchQuery,
-  roleFilter,
-  statusFilter,
-}: UserTableProps) {
+export function UserTable({ initialData }: UserTableProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams(); // Kept for other potential uses or safe removal later
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const [searchInput, setSearchInput] = useState(searchQuery);
+  // Client-Side Filtering & Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchInput, setSearchInput] = useState(""); // Input value
+  const [activeSearchQuery, setActiveSearchQuery] = useState(""); // Triggered search value
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
 
+  const ITEMS_PER_PAGE = 15;
+
+  // Filter Logic (Client-Side)
+  const filteredData = useMemo(() => {
+    let data = [...initialData];
+
+    // 1. Search
+    if (activeSearchQuery) {
+      const lowerQuery = activeSearchQuery.toLowerCase();
+      data = data.filter(
+        (user) =>
+          user.username?.toLowerCase().includes(lowerQuery) ||
+          user.fullname?.toLowerCase().includes(lowerQuery) ||
+          user.email?.toLowerCase().includes(lowerQuery)
+      );
+    }
+
+    // 2. Role Filter
+    if (roleFilter && roleFilter !== "all") {
+      data = data.filter(
+        (user) => user.role?.toLowerCase() === roleFilter.toLowerCase()
+      );
+    }
+
+    // 3. Status Filter
+    if (statusFilter && statusFilter !== "all") {
+      if (statusFilter === "blocked") {
+        data = data.filter((user) => user.is_blocked);
+      } else if (statusFilter === "active") {
+        data = data.filter((user) => !user.is_blocked);
+      }
+    }
+
+    return data;
+  }, [initialData, activeSearchQuery, roleFilter, statusFilter]);
+
+  // Pagination Logic (Client-Side)
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredData.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredData, currentPage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeSearchQuery, roleFilter, statusFilter]);
+
+  // --- Dialog States (Preserved) ---
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
     type: "role" | "status";
@@ -131,24 +173,11 @@ export function UserTable({
     confirmText: "",
   });
 
-  const updateUrl = (params: Record<string, string | number>) => {
-    const newParams = new URLSearchParams(searchParams.toString());
-
-    Object.entries(params).forEach(([key, value]) => {
-      if (value && value !== "all" && value !== "") {
-        newParams.set(key, String(value));
-      } else {
-        newParams.delete(key);
-      }
-    });
-
-    startTransition(() => {
-      router.push(`?${newParams.toString()}`);
-    });
-  };
+  // Removed updateUrl function as we now use local state
+  // If URL sync is needed later, we can add useEffect to push router
 
   const handleSearch = () => {
-    updateUrl({ search: searchInput, page: 1 });
+    setActiveSearchQuery(searchInput);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -158,12 +187,7 @@ export function UserTable({
   };
 
   const handlePageChange = (page: number) => {
-    updateUrl({
-      page,
-      search: searchQuery,
-      role: roleFilter,
-      status: statusFilter,
-    });
+    setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -522,7 +546,7 @@ export function UserTable({
     },
   ];
 
-  const tableData = initialData.map((profile) => ({
+  const tableData = paginatedData.map((profile) => ({
     id: profile.id,
     account: profile.id,
     avatar: getAvatarUrl(profile.avatar_url),
@@ -564,7 +588,7 @@ export function UserTable({
 
           <Select
             value={roleFilter}
-            onValueChange={(value) => updateUrl({ role: value, page: 1 })}
+            onValueChange={(value) => setRoleFilter(value)}
           >
             <SelectTrigger className="w-[170px]">
               <div className="flex items-center gap-2">
@@ -581,7 +605,7 @@ export function UserTable({
 
           <Select
             value={statusFilter}
-            onValueChange={(value) => updateUrl({ status: value, page: 1 })}
+            onValueChange={(value) => setStatusFilter(value)}
           >
             <SelectTrigger className="w-[170px]">
               <div className="flex items-center gap-2">

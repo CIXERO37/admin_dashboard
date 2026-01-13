@@ -481,3 +481,21 @@ export async function fetchGroupCategories(): Promise<string[]> {
     "Other",
   ]
 }
+
+export async function getAllGroups() {
+  const supabase = getSupabaseAdminClient()
+  
+  const { data, error } = await supabase
+    .from("groups")
+    .select("*, creator:profiles!groups_creator_id_fkey(fullname, email, avatar_url, username, state:states(name), city:cities(name))")
+    .is("deleted_at", null)
+    .order("created_at", { ascending: false })
+    .limit(2000)
+
+  if (error) {
+    console.error("Error fetching all groups:", error)
+    return []
+  }
+
+  return data ?? []
+}
