@@ -33,6 +33,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -89,14 +90,14 @@ export function UserTable({ initialData }: UserTableProps) {
         (user) =>
           user.username?.toLowerCase().includes(lowerQuery) ||
           user.fullname?.toLowerCase().includes(lowerQuery) ||
-          user.email?.toLowerCase().includes(lowerQuery)
+          user.email?.toLowerCase().includes(lowerQuery),
       );
     }
 
     // 2. Role Filter
     if (roleFilter && roleFilter !== "all") {
       data = data.filter(
-        (user) => user.role?.toLowerCase() === roleFilter.toLowerCase()
+        (user) => user.role?.toLowerCase() === roleFilter.toLowerCase(),
       );
     }
 
@@ -132,6 +133,7 @@ export function UserTable({ initialData }: UserTableProps) {
     currentValue: string;
     newValue: string;
     userName: string;
+    reason: string;
   }>({
     open: false,
     type: "role",
@@ -139,6 +141,7 @@ export function UserTable({ initialData }: UserTableProps) {
     currentValue: "",
     newValue: "",
     userName: "",
+    reason: "",
   });
 
   const [editDialog, setEditDialog] = useState<{
@@ -196,7 +199,7 @@ export function UserTable({ initialData }: UserTableProps) {
     id: string,
     currentValue: string,
     newValue: string,
-    userName: string
+    userName: string,
   ) => {
     setConfirmDialog({
       open: true,
@@ -205,6 +208,7 @@ export function UserTable({ initialData }: UserTableProps) {
       currentValue,
       newValue,
       userName,
+      reason: "",
     });
   };
 
@@ -371,51 +375,32 @@ export function UserTable({ initialData }: UserTableProps) {
       key: "role",
       label: t("users.role"),
       render: (value: unknown, row: Record<string, unknown>) => {
-        const role = (value as string) || "user";
+        const role = ((value as string) || "user").toLowerCase();
         const id = row.id as string;
         const userName =
           (row.fullname as string) ||
           (row.username as string) ||
           "Unknown user";
+
+        const nextRole = role === "admin" ? "user" : "admin";
+
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger className="focus:outline-none">
-              <div className="cursor-pointer hover:opacity-80 flex items-center">
-                <Badge
-                  variant="outline"
-                  className={
-                    roleColors[role.toLowerCase()] ??
-                    "bg-secondary text-secondary-foreground border-border"
-                  }
-                >
-                  {role === "admin" ? t("users.admin") : t("users.user")}
-                </Badge>
-                <ChevronDown className="ml-1.5 h-3 w-3 text-muted-foreground/50" />
-              </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              {role !== "user" && (
-                <DropdownMenuItem
-                  onClick={() =>
-                    openConfirmDialog("role", id, role, "user", userName)
-                  }
-                  className="cursor-pointer"
-                >
-                  {t("users.user")}
-                </DropdownMenuItem>
-              )}
-              {role !== "admin" && (
-                <DropdownMenuItem
-                  onClick={() =>
-                    openConfirmDialog("role", id, role, "admin", userName)
-                  }
-                  className="cursor-pointer"
-                >
-                  {t("users.admin")}
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div
+            className="cursor-pointer hover:opacity-80 flex items-center w-fit"
+            onClick={() =>
+              openConfirmDialog("role", id, role, nextRole, userName)
+            }
+          >
+            <Badge
+              variant="outline"
+              className={
+                roleColors[role] ??
+                "bg-secondary text-secondary-foreground border-border"
+              }
+            >
+              {role === "admin" ? t("users.admin") : t("users.user")}
+            </Badge>
+          </div>
         );
       },
     },
@@ -436,47 +421,25 @@ export function UserTable({ initialData }: UserTableProps) {
           Blocked: "bg-destructive/20 text-destructive border-destructive/30",
         };
 
+        const nextStatus = status === "Active" ? "Blocked" : "Active";
+
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger className="focus:outline-none">
-              <div className="cursor-pointer hover:opacity-80 flex items-center">
-                <Badge
-                  variant="outline"
-                  className={
-                    statusStyles[status] ||
-                    "bg-secondary text-secondary-foreground border-border"
-                  }
-                >
-                  {status === "Active"
-                    ? t("status.active")
-                    : t("status.blocked")}
-                </Badge>
-                <ChevronDown className="ml-1.5 h-3 w-3 text-muted-foreground/50" />
-              </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              {status !== "Active" && (
-                <DropdownMenuItem
-                  onClick={() =>
-                    openConfirmDialog("status", id, status, "Active", userName)
-                  }
-                  className="cursor-pointer"
-                >
-                  {t("status.active")}
-                </DropdownMenuItem>
-              )}
-              {status !== "Blocked" && (
-                <DropdownMenuItem
-                  onClick={() =>
-                    openConfirmDialog("status", id, status, "Blocked", userName)
-                  }
-                  className="cursor-pointer"
-                >
-                  {t("status.blocked")}
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div
+            className="cursor-pointer hover:opacity-80 flex items-center w-fit"
+            onClick={() =>
+              openConfirmDialog("status", id, status, nextStatus, userName)
+            }
+          >
+            <Badge
+              variant="outline"
+              className={
+                statusStyles[status] ||
+                "bg-secondary text-secondary-foreground border-border"
+              }
+            >
+              {status === "Active" ? t("status.active") : t("status.blocked")}
+            </Badge>
+          </div>
         );
       },
     },
@@ -649,6 +612,22 @@ export function UserTable({ initialData }: UserTableProps) {
               {t("users.from")} <strong>{confirmDialog.currentValue}</strong>{" "}
               {t("users.to")} <strong>{confirmDialog.newValue}</strong>?
             </DialogDescription>
+            {confirmDialog.type === "status" && (
+              <div className="grid gap-2 py-2">
+                <Label>{t("users.reason_label")}</Label>
+                <Textarea
+                  value={confirmDialog.reason}
+                  onChange={(e) =>
+                    setConfirmDialog((prev) => ({
+                      ...prev,
+                      reason: e.target.value,
+                    }))
+                  }
+                  placeholder={t("users.reason_placeholder")}
+                  className="h-24 resize-none"
+                />
+              </div>
+            )}
           </DialogHeader>
           <DialogFooter>
             <Button
@@ -659,7 +638,7 @@ export function UserTable({ initialData }: UserTableProps) {
             >
               {t("action.cancel")}
             </Button>
-            <Button onClick={handleConfirm}>{t("users.yes_change")}</Button>
+            <Button onClick={handleConfirm}>{t("action.change")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -810,7 +789,7 @@ export function UserTable({ initialData }: UserTableProps) {
                 }))
               }
               placeholder={`${t("users.type_confirm")} '${t(
-                "users.move_to_trash"
+                "users.move_to_trash",
               )}'`}
             />
           </div>

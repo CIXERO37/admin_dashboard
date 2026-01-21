@@ -30,6 +30,11 @@ import {
   PanelLeft,
   Trash2,
   Palette,
+  Gamepad2,
+  BookOpenCheck,
+  History,
+  FileQuestion,
+  FileCheck,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -63,6 +68,45 @@ const navigation: NavItem[] = [
     icon: LayoutDashboard,
   },
   {
+    title: "nav.game",
+    href: "/game",
+    icon: Gamepad2,
+    children: [
+      {
+        title: "nav.dashboard",
+        href: "/game/dashboard",
+        icon: LayoutDashboard,
+      },
+      {
+        title: "nav.game_sessions",
+        href: "/game-sessions",
+        icon: History,
+      },
+    ],
+  },
+  {
+    title: "nav.quiz",
+    href: "/quiz",
+    icon: BookOpenCheck,
+    children: [
+      {
+        title: "nav.dashboard",
+        href: "/quiz/dashboard",
+        icon: LayoutDashboard,
+      },
+      {
+        title: "nav.quizzes",
+        href: "/quizzes",
+        icon: FileQuestion,
+      },
+      {
+        title: "nav.quiz_approval",
+        href: "/quiz-approval",
+        icon: FileCheck,
+      },
+    ],
+  },
+  {
     title: "nav.support",
     href: "/support",
     icon: Headphones,
@@ -73,7 +117,6 @@ const navigation: NavItem[] = [
         icon: LayoutDashboard,
       },
       { title: "nav.reports", href: "/reports", icon: FileText },
-      { title: "nav.quiz_approval", href: "/quiz-approval", icon: HelpCircle },
       { title: "nav.groups", href: "/groups", icon: Users },
     ],
   },
@@ -100,7 +143,6 @@ const navigation: NavItem[] = [
         href: "/master/dashboard",
         icon: LayoutDashboard,
       },
-      { title: "nav.quizzes", href: "/quizzes", icon: BookOpen },
       {
         title: "nav.address",
         href: "/address",
@@ -200,7 +242,7 @@ export function AppSidebar() {
       }
     });
 
-    setOpenMenus(activeMenus);
+    setOpenMenus((prev) => Array.from(new Set([...prev, ...activeMenus])));
   }, [pathname, mounted]);
 
   const toggleMenu = (title: string) => {

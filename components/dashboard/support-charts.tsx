@@ -19,60 +19,61 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "@/lib/i18n";
 
 interface SupportChartsProps {
   reports: any[];
   groupStats?: { category: string; count: number }[];
+  loading?: boolean;
 }
 
-export function SupportCharts({ reports, groupStats }: SupportChartsProps) {
+export function SupportCharts({
+  reports,
+  groupStats,
+  loading,
+}: SupportChartsProps) {
   const { t } = useTranslation();
 
   const typeData = React.useMemo(() => {
+    // ... memoized charts data logic
+    // But wait, if I put skeleton check HERE, I bypass useMemo errors if data is empty during loading?
+    // Actually React hooks must run unconditionally. So loading check should be AFTER useMemo if possible,
+    // OR ensure hooks are not inside if(loading).
+    // The previous code had hooks at top. I must keep hooks at top.
     const counts: Record<string, number> = {};
-    reports.forEach((r) => {
-      let type = r.report_type || t("admin.unknown");
-      // Format readable
-      type = type
-        .replace(/_/g, " ")
-        .replace(/\b\w/g, (l: string) => l.toUpperCase());
-      counts[type] = (counts[type] || 0) + 1;
-    });
+    if (reports) {
+      reports.forEach((r) => {
+        let type = r.report_type || t("admin.unknown");
+        type = type
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, (l: string) => l.toUpperCase());
+        counts[type] = (counts[type] || 0) + 1;
+      });
+    }
     return Object.entries(counts)
       .map(([type, count]) => ({ type, count }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 5); // Top 5
+      .slice(0, 5);
   }, [reports, t]);
 
   const monthlyData = React.useMemo(() => {
     const counts: Record<number, number> = {};
-    reports.forEach((r) => {
-      if (!r.created_at) return;
-      const d = new Date(r.created_at);
-      const m = d.getMonth(); // 0-11
-      counts[m] = (counts[m] || 0) + 1;
-    });
+    if (reports) {
+      reports.forEach((r) => {
+        if (!r.created_at) return;
+        const d = new Date(r.created_at);
+        const m = d.getMonth();
+        counts[m] = (counts[m] || 0) + 1;
+      });
+    }
 
-    const months = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
+    const months = t("months.short").split(",");
     return months.map((name, index) => ({
       name,
       count: counts[index] || 0,
     }));
-  }, [reports]);
+  }, [reports, t]); // Added t dependency
 
   const chartConfig = {
     count: {
@@ -81,9 +82,41 @@ export function SupportCharts({ reports, groupStats }: SupportChartsProps) {
     },
   } satisfies ChartConfig;
 
+  if (loading) {
+    return (
+      <>
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("stats.reports_by_type")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-[250px] w-full" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("stats.top_group_categories")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-[250px] w-full" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("stats.activity")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-[250px] w-full" />
+          </CardContent>
+        </Card>
+      </>
+    );
+  }
+
   return (
     <>
       <Card>
+        {/* ... rest of the content ... */}
         <CardHeader>
           <CardTitle>{t("stats.reports_by_type")}</CardTitle>
         </CardHeader>

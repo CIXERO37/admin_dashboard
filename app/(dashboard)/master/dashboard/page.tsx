@@ -1,9 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { BookOpen, Globe, Layers, Lock } from "lucide-react";
-import { isSameYear, subYears } from "date-fns";
-
+import { useEffect, useState } from "react";
+import { Globe, Map, Building2, MapPin } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { StatCard } from "@/components/dashboard/stat-card";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import {
   Select,
   SelectContent,
@@ -11,61 +19,61 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import { StatCard } from "@/components/dashboard/stat-card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useDashboardData } from "@/contexts/dashboard-store";
-import { useGameStats } from "@/hooks/useGameStats";
-import { MasterStatsCharts } from "@/components/dashboard/master-stats-charts";
 import { useTranslation } from "@/lib/i18n";
+import { formatNumber } from "@/lib/utils";
+
+interface DashboardData {
+  kpi: {
+    totalCountries: number;
+    totalStates: number;
+    totalCities: number;
+    usersWithLocation: number;
+  };
+  charts: {
+    topStates: { name: string; count: number }[];
+    topCities: { name: string; count: number }[];
+  };
+}
 
 export default function MasterDashboardPage() {
   const { t } = useTranslation();
-  const { quizzes, users, isLoading: dashboardLoading } = useDashboardData();
-  const {
-    sessionCounts,
-    topPlayers,
-    topHosts,
-    loading: gameStatsLoading,
-  } = useGameStats();
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("this-year");
 
-  const loading = dashboardLoading || gameStatsLoading;
-
-  const checkDate = (dateStr: string | null | undefined, range: string) => {
-    if (range === "all") return true;
-    if (!dateStr) return false;
-
-    const date = new Date(dateStr);
-    const now = new Date();
-
-    if (range === "this-year") {
-      return isSameYear(date, now);
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `/api/master-dashboard?timeRange=${timeRange}`,
+        );
+        const result = await response.json();
+        setData(result);
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
     }
-    if (range === "last-year") {
-      return isSameYear(date, subYears(now, 1));
-    }
-    return true;
-  };
+    fetchData();
+  }, [timeRange]);
 
-  const filteredQuizzes = quizzes.filter((quiz) =>
-    checkDate(quiz.created_at, timeRange)
-  );
-
-  const publicQuizzes = filteredQuizzes.filter((quiz) => quiz.is_public);
-  const privateCount = filteredQuizzes.length - publicQuizzes.length;
-  const categoriesCount = new Set(
-    filteredQuizzes.map((q) => q.category).filter(Boolean)
-  ).size;
+  const chartConfig = {
+    count: {
+      label: t("master_dashboard.users"),
+      color: "var(--chart-1)",
+    },
+  } satisfies ChartConfig;
 
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">
-          {t("master.title")}
+          {t("master_dashboard.title")}
         </h1>
         <Select value={timeRange} onValueChange={setTimeRange}>
-          <SelectTrigger className="w-[160px]" aria-label="Select a value">
+          <SelectTrigger className="w-[160px]" aria-label="Selected time range">
             <SelectValue placeholder={t("master.this_year")} />
           </SelectTrigger>
           <SelectContent>
@@ -76,7 +84,7 @@ export default function MasterDashboardPage() {
         </Select>
       </div>
 
-      {/* Stats Grid */}
+      {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {loading ? (
           <>
@@ -88,45 +96,137 @@ export default function MasterDashboardPage() {
         ) : (
           <>
             <StatCard
-              title={t("stats.quizzes")}
-              value={filteredQuizzes.length}
-              icon={BookOpen}
-            />
-            <StatCard
-              title={t("stats.categories")}
-              value={categoriesCount}
-              icon={Layers}
-            />
-            <StatCard
-              title={t("stats.public")}
-              value={publicQuizzes.length}
+              title={t("master_dashboard.countries")}
+              value={formatNumber(data?.kpi.totalCountries || 0)}
               icon={Globe}
+              href="/address/country"
             />
             <StatCard
-              title={t("stats.private")}
-              value={privateCount}
-              icon={Lock}
+              title={t("master_dashboard.states")}
+              value={formatNumber(data?.kpi.totalStates || 0)}
+              icon={Map}
+              href="/address/state"
+            />
+            <StatCard
+              title={t("master_dashboard.cities")}
+              value={formatNumber(data?.kpi.totalCities || 0)}
+              icon={Building2}
+              href="/address/city"
+            />
+            <StatCard
+              title={t("master_dashboard.users_with_location")}
+              value={formatNumber(data?.kpi.usersWithLocation || 0)}
+              icon={MapPin}
             />
           </>
         )}
       </div>
 
       {/* Charts */}
-      <div>
-        {loading || gameStatsLoading ? (
-          <div className="grid gap-6 lg:grid-cols-2">
-            <Skeleton className="h-[400px] rounded-xl" />
-            <Skeleton className="h-[400px] rounded-xl" />
-          </div>
-        ) : (
-          <MasterStatsCharts
-            quizzes={filteredQuizzes}
-            profiles={users as any}
-            sessionCounts={sessionCounts}
-            topPlayers={topPlayers}
-            topHosts={topHosts}
-          />
-        )}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Top States Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("master_dashboard.top_states")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="h-[220px] w-full" />
+            ) : (data?.charts.topStates?.length || 0) > 0 ? (
+              <ChartContainer
+                config={chartConfig}
+                className="aspect-auto h-[220px] w-full"
+              >
+                <BarChart
+                  accessibilityLayer
+                  data={data?.charts.topStates}
+                  layout="vertical"
+                  margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid horizontal={false} />
+                  <YAxis
+                    dataKey="name"
+                    type="category"
+                    tickLine={false}
+                    tickMargin={10}
+                    axisLine={false}
+                    width={120}
+                    tickFormatter={(value) =>
+                      value.length > 20 ? `${value.slice(0, 20)}...` : value
+                    }
+                  />
+                  <XAxis dataKey="count" type="number" hide />
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent hideLabel />}
+                  />
+                  <Bar
+                    dataKey="count"
+                    fill="var(--color-count)"
+                    radius={[0, 4, 4, 0]}
+                    barSize={20}
+                  />
+                </BarChart>
+              </ChartContainer>
+            ) : (
+              <div className="flex h-[220px] items-center justify-center text-muted-foreground">
+                {t("msg.no_data")}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Top Cities Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("master_dashboard.top_cities")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="h-[220px] w-full" />
+            ) : (data?.charts.topCities?.length || 0) > 0 ? (
+              <ChartContainer
+                config={chartConfig}
+                className="aspect-auto h-[220px] w-full"
+              >
+                <BarChart
+                  accessibilityLayer
+                  data={data?.charts.topCities}
+                  layout="vertical"
+                  margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid horizontal={false} />
+                  <YAxis
+                    dataKey="name"
+                    type="category"
+                    tickLine={false}
+                    tickMargin={10}
+                    axisLine={false}
+                    width={120}
+                    tickFormatter={(value) =>
+                      value.length > 20 ? `${value.slice(0, 20)}...` : value
+                    }
+                  />
+                  <XAxis dataKey="count" type="number" hide />
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent hideLabel />}
+                  />
+                  <Bar
+                    dataKey="count"
+                    fill="var(--color-count)"
+                    radius={[0, 4, 4, 0]}
+                    barSize={20}
+                  />
+                </BarChart>
+              </ChartContainer>
+            ) : (
+              <div className="flex h-[220px] items-center justify-center text-muted-foreground">
+                {t("msg.no_data")}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
