@@ -11,6 +11,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { isSameYear, subYears } from "date-fns";
 import { useTranslation } from "@/lib/i18n";
@@ -113,9 +114,35 @@ export function LocationChart({
   if (loading) {
     return (
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="h-[400px] animate-pulse bg-muted/20" />
-        <Card className="h-[400px] animate-pulse bg-muted/20" />
-        <Card className="h-[400px] animate-pulse bg-muted/20" />
+        {/* Top Countries Skeleton */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle>{t("admin.top_countries")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-[250px] w-full" />
+          </CardContent>
+        </Card>
+
+        {/* Top States Skeleton */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle>{t("admin.top_states")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-[250px] w-full" />
+          </CardContent>
+        </Card>
+
+        {/* Top Cities Skeleton */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle>{t("admin.top_cities")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-[250px] w-full" />
+          </CardContent>
+        </Card>
       </div>
     );
   }

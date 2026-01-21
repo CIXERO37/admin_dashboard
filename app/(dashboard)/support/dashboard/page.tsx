@@ -27,7 +27,7 @@ export default function SupportDashboardPage() {
   const [approvalCount, setApprovalCount] = useState(0);
   const [groupCount, setGroupCount] = useState(0);
   const [timeRange, setTimeRange] = useState<"this-year" | "last-year" | "all">(
-    "this-year"
+    "this-year",
   );
   const [groupStats, setGroupStats] = useState<
     { category: string; count: number }[]
@@ -58,13 +58,13 @@ export default function SupportDashboardPage() {
   const filteredStats = {
     total: filteredReports.length,
     pending: filteredReports.filter(
-      (r) => r.status === "pending" || r.status === "Pending"
+      (r) => r.status === "pending" || r.status === "Pending",
     ).length,
     inProgress: filteredReports.filter(
-      (r) => r.status === "in_progress" || r.status === "In Progress"
+      (r) => r.status === "in_progress" || r.status === "In Progress",
     ).length,
     resolved: filteredReports.filter(
-      (r) => r.status === "resolved" || r.status === "Resolved"
+      (r) => r.status === "resolved" || r.status === "Resolved",
     ).length,
   };
 
@@ -166,15 +166,11 @@ export default function SupportDashboardPage() {
 
       {/* Charts */}
       <div className="grid gap-4 md:grid-cols-3">
-        {isChartsLoading ? (
-          <>
-            <Skeleton className="h-[350px] rounded-xl" />
-            <Skeleton className="h-[350px] rounded-xl" />
-            <Skeleton className="h-[350px] rounded-xl" />
-          </>
-        ) : (
-          <SupportCharts reports={filteredReports} groupStats={groupStats} />
-        )}
+        <SupportCharts
+          reports={filteredReports}
+          groupStats={groupStats}
+          loading={isChartsLoading}
+        />
       </div>
     </div>
   );

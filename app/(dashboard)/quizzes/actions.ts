@@ -14,6 +14,8 @@ export interface Quiz {
   created_at: string | null
   language: string | null
   status: string | null
+  request: boolean | null
+
   creator?: {
     id: string | null
     username: string | null
@@ -52,7 +54,7 @@ export async function fetchQuizzes({
 
   let query = supabase
     .from("quizzes")
-    .select("id, title, description, category, questions, is_hidden, is_public, created_at, language, status, creator:profiles!creator_id(id, email, username, fullname, avatar_url)", { count: "exact" })
+    .select("id, title, description, category, questions, is_hidden, is_public, created_at, language, status, request, creator:profiles!creator_id(id, email, username, fullname, avatar_url)", { count: "exact" })
     .is("deleted_at", null)
 
   if (search) {
@@ -100,6 +102,7 @@ export async function fetchQuizzes({
 
   const transformedData: Quiz[] = (data ?? []).map((item) => ({
     ...item,
+
     creator: Array.isArray(item.creator) ? item.creator[0] ?? null : item.creator,
   }))
 
@@ -111,7 +114,7 @@ export async function fetchQuizzes({
   }
 }
 
-export async function updateQuizVisibility(id: string, isPublic: boolean) {
+export async function updateQuizVisibility(id: string, isPublic: boolean, note?: string) {
   const supabase = getSupabaseAdminClient()
 
   const { error } = await supabase
@@ -128,7 +131,7 @@ export async function updateQuizVisibility(id: string, isPublic: boolean) {
   return { error: null }
 }
 
-export async function blockQuizAction(id: string) {
+export async function blockQuizAction(id: string, note?: string) {
   const supabase = getSupabaseAdminClient()
 
   const { error } = await supabase
@@ -145,12 +148,29 @@ export async function blockQuizAction(id: string) {
   return { error: null }
 }
 
+export async function unblockQuizAction(id: string, note?: string) {
+  const supabase = getSupabaseAdminClient()
+
+  const { error } = await supabase
+    .from("quizzes")
+    .update({ status: null })
+    .eq("id", id)
+
+  if (error) {
+    console.error("Error unblocking quiz:", error)
+    return { error: error.message }
+  }
+
+  revalidatePath("/quizzes")
+  return { error: null }
+}
+
 export async function fetchQuizById(id: string): Promise<{ data: Quiz | null; error: string | null }> {
   const supabase = getSupabaseAdminClient()
 
   const { data, error } = await supabase
     .from("quizzes")
-    .select("id, title, description, category, questions, is_hidden, is_public, created_at, language, status, creator:profiles!creator_id(id, email, username, fullname, avatar_url)")
+    .select("id, title, description, category, questions, is_hidden, is_public, created_at, language, status, request, creator:profiles!creator_id(id, email, username, fullname, avatar_url)")
     .eq("id", id)
     .is("deleted_at", null)
     .single()
@@ -162,6 +182,7 @@ export async function fetchQuizById(id: string): Promise<{ data: Quiz | null; er
 
   const transformedData: Quiz = {
     ...data,
+
     creator: Array.isArray(data.creator) ? data.creator[0] ?? null : data.creator,
   }
 
@@ -191,7 +212,7 @@ export async function getAllQuizzes() {
   
   const { data, error } = await supabase
     .from("quizzes")
-    .select("id, title, description, category, questions, is_hidden, is_public, created_at, language, status, creator:profiles!creator_id(id, email, username, fullname, avatar_url)")
+    .select("id, title, description, category, questions, is_hidden, is_public, created_at, language, status, request, creator:profiles!creator_id(id, email, username, fullname, avatar_url)")
     .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .limit(5000)
@@ -203,6 +224,7 @@ export async function getAllQuizzes() {
 
   const transformedData: Quiz[] = (data ?? []).map((item) => ({
     ...item,
+
     creator: Array.isArray(item.creator) ? item.creator[0] ?? null : item.creator,
   }))
 
