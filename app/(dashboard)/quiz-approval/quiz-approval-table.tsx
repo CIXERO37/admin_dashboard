@@ -214,15 +214,9 @@ export function QuizApprovalTable({
           >
             <span
               className="text-sm font-medium truncate max-w-[120px] group-hover:text-primary transition-colors"
-              title={creator.fullname}
+              title={`${creator.fullname} @${creator.username}`}
             >
               {creator.fullname}
-            </span>
-            <span
-              className="text-xs text-muted-foreground truncate max-w-[120px]"
-              title={creator.username}
-            >
-              @{creator.username}
             </span>
           </Link>
         );
@@ -300,7 +294,7 @@ export function QuizApprovalTable({
     questions: Array.isArray(quiz.questions) ? quiz.questions.length : 0,
     language: quiz.language ?? "ID",
     createdAt: quiz.created_at
-      ? format(new Date(quiz.created_at), "dd MMM yyyy")
+      ? format(new Date(quiz.created_at), "d MMM yyyy")
       : "-",
     actions: null,
   }));

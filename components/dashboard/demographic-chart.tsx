@@ -11,6 +11,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { useTranslation } from "@/lib/i18n";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DemographicChartProps {
   profiles: Profile[];
@@ -76,9 +77,35 @@ export function DemographicChart({ profiles, loading }: DemographicChartProps) {
   if (loading) {
     return (
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="h-[300px] animate-pulse bg-muted/20" />
-        <Card className="h-[300px] animate-pulse bg-muted/20" />
-        <Card className="h-[300px] animate-pulse bg-muted/20" />
+        {/* Age Chart Skeleton */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("admin.chart_age")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="mx-auto aspect-square max-h-[250px] w-full rounded-full" />
+          </CardContent>
+        </Card>
+
+        {/* Gender Chart Skeleton */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("admin.chart_gender")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="mx-auto aspect-square max-h-[250px] w-full rounded-full" />
+          </CardContent>
+        </Card>
+
+        {/* Education Chart Skeleton */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("admin.chart_education")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="mx-auto aspect-square max-h-[250px] w-full rounded-full" />
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -137,7 +164,7 @@ export function DemographicChart({ profiles, loading }: DemographicChartProps) {
         value,
         fill: COLORS[index % COLORS.length],
       };
-    }
+    },
   );
 
   const gradeData = Object.entries(gradeCounts).map(([name, value], index) => ({

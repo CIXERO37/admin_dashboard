@@ -282,7 +282,7 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
               </div>
               <p className="font-medium">
                 {quiz.created_at
-                  ? format(new Date(quiz.created_at), "dd MMM yyyy, HH:mm")
+                  ? format(new Date(quiz.created_at), "d MMM yyyy, HH:mm")
                   : "-"}
               </p>
             </div>
