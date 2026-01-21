@@ -17,6 +17,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { id as idLocale } from "date-fns/locale";
 
 import Link from "next/link";
+import Image from "next/image";
 
 import { cn, getAvatarUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -136,9 +137,10 @@ function GroupCard({ group, onDelete }: GroupCardProps) {
       <div className="relative p-4 bg-muted overflow-hidden h-32">
         {coverUrl ? (
           <>
-            <img
+            <Image
               src={coverUrl}
               alt={name}
+              fill
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/60" />
@@ -373,7 +375,7 @@ export function GroupTable({
       data = data.filter(
         (group) =>
           group.name?.toLowerCase().includes(lowerQuery) ||
-          group.description?.toLowerCase().includes(lowerQuery)
+          group.description?.toLowerCase().includes(lowerQuery),
       );
     }
 
@@ -681,7 +683,7 @@ export function GroupTable({
                 "px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors",
                 currentPage === 1 || isPending
                   ? "border-border bg-secondary/50 text-muted-foreground cursor-not-allowed"
-                  : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer"
+                  : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer",
               )}
             >
               {t("action.previous")}
@@ -706,7 +708,7 @@ export function GroupTable({
                       totalPages - 3,
                       totalPages - 2,
                       totalPages - 1,
-                      totalPages
+                      totalPages,
                     );
                   } else {
                     pages.push(
@@ -715,7 +717,7 @@ export function GroupTable({
                       currentPage,
                       currentPage + 1,
                       "...",
-                      totalPages
+                      totalPages,
                     );
                   }
                 }
@@ -741,7 +743,7 @@ export function GroupTable({
                         "w-9 h-9 text-sm font-medium rounded-lg border transition-colors cursor-pointer",
                         currentPage === page
                           ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border bg-card text-foreground hover:bg-secondary/80"
+                          : "border-border bg-card text-foreground hover:bg-secondary/80",
                       )}
                     >
                       {page}
@@ -758,7 +760,7 @@ export function GroupTable({
                 "px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors",
                 currentPage === totalPages || isPending
                   ? "border-border bg-secondary/50 text-muted-foreground cursor-not-allowed"
-                  : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer"
+                  : "border-border bg-card text-foreground hover:bg-secondary/80 cursor-pointer",
               )}
             >
               {t("action.next")}
@@ -785,8 +787,11 @@ export function GroupTable({
           </DialogHeader>
           <div className="grid gap-2 py-4">
             <Label htmlFor="confirmDelete">
-              Type <strong className="text-destructive">Move to Trash</strong>{" "}
-              to confirm
+              {t("users.type_confirm")}{" "}
+              <strong className="text-destructive">
+                {t("users.move_trash_title")}
+              </strong>{" "}
+              {t("users.to_confirm")}
             </Label>
             <Input
               id="confirmDelete"
@@ -797,7 +802,9 @@ export function GroupTable({
                   confirmText: e.target.value,
                 }))
               }
-              placeholder="Type 'Move to Trash' here"
+              placeholder={`${t("users.type_confirm")} '${t(
+                "users.move_trash_title",
+              )}' ${t("users.here") || "here"}`}
             />
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
