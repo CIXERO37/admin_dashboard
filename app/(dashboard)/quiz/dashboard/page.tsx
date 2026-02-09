@@ -45,11 +45,11 @@ export default function QuizDashboardPage() {
   };
 
   const filteredQuizzes = quizzes.filter((quiz) =>
-    checkDate(quiz.created_at, timeRange)
+    checkDate(quiz.created_at, timeRange),
   );
 
   const pendingQuizzes = filteredQuizzes.filter(
-    (q) => q.request === true
+    (q) => q.request === true,
   ).length;
 
   // Statistics Calculation
@@ -145,19 +145,13 @@ export default function QuizDashboardPage() {
 
       {/* Charts */}
       <div>
-        {isLoading ? (
-          <div className="grid gap-6 md:grid-cols-2">
-            <Skeleton className="h-[400px] rounded-xl" />
-            <Skeleton className="h-[400px] rounded-xl" />
-          </div>
-        ) : (
-          <QuizStatsCharts
-            quizzes={filteredQuizzes}
-            timeRange={timeRange}
-            profiles={users as any}
-            sessionCounts={sessionCounts}
-          />
-        )}
+        <QuizStatsCharts
+          quizzes={filteredQuizzes}
+          timeRange={timeRange}
+          profiles={users as any}
+          sessionCounts={sessionCounts}
+          loading={isLoading}
+        />
       </div>
     </div>
   );
