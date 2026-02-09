@@ -1,10 +1,7 @@
 import { Suspense } from "react";
 import { getGameDashboardStats } from "./actions";
-import {
-  GameDashboardClient,
-  GameDashboardSkeleton,
-} from "./game-dashboard-client";
-import { DashboardFilter } from "./dashboard-filter";
+import { GameDashboardSkeleton } from "./game-dashboard-client";
+import { GameDashboardWrapper } from "./game-dashboard-wrapper";
 
 export const metadata = {
   title: "Game Dashboard",
@@ -23,13 +20,9 @@ export default async function GameDashboardPage(props: {
   const stats = await getGameDashboardStats(range);
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Game Dashboard</h2>
-        <DashboardFilter />
-      </div>
+    <div className="flex-1 p-8 pt-6">
       <Suspense fallback={<GameDashboardSkeleton />}>
-        <GameDashboardClient data={stats} />
+        <GameDashboardWrapper initialData={stats} />
       </Suspense>
     </div>
   );
