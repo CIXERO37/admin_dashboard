@@ -101,17 +101,6 @@ export function QuizTable({ initialData }: QuizTableProps) {
     status: "all",
   });
 
-  // Sync temp state when dialog opens
-  useEffect(() => {
-    if (filterDialogOpen) {
-      setTempFilters({
-        category: categoryFilter,
-        visibility: visibilityFilter,
-        status: statusFilter,
-      });
-    }
-  }, [filterDialogOpen, categoryFilter, visibilityFilter, statusFilter]);
-
   const ITEMS_PER_PAGE = 15;
 
   // Derive Categories from Data
@@ -121,6 +110,24 @@ export function QuizTable({ initialData }: QuizTableProps) {
     );
     return Array.from(cats).sort();
   }, [data]);
+
+  // Sync temp state when dialog opens
+  useEffect(() => {
+    if (filterDialogOpen) {
+      // Try to find a matching category with correct casing
+      const matchingCat = categories.find(
+        (c) => c?.toLowerCase() === categoryFilter?.toLowerCase()
+      );
+
+      setTempFilters({
+        category: matchingCat || categoryFilter,
+        visibility: visibilityFilter,
+        status: statusFilter,
+      });
+    }
+  }, [filterDialogOpen, categoryFilter, visibilityFilter, statusFilter, categories]);
+
+
 
   // Filter Logic
   const filteredData = useMemo(() => {
@@ -138,7 +145,9 @@ export function QuizTable({ initialData }: QuizTableProps) {
 
     // 2. Category Filter
     if (categoryFilter && categoryFilter !== "all") {
-      filtered = filtered.filter((quiz) => quiz.category === categoryFilter);
+      filtered = filtered.filter(
+        (quiz) => quiz.category?.toLowerCase() === categoryFilter.toLowerCase()
+      );
     }
 
     // 3. Visibility Filter

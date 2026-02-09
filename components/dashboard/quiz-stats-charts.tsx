@@ -19,12 +19,14 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { MapPinOff, BarChart2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface QuizStatsChartsProps {
   quizzes: Quiz[];
   timeRange: string;
   profiles: Profile[];
   sessionCounts: Record<string, number>;
+  loading?: boolean;
 }
 
 // Helper for truncated Y-axis labels with wrapping
@@ -82,6 +84,7 @@ export function QuizStatsCharts({
   timeRange,
   profiles,
   sessionCounts,
+  loading,
 }: QuizStatsChartsProps) {
   const { t } = useTranslation();
 
@@ -226,6 +229,68 @@ export function QuizStatsCharts({
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
   }, [quizzes]);
+
+  // Loading Skeleton State MOVED HERE
+  if (loading) {
+    return (
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* 1. Most Played Skeleton */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("master.most_played")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-[250px] w-full" />
+          </CardContent>
+        </Card>
+        {/* 2. Most Favorited Skeleton */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("master.most_favorited")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-[250px] w-full" />
+          </CardContent>
+        </Card>
+        {/* 3. Top Creators Skeleton */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("master.top_creators")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-[250px] w-full" />
+          </CardContent>
+        </Card>
+        {/* 4. Trend Skeleton */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("stats.trend_title")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-[250px] w-full" />
+          </CardContent>
+        </Card>
+        {/* 5. Categories Skeleton */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("stats.category_title")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-[250px] w-full" />
+          </CardContent>
+        </Card>
+        {/* 6. Languages Skeleton */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("stats.language_title")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-[250px] w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
