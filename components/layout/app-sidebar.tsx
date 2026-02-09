@@ -202,7 +202,7 @@ export function AppSidebar() {
           pathname === child.href ||
           pathname.startsWith(child.href + "/") ||
           (child.children &&
-            child.children.some((grandChild) => pathname === grandChild.href))
+            child.children.some((grandChild) => pathname === grandChild.href)),
       ) ?? false
     );
   };
@@ -223,7 +223,9 @@ export function AppSidebar() {
             pathname === child.href ||
             pathname.startsWith(child.href + "/") ||
             (child.children &&
-              child.children.some((grandChild) => pathname === grandChild.href))
+              child.children.some(
+                (grandChild) => pathname === grandChild.href,
+              )),
         );
         if (childActive) {
           activeMenus.push(item.title);
@@ -232,7 +234,7 @@ export function AppSidebar() {
               child.children?.some(
                 (grandChild) =>
                   pathname === grandChild.href ||
-                  pathname.startsWith(grandChild.href + "/")
+                  pathname.startsWith(grandChild.href + "/"),
               )
             ) {
               activeMenus.push(child.title);
@@ -247,7 +249,7 @@ export function AppSidebar() {
 
   const toggleMenu = (title: string) => {
     setOpenMenus((prev) =>
-      prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title]
+      prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title],
     );
   };
 
@@ -255,7 +257,7 @@ export function AppSidebar() {
     <aside
       className={cn(
         "flex flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300",
-        collapsed ? "w-16" : "w-64"
+        collapsed ? "w-16" : "w-64",
       )}
     >
       {/* Header */}
@@ -300,7 +302,7 @@ export function AppSidebar() {
                       "flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                       active || isChildActive(item)
                         ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                        : "text-sidebar-foreground hover:bg-secondary hover:text-foreground"
+                        : "text-sidebar-foreground hover:bg-secondary hover:text-foreground",
                     )}
                   >
                     <div className="flex items-center gap-3">
@@ -326,7 +328,7 @@ export function AppSidebar() {
                       "flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                       active || isChildActive(item)
                         ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                        : "text-sidebar-foreground hover:bg-secondary hover:text-foreground"
+                        : "text-sidebar-foreground hover:bg-secondary hover:text-foreground",
                     )}
                   >
                     <div className="flex items-center gap-3">
@@ -336,7 +338,7 @@ export function AppSidebar() {
                     <ChevronDown
                       className={cn(
                         "h-4 w-4 transition-transform",
-                        isOpen && "rotate-180"
+                        isOpen && "rotate-180",
                       )}
                     />
                   </button>
@@ -364,7 +366,7 @@ export function AppSidebar() {
                                 "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors",
                                 isNestedOpen || pathname.startsWith(child.href)
                                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                                  : "text-sidebar-foreground hover:bg-secondary hover:text-foreground"
+                                  : "text-sidebar-foreground hover:bg-secondary hover:text-foreground",
                               )}
                             >
                               <div className="flex items-center gap-3">
@@ -374,7 +376,7 @@ export function AppSidebar() {
                               <ChevronDown
                                 className={cn(
                                   "h-3 w-3 transition-transform",
-                                  isNestedOpen && "rotate-180"
+                                  isNestedOpen && "rotate-180",
                                 )}
                               />
                             </button>
@@ -390,7 +392,7 @@ export function AppSidebar() {
                                     "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                                     pathname === grandChild.href
                                       ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                                      : "text-sidebar-foreground hover:bg-secondary hover:text-foreground"
+                                      : "text-sidebar-foreground hover:bg-secondary hover:text-foreground",
                                   )}
                                 >
                                   <GrandChildIcon className="h-4 w-4" />
@@ -411,7 +413,7 @@ export function AppSidebar() {
                           "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                           pathname === child.href
                             ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                            : "text-sidebar-foreground hover:bg-secondary hover:text-foreground"
+                            : "text-sidebar-foreground hover:bg-secondary hover:text-foreground",
                         )}
                       >
                         <ChildIcon className="h-4 w-4" />
@@ -424,16 +426,22 @@ export function AppSidebar() {
             );
           }
 
+          // If sidebar is collapsed and item has children, redirect to the first child (usually Dashboard)
+          const linkHref =
+            collapsed && hasChildren && item.children?.[0]
+              ? item.children[0].href
+              : item.href;
+
           return (
             <Link
               key={item.title}
-              href={item.href}
+              href={linkHref}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 active
                   ? "bg-sidebar-primary text-sidebar-primary-foreground"
                   : "text-sidebar-foreground hover:bg-secondary hover:text-foreground",
-                collapsed && "justify-center px-2"
+                collapsed && "justify-center px-2",
               )}
               title={collapsed ? t(item.title) : undefined}
             >

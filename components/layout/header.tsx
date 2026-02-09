@@ -33,12 +33,15 @@ import { ThemeCustomizer } from "@/components/theme-customizer";
 import { ModeToggle } from "@/components/mode-toggle";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { useTranslation } from "@/lib/i18n";
+import { useSidebar } from "@/components/ui/sidebar";
+import Image from "next/image";
 
 export function Header() {
   const { t } = useTranslation();
   const { user, loading } = useCurrentUser();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const { open } = useSidebar();
 
   useEffect(() => {
     setMounted(true);
@@ -47,7 +50,6 @@ export function Header() {
   // Show loading state on SSR and until mounted to prevent hydration mismatch
   const isLoading = !mounted || loading;
 
-  // ... (rest of logic)
   const handleLogout = async () => {
     await logout();
   };
@@ -70,9 +72,26 @@ export function Header() {
   const displayName =
     user?.fullname || user?.username || user?.email?.split("@")[0] || "Admin";
   const displayEmail = user?.email || "-";
+
   return (
-    <header className="flex h-16 items-center justify-end border-b border-border bg-card px-6">
+    <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6">
+      <div className="flex items-center">
+        {/* Show logo only when sidebar is collapsed (!open) */}
+        {!open && mounted && (
+          <Link href="/dashboard" className="flex items-center">
+            <Image
+              src="/icons/gameforsmartlogo.webp"
+              alt="Gameforsmart"
+              width={150}
+              height={32}
+              className="object-contain"
+            />
+          </Link>
+        )}
+      </div>
+
       <div className="flex items-center gap-4">
+        {/* ... existing right content ... */}
         {/* Notifications */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
