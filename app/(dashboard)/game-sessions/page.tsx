@@ -10,6 +10,7 @@ interface PageProps {
     questions?: string;
     duration?: string;
     sort?: string;
+    category?: string;
   }>;
 }
 
@@ -22,6 +23,7 @@ export default async function GameSessionsPage({ searchParams }: PageProps) {
   const questions = params.questions || "all";
   const duration = params.duration || "all";
   const sort = params.sort || "newest";
+  const category = params.category || "all";
 
   const { data, totalPages, currentPage, totalCount } = await fetchGameSessions(
     {
@@ -33,6 +35,7 @@ export default async function GameSessionsPage({ searchParams }: PageProps) {
       questions,
       duration,
       sort,
+      category,
     }
   );
 
@@ -48,6 +51,7 @@ export default async function GameSessionsPage({ searchParams }: PageProps) {
       currentQuestions={questions}
       currentDuration={duration}
       currentSort={sort}
+      currentCategory={category}
     />
   );
 }
