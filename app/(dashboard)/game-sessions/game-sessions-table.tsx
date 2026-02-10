@@ -11,7 +11,7 @@ import {
   Users,
   Gamepad2,
   FileQuestion,
-  Smartphone,
+  Globe,
   Filter,
   RotateCcw,
 } from "lucide-react";
@@ -52,6 +52,7 @@ interface GameSessionsTableProps {
   currentQuestions: string;
   currentDuration: string;
   currentSort: string;
+  currentCategory: string;
 }
 
 export function GameSessionsTable({
@@ -65,6 +66,7 @@ export function GameSessionsTable({
   currentQuestions,
   currentDuration,
   currentSort,
+  currentCategory,
 }: GameSessionsTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -79,6 +81,7 @@ export function GameSessionsTable({
     questions: currentQuestions,
     duration: currentDuration,
     sort: currentSort,
+    category: currentCategory,
   });
 
   // Sync temp state when dialog opens
@@ -90,6 +93,7 @@ export function GameSessionsTable({
         questions: currentQuestions,
         duration: currentDuration,
         sort: currentSort,
+        category: currentCategory,
       });
     }
   }, [
@@ -99,6 +103,7 @@ export function GameSessionsTable({
     currentQuestions,
     currentDuration,
     currentSort,
+    currentCategory,
   ]);
 
   const [selectedParticipants, setSelectedParticipants] = useState<
@@ -131,6 +136,7 @@ export function GameSessionsTable({
       questions: tempFilters.questions,
       duration: tempFilters.duration,
       sort: tempFilters.sort,
+      category: tempFilters.category,
     });
     setIsFilterOpen(false);
   };
@@ -142,6 +148,7 @@ export function GameSessionsTable({
       questions: "all",
       duration: "all",
       sort: "newest",
+      category: "all",
     });
   };
 
@@ -183,6 +190,25 @@ export function GameSessionsTable({
           </span>
         </div>
       ),
+    },
+    {
+      key: "category",
+      label: t("table.category"),
+      render: (value: unknown) => {
+        const catKey = (value as string)?.toLowerCase();
+        const label = catKey
+          ? t(`category.${catKey}`) ||
+            catKey.charAt(0).toUpperCase() + catKey.slice(1)
+          : "-";
+        return (
+          <Badge
+            variant="secondary"
+            className="font-normal capitalize whitespace-nowrap"
+            >
+            {label}
+          </Badge>
+        );
+      },
     },
     {
       key: "status",
@@ -251,7 +277,7 @@ export function GameSessionsTable({
         const displayName = appName.replace(/\.com$/i, "");
         return (
           <div className="flex items-center gap-1.5">
-            <Smartphone className="h-4 w-4 text-muted-foreground" />
+            <Globe className="h-4 w-4 text-muted-foreground" />
             <span className="capitalize">{displayName}</span>
           </div>
         );
@@ -271,7 +297,8 @@ export function GameSessionsTable({
                 ? "cursor-pointer hover:text-primary transition-colors"
                 : ""
             }`}
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               if (count > 0 && participants) {
                 setSelectedParticipants(participants);
               }
@@ -348,6 +375,7 @@ export function GameSessionsTable({
     return {
       id: session.id,
       quiz_title: session.quiz_title,
+      category: session.category,
       game_pin: session.game_pin,
       host: session.host,
       status: session.status,
@@ -433,6 +461,46 @@ export function GameSessionsTable({
                       <SelectItem value="waiting">
                         {t("game_sessions.status_waiting")}
                       </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Category */}
+                <div className="grid gap-2">
+                  <Label>{t("table.category")}</Label>
+                  <Select
+                    value={tempFilters.category}
+                    onValueChange={(value) =>
+                      setTempFilters((prev) => ({ ...prev, category: value }))
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue
+                        placeholder={t("game_sessions.select_category")}
+                      />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[200px]">
+                      <SelectItem value="all">
+                        {t("filter.all_categories")}
+                      </SelectItem>
+                      {[
+                        "math",
+                        "science",
+                        "history",
+                        "geography",
+                        "technology",
+                        "language",
+                        "art",
+                        "music",
+                        "sports",
+                        "general",
+                        "business",
+                      ].map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {t(`category.${cat}`) ||
+                            cat.charAt(0).toUpperCase() + cat.slice(1)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -603,6 +671,7 @@ export function GameSessionsTable({
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
+            onRowClick={(row) => router.push(`/game-sessions/${row.id as string}`)}
           />
         ) : (
           <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-border rounded-xl bg-card">
