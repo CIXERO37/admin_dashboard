@@ -62,6 +62,24 @@ export function GameDashboardWrapper({
             <SelectValue placeholder={t("master.this_year") || "This Year"} />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="today">
+              {t("master.today") || "Today"}
+            </SelectItem>
+            <SelectItem value="yesterday">
+              {t("master.yesterday") || "Yesterday"}
+            </SelectItem>
+            <SelectItem value="this-week">
+              {t("master.this_week") || "This Week"}
+            </SelectItem>
+            <SelectItem value="last-week">
+              {t("master.last_week") || "Last Week"}
+            </SelectItem>
+            <SelectItem value="this-month">
+              {t("master.this_month") || "This Month"}
+            </SelectItem>
+            <SelectItem value="last-month">
+              {t("master.last_month") || "Last Month"}
+            </SelectItem>
             <SelectItem value="this-year">
               {t("master.this_year") || "This Year"}
             </SelectItem>
