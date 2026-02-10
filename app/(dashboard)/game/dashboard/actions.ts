@@ -12,7 +12,40 @@ export async function getGameDashboardStats(timeRange: string = "this-year") {
   let startDate: string | undefined;
   let endDate: string | undefined;
 
-  if (timeRange === "this-year") {
+  if (timeRange === "today") {
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+    startDate = today.toISOString();
+  } else if (timeRange === "yesterday") {
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(0, 0, 0, 0);
+    startDate = yesterday.toISOString();
+
+    const endOfYesterday = new Date(now);
+    endOfYesterday.setHours(0, 0, 0, 0);
+    endDate = endOfYesterday.toISOString();
+  } else if (timeRange === "this-week") {
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday start
+    startOfWeek.setHours(0, 0, 0, 0);
+    startDate = startOfWeek.toISOString();
+  } else if (timeRange === "last-week") {
+    const startOfLastWeek = new Date(now);
+    startOfLastWeek.setDate(now.getDate() - now.getDay() - 7);
+    startOfLastWeek.setHours(0, 0, 0, 0);
+    startDate = startOfLastWeek.toISOString();
+
+    const endOfLastWeek = new Date(now);
+    endOfLastWeek.setDate(now.getDate() - now.getDay());
+    endOfLastWeek.setHours(0, 0, 0, 0);
+    endDate = endOfLastWeek.toISOString();
+  } else if (timeRange === "this-month") {
+    startDate = new Date(currentYear, now.getMonth(), 1).toISOString();
+  } else if (timeRange === "last-month") {
+    startDate = new Date(currentYear, now.getMonth() - 1, 1).toISOString();
+    endDate = new Date(currentYear, now.getMonth(), 1).toISOString();
+  } else if (timeRange === "this-year") {
     startDate = new Date(currentYear, 0, 1).toISOString();
   } else if (timeRange === "last-year") {
     startDate = new Date(currentYear - 1, 0, 1).toISOString();
