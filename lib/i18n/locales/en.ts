@@ -517,6 +517,7 @@ export const en: Record<string, string> = {
   "settings.first_name": "First Name",
   "settings.last_name": "Last Name",
   "settings.phone": "Phone",
+  "game_session.statistics": "Statistics",
   "settings.save": "Save Changes",
 
   "settings.current_device": "Current",

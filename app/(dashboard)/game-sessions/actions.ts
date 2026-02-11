@@ -13,6 +13,8 @@ export interface GameSession {
   created_at: string;
   started_at: string | null;
   ended_at: string | null;
+  question_limit?: string;
+  total_time_minutes?: number;
   participants: Array<{
     user_id?: string;
     nickname?: string;
@@ -254,7 +256,7 @@ export async function getGameSessionById(id: string) {
       .eq("id", id)
       .maybeSingle();
 
-    console.log("🔍 Query result - data:", data ? "found" : "null");
+    console.log("🔍 Query result - data found:", !!data);
     console.log("🔍 Query result - error:", error);
 
     if (error) {
