@@ -161,8 +161,7 @@ export function Header() {
                 <>
                   <Skeleton className="h-8 w-8 rounded-full" />
                   <div className="hidden md:flex flex-col gap-1">
-                    <Skeleton className="h-4 w-20" />
-                    <Skeleton className="h-3 w-28" />
+                    <Skeleton className="h-4 w-24" />
                   </div>
                 </>
               ) : (
@@ -179,9 +178,6 @@ export function Header() {
                   <div className="hidden flex-col items-start text-left md:flex">
                     <span className="text-sm font-medium text-foreground">
                       {displayName}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {displayEmail}
                     </span>
                   </div>
                 </>
