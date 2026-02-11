@@ -685,4 +685,5 @@ export const id: Record<string, string> = {
   "master_dashboard.top_states": "Provinsi Teratas",
   "master_dashboard.top_cities": "Kota Teratas",
   "master_dashboard.users": "Pengguna",
+  "game_session.statistics": "Statistik",
 };

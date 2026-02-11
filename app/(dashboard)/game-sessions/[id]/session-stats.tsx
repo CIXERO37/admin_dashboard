@@ -1,25 +1,27 @@
 "use client";
 
-import { Users, Trophy, Medal, Clock } from "lucide-react";
+import { Users, Trophy, Medal, Clock, FileQuestion } from "lucide-react";
 import { StatCard } from "@/components/dashboard/stat-card";
 
 interface SessionStatsProps {
   totalPlayers: number;
   avgScore: number;
   maxScore: number;
-  durationMinutes: number;
+  questionsCount: number;
+  duration: string;
 }
 
 export function SessionStats({
   totalPlayers,
   avgScore,
   maxScore,
-  durationMinutes,
+  questionsCount,
+  duration,
 }: SessionStatsProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
       <StatCard
-        title="Total Players"
+        title="Players"
         value={totalPlayers}
         icon={Users}
       />
@@ -34,8 +36,13 @@ export function SessionStats({
         icon={Medal}
       />
       <StatCard
+        title="Questions"
+        value={questionsCount}
+        icon={FileQuestion}
+      />
+      <StatCard
         title="Duration"
-        value={`${durationMinutes}m`}
+        value={duration}
         icon={Clock}
       />
     </div>
