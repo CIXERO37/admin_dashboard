@@ -50,10 +50,10 @@ export function ProfileView({
                   avatarUrl={profile.avatar_url}
                   fullname={profile.fullname}
                 />
-                <h2 className="mt-2 text-xl font-semibold">
+                <h2 className="mt-2 text-xl font-semibold w-full truncate px-4" title={profile.fullname ?? "-"}>
                   {profile.fullname ?? "-"}
                 </h2>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground w-full truncate px-4" title={`@${profile.username}`}>
                   @{profile.username}
                 </p>
 
@@ -93,7 +93,7 @@ export function ProfileView({
                 {profile.email && (
                   <div className="flex items-center gap-3">
                     <Mail className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground truncate">
+                    <span className="text-muted-foreground truncate" title={profile.email}>
                       {profile.email}
                     </span>
                   </div>
@@ -195,7 +195,7 @@ export function ProfileView({
                       {index + 1}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{quiz.title}</p>
+                      <p className="font-medium truncate" title={quiz.title}>{quiz.title}</p>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
                         {quiz.category && (
                           <Badge variant="secondary" className="text-xs">

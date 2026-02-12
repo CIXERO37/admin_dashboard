@@ -170,7 +170,7 @@ export default function ReportDetailPage({ params }: PageProps) {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage className="max-w-[200px] truncate">
+              <BreadcrumbPage className="max-w-[200px] truncate" title={report.title || t("reports.untitled")}>
                 {report.title || t("reports.untitled")}
               </BreadcrumbPage>
             </BreadcrumbItem>
@@ -316,7 +316,7 @@ export default function ReportDetailPage({ params }: PageProps) {
                   <FileText className="h-3.5 w-3.5" />
                   {t("table.title")}
                 </p>
-                <p className="font-medium">{report.title || "-"}</p>
+                <p className="font-medium truncate" title={report.title || "-"}>{report.title || "-"}</p>
               </div>
 
               <Separator />
@@ -326,7 +326,7 @@ export default function ReportDetailPage({ params }: PageProps) {
                 <p className="text-xs text-muted-foreground">
                   {t("reports.description")}
                 </p>
-                <p className="text-sm">{report.description || "-"}</p>
+                <p className="text-sm line-clamp-3" title={report.description || "-"}>{report.description || "-"}</p>
               </div>
 
               <Separator />
