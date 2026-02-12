@@ -39,7 +39,7 @@ export function ProfileBreadcrumb({ name }: ProfileBreadcrumbProps) {
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbPage>{name}</BreadcrumbPage>
+          <BreadcrumbPage className="max-w-[300px] truncate" title={name}>{name}</BreadcrumbPage>
         </BreadcrumbItem>
       </BreadcrumbList>
     </Breadcrumb>
@@ -179,7 +179,7 @@ export function TopQuizzesList({ quizzes }: TopQuizzesListProps) {
             {index + 1}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-medium truncate">{quiz.title}</p>
+            <p className="font-medium truncate" title={quiz.title}>{quiz.title}</p>
             <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
               <span>
                 {t("stats.average")}: {quiz.avg_score}

@@ -260,7 +260,7 @@ export function GameSessionsTable({
         return (
           <Link
             href={`/users/${host.id}`}
-            className="text-sm font-medium hover:text-primary transition-colors"
+            className="text-sm font-medium hover:text-primary transition-colors truncate block max-w-[150px]"
             title={`${host.fullname} @${host.username}`}
             onClick={(e) => e.stopPropagation()}
           >

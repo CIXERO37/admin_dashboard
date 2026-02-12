@@ -166,9 +166,9 @@ export function TrashUserTable({ initialData }: TrashUserTableProps) {
               <AvatarImage src={getAvatarUrl(avatarUrl)} />
               <AvatarFallback>{getInitials(name)}</AvatarFallback>
             </Avatar>
-            <div className="flex flex-col">
-              <span className="font-medium">{name}</span>
-              <span className="text-xs text-muted-foreground">{email}</span>
+            <div className="flex flex-col min-w-0">
+              <span className="font-medium truncate" title={name}>{name}</span>
+              <span className="text-xs text-muted-foreground truncate" title={email}>{email}</span>
             </div>
           </div>
         );
