@@ -257,11 +257,11 @@ export function ReportTable({ initialData }: ReportTableProps) {
             href={`/users/${reporter.id}`}
             className="flex items-center gap-3 cursor-pointer"
           >
-            <div>
-              <p className="font-medium leading-tight hover:text-primary transition-colors">
+            <div className="min-w-0">
+              <p className="font-medium leading-tight hover:text-primary transition-colors truncate" title={name}>
                 {name}
               </p>
-              <p className="text-xs text-muted-foreground">{username}</p>
+              <p className="text-xs text-muted-foreground truncate" title={username}>{username}</p>
             </div>
           </Link>
         );
@@ -292,7 +292,7 @@ export function ReportTable({ initialData }: ReportTableProps) {
         const description = (value as string) || "";
         return (
           <div className="max-w-[250px]">
-            <p className="truncate">
+            <p className="truncate" title={description || "No description provided"}>
               {description || "No description provided"}
             </p>
           </div>
@@ -313,7 +313,7 @@ export function ReportTable({ initialData }: ReportTableProps) {
               className="flex items-center gap-2 cursor-pointer"
             >
               <User className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm hover:text-primary transition-colors">
+              <span className="text-sm hover:text-primary transition-colors truncate block max-w-[150px]" title={reportedUser.fullname || reportedUser.username || "Unknown"}>
                 {reportedUser.fullname || reportedUser.username || "Unknown"}
               </span>
             </Link>

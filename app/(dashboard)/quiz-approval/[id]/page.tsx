@@ -149,7 +149,7 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage className="max-w-[200px] truncate">
+                <BreadcrumbPage className="max-w-[200px] truncate" title={quiz.title}>
                   {quiz.title}
                 </BreadcrumbPage>
               </BreadcrumbItem>
@@ -198,13 +198,13 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
 
         <div className="p-6 space-y-6">
           {/* Title & Status */}
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <h2 className="text-xl font-semibold text-foreground">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-1 min-w-0 flex-1">
+              <h2 className="text-xl font-semibold text-foreground truncate" title={quiz.title}>
                 {quiz.title}
               </h2>
               {quiz.description && (
-                <p className="text-muted-foreground">{quiz.description}</p>
+                <p className="text-muted-foreground line-clamp-2" title={quiz.description}>{quiz.description}</p>
               )}
             </div>
             <Badge

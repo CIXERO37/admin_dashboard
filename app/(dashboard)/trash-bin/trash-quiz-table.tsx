@@ -140,9 +140,9 @@ export function TrashQuizTable({ initialData }: TrashQuizTableProps) {
         const category = row.category as string;
         const questionsCount = row.questions_count as number;
         return (
-          <div className="flex flex-col">
-            <span className="font-medium">{title}</span>
-            <span className="text-xs text-muted-foreground">
+          <div className="flex flex-col min-w-0">
+            <span className="font-medium truncate" title={title}>{title}</span>
+            <span className="text-xs text-muted-foreground truncate">
               {category || t("groups.no_category")} - {questionsCount}{" "}
               {t("table.questions")}
             </span>
@@ -159,9 +159,9 @@ export function TrashQuizTable({ initialData }: TrashQuizTableProps) {
           email: string | null;
         } | null;
         return (
-          <div className="flex flex-col">
-            <span className="text-sm">{creator?.fullname || "-"}</span>
-            <span className="text-xs text-muted-foreground">
+          <div className="flex flex-col min-w-0">
+            <span className="text-sm truncate" title={creator?.fullname || "-"}>{creator?.fullname || "-"}</span>
+            <span className="text-xs text-muted-foreground truncate" title={creator?.email || ""}>
               {creator?.email}
             </span>
           </div>

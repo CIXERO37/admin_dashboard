@@ -140,15 +140,15 @@ export default async function GameSessionDetailPage({
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>{session.quiz_title}</BreadcrumbPage>
+            <BreadcrumbPage className="max-w-[300px] truncate" title={session.quiz_title}>{session.quiz_title}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
       
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-        <h1 className="text-2xl font-bold tracking-tight">
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0 flex-1">
+        <h1 className="text-2xl font-bold tracking-tight truncate" title={session.quiz_title}>
           {session.quiz_title}
         </h1>
         <div className="flex items-center gap-2 text-muted-foreground text-sm flex-wrap mt-1">
@@ -207,7 +207,7 @@ export default async function GameSessionDetailPage({
                     {index === 2 && <span className="ml-2">🥉</span>}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
                       <Avatar className="h-8 w-8">
                         <AvatarImage
                           src={
@@ -224,12 +224,13 @@ export default async function GameSessionDetailPage({
                       {p.user_id ? (
                         <Link
                           href={`/users/${p.user_id}`}
-                          className="font-medium hover:text-emerald-500 transition-colors"
+                          className="font-medium hover:text-emerald-500 transition-colors truncate"
+                          title={p.nickname || "Unknown"}
                         >
                           {p.nickname || "Unknown"}
                         </Link>
                       ) : (
-                        <span className="font-medium">
+                        <span className="font-medium truncate" title={p.nickname || "Unknown"}>
                           {p.nickname || "Unknown"}
                         </span>
                       )}
