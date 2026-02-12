@@ -147,9 +147,9 @@ export function TrashGroupTable({ initialData }: TrashGroupTableProps) {
               <AvatarImage src={getAvatarUrl(avatarUrl)} />
               <AvatarFallback>{name.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
-            <div className="flex flex-col">
-              <span className="font-medium">{name}</span>
-              <span className="text-xs text-muted-foreground line-clamp-1">
+            <div className="flex flex-col min-w-0">
+              <span className="font-medium truncate" title={name}>{name}</span>
+              <span className="text-xs text-muted-foreground line-clamp-1" title={description || t("groups.description_empty")}>
                 {description || t("groups.description_empty")}
               </span>
             </div>
@@ -166,9 +166,9 @@ export function TrashGroupTable({ initialData }: TrashGroupTableProps) {
           email: string | null;
         } | null;
         return (
-          <div className="flex flex-col">
-            <span className="text-sm">{creator?.fullname || "-"}</span>
-            <span className="text-xs text-muted-foreground">
+          <div className="flex flex-col min-w-0">
+            <span className="text-sm truncate" title={creator?.fullname || "-"}>{creator?.fullname || "-"}</span>
+            <span className="text-xs text-muted-foreground truncate" title={creator?.email || ""}>
               {creator?.email}
             </span>
           </div>

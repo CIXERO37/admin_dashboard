@@ -361,11 +361,11 @@ export function UserTable({ initialData }: UserTableProps) {
               <AvatarImage src={avatar} alt={name} />
               <AvatarFallback>{getInitials(name)}</AvatarFallback>
             </Avatar>
-            <div>
-              <p className="font-medium leading-tight hover:text-primary transition-colors">
+            <div className="min-w-0">
+              <p className="font-medium leading-tight hover:text-primary transition-colors truncate max-w-[160px]" title={name}>
                 {name}
               </p>
-              <p className="text-xs text-muted-foreground">{displayUsername}</p>
+              <p className="text-xs text-muted-foreground truncate max-w-[160px]" title={displayUsername}>{displayUsername}</p>
             </div>
           </Link>
         );
@@ -461,8 +461,8 @@ export function UserTable({ initialData }: UserTableProps) {
             href={`https://www.google.com/maps/search/?api=1&query=${encodedLocation}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-medium hover:underline hover:text-primary transition-colors"
-            title="View on Google Maps"
+            className="text-sm font-medium hover:underline hover:text-primary transition-colors truncate block max-w-[160px]"
+            title={locationText}
             onClick={(e) => e.stopPropagation()}
           >
             {locationText}

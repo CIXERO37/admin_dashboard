@@ -281,7 +281,7 @@ export function GroupDetailClient({
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{group.name}</BreadcrumbPage>
+              <BreadcrumbPage className="max-w-[300px] truncate" title={group.name}>{group.name}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -321,8 +321,8 @@ export function GroupDetailClient({
               </Avatar>
             </div>
 
-            <h1 className="text-2xl font-bold text-foreground">{group.name}</h1>
-            <p className="max-w-2xl text-muted-foreground mt-1 text-sm">
+            <h1 className="text-2xl font-bold text-foreground truncate max-w-lg" title={group.name}>{group.name}</h1>
+            <p className="max-w-2xl text-muted-foreground mt-1 text-sm line-clamp-2" title={group.description || t("group_detail.description_empty")}>
               {group.description || t("group_detail.description_empty")}
             </p>
 
@@ -417,7 +417,7 @@ export function GroupDetailClient({
                       >
                         {group.creator?.fullname || "Unknown"}
                       </p>
-                      <p className="text-xs text-muted-foreground truncate">
+                      <p className="text-xs text-muted-foreground truncate" title={`@${group.creator?.username || "-"}`}>
                         @{group.creator?.username || "-"}
                       </p>
                     </div>

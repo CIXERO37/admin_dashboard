@@ -209,7 +209,7 @@ export async function deleteQuizAction(id: string) {
 
 export async function getAllQuizzes() {
   const supabase = getSupabaseAdminClient()
-  
+
   const { data, error } = await supabase
     .from("quizzes")
     .select("id, title, description, category, questions, is_hidden, is_public, created_at, language, status, request, creator:profiles!creator_id(id, email, username, fullname, avatar_url)")
@@ -229,4 +229,37 @@ export async function getAllQuizzes() {
   }))
 
   return transformedData
+}
+
+export interface QuizSession {
+  id: string;
+  game_pin: string;
+  status: string;
+  created_at: string;
+  started_at: string | null;
+  ended_at: string | null;
+  participants: Array<{
+    user_id?: string;
+    nickname?: string;
+    score?: number;
+    started?: string;
+    ended?: string;
+  }> | null;
+}
+
+export async function fetchQuizSessions(quizId: string): Promise<QuizSession[]> {
+  const supabase = getSupabaseAdminClient()
+
+  const { data, error } = await supabase
+    .from("game_sessions")
+    .select("id, game_pin, status, created_at, started_at, ended_at, participants")
+    .eq("quiz_id", quizId)
+    .order("created_at", { ascending: false })
+
+  if (error) {
+    console.error("Error fetching quiz sessions:", error)
+    return []
+  }
+
+  return (data ?? []) as QuizSession[]
 }

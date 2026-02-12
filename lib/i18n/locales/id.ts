@@ -686,4 +686,13 @@ export const id: Record<string, string> = {
   "master_dashboard.top_cities": "Kota Teratas",
   "master_dashboard.users": "Pengguna",
   "game_session.statistics": "Statistik",
+  "quiz.total_plays": "Total Dimainkan",
+  "quiz.plays": "Dimainkan",
+  "quiz.total_participants": "Total Peserta",
+  "quiz.participants": "Peserta",
+  "quiz.avg_score": "Rata-rata Skor",
+  "quiz.questions": "Soal",
+  "quiz.session_history": "Riwayat Sesi",
+  "quiz.no_sessions": "Belum ada sesi",
+  "quiz.no_questions": "Tidak ada soal",
 };
