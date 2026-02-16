@@ -46,7 +46,7 @@ export function ProfileBreadcrumb({ name }: ProfileBreadcrumbProps) {
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbPage className="max-w-[300px] truncate" title={name}>{name}</BreadcrumbPage>
+          <BreadcrumbPage title="Profile Detail">Profile Detail</BreadcrumbPage>
         </BreadcrumbItem>
       </BreadcrumbList>
     </Breadcrumb>

@@ -66,6 +66,8 @@ export const id: Record<string, string> = {
   "action.block": "Blokir",
   "action.unblock": "Buka Blokir",
   "action.restore": "Pulihkan",
+  "action.expand_all": "Buka Semua",
+  "action.collapse_all": "Tutup Semua",
 
   // Table Headers
   "table.name": "Nama",
@@ -692,7 +694,28 @@ export const id: Record<string, string> = {
   "quiz.participants": "Peserta",
   "quiz.avg_score": "Rata-rata Skor",
   "quiz.questions": "Soal",
-  "quiz.session_history": "Riwayat Sesi",
+  "quiz.session_history": "Sesi Game",
   "quiz.no_sessions": "Belum ada sesi",
   "quiz.no_questions": "Tidak ada soal",
+
+  // Quiz Detail Statistics
+  "quiz.detail_title": "Detail Kuis",
+  "quiz.statistics": "Statistik",
+  "quiz.quiz_stats": "Statistik",
+  "quiz.total_plays_desc": "Total kali dimainkan",
+  "quiz.total_participants_desc": "Pemain unik",
+  "quiz.avg_score_desc": "Persentase rata-rata",
+  "quiz.completion_rate": "Penyelesaian",
+  "quiz.session_status": "Status Sesi",
+  "quiz.finished": "Selesai",
+  "quiz.waiting": "Menunggu",
+  "quiz.active_status": "Aktif",
+  "quiz.score_insights": "Wawasan Skor",
+  "quiz.best_score": "Skor Tertinggi",
+  "quiz.lowest_score": "Skor Terendah",
+  "quiz.avg_per_session": "Rata-rata Pemain/Sesi",
+  "quiz.top_players": "Pemain Teratas",
+  "quiz.top_application": "Aplikasi Teratas",
+  "quiz.no_players": "Belum ada pemain",
+  "quiz.no_data": "Belum ada data",
 };

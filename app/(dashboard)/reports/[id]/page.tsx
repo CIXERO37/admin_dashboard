@@ -170,8 +170,8 @@ export default function ReportDetailPage({ params }: PageProps) {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage className="max-w-[200px] truncate" title={report.title || t("reports.untitled")}>
-                {report.title || t("reports.untitled")}
+              <BreadcrumbPage title="Report Detail">
+                Report Detail
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
