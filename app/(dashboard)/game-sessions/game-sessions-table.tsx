@@ -29,7 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTranslation } from "@/lib/i18n";
-import { type GameSession } from "./actions";
+import { fetchGameSessions, type GameSession } from "./actions";
 
 import {
   Dialog,
@@ -98,6 +98,46 @@ export function GameSessionsTable({
     }
   }, [
     isFilterOpen,
+    currentStatus,
+    currentApplication,
+    currentQuestions,
+    currentDuration,
+    currentSort,
+    currentCategory,
+  ]);
+
+  const [sessions, setSessions] = useState<GameSession[]>(initialData);
+
+  // Sync state when initialData changes (e.g. from parent/url change)
+  useEffect(() => {
+    setSessions(initialData);
+  }, [initialData]);
+
+  // Auto-refresh sessions every 15 seconds
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const { data } = await fetchGameSessions({
+          page: currentPage,
+          pageSize: 15,
+          search: searchQuery,
+          status: currentStatus,
+          application: currentApplication,
+          questions: currentQuestions,
+          duration: currentDuration,
+          sort: currentSort,
+          category: currentCategory,
+        });
+        setSessions(data);
+      } catch (error) {
+        console.error("Auto-refresh failed:", error);
+      }
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [
+    currentPage,
+    searchQuery,
     currentStatus,
     currentApplication,
     currentQuestions,
@@ -371,7 +411,7 @@ export function GameSessionsTable({
     },
   ];
 
-  const tableData = initialData.map((session) => {
+  const tableData = sessions.map((session) => {
     return {
       id: session.id,
       quiz_title: session.quiz_title,
@@ -664,7 +704,7 @@ export function GameSessionsTable({
 
       {/* Table */}
       <div className={isPending ? "opacity-60 pointer-events-none" : ""}>
-        {initialData.length > 0 ? (
+        {sessions.length > 0 ? (
           <DataTable
             columns={columns}
             data={tableData as Record<string, unknown>[]}

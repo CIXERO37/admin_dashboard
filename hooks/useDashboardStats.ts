@@ -36,9 +36,9 @@ export function useDashboardStats() {
     const controller = new AbortController()
     const supabase = getSupabaseBrowserClient()
 
-    async function fetchData() {
+    async function fetchData(isInitial = false) {
       try {
-        setLoading(true)
+        if (isInitial) setLoading(true)
         setError(null)
 
         const [profilesRes, quizzesRes, reportsRes] = await Promise.all([
@@ -69,19 +69,24 @@ export function useDashboardStats() {
             reporter: Array.isArray(r.reporter) ? r.reporter[0] : r.reporter,
           }))
         )
-        setLoading(false)
+        if (isInitial) setLoading(false)
       } catch (err) {
         if (err instanceof Error && (err.name === "AbortError" || err.message.includes("aborted"))) {
           return
         }
         setError(err instanceof Error ? err.message : "An error occurred")
-        setLoading(false)
+        if (isInitial) setLoading(false)
       }
     }
 
-    fetchData()
+    fetchData(true)
 
-    return () => controller.abort()
+    const interval = setInterval(() => fetchData(false), 60000)
+
+    return () => {
+      clearInterval(interval)
+      controller.abort()
+    }
   }, [])
 
   const stats = useMemo<DashboardStats>(() => {

@@ -8,6 +8,7 @@ import { SessionStats } from "./session-stats";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getAvatarUrl } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -130,7 +131,7 @@ export default async function GameSessionDetailPage({
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto py-0 space-y-6">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -140,7 +141,7 @@ export default async function GameSessionDetailPage({
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className="max-w-[300px] truncate" title={session.quiz_title}>{session.quiz_title}</BreadcrumbPage>
+            <BreadcrumbPage title="Game Session Detail">Game Session Detail</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -152,7 +153,37 @@ export default async function GameSessionDetailPage({
           {session.quiz_title}
         </h1>
         <div className="flex items-center gap-2 text-muted-foreground text-sm flex-wrap mt-1">
-          <span className="font-medium text-foreground">
+          {session.host && (
+            <>
+              <Link 
+                href={`/users/${session.host.id}`} 
+                className="flex items-center gap-2 group hover:text-primary transition-colors"
+                title={`Host: ${session.host.fullname}`}
+              >
+                <Avatar className="h-5 w-5 border border-border">
+                  <AvatarImage src={getAvatarUrl(session.host.avatar_url)} />
+                  <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
+                    {session.host.fullname?.[0] || "?"}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="font-medium">
+                  {session.host.fullname}
+                </span>
+              </Link>
+              <span className="text-muted-foreground/40">•</span>
+            </>
+          )}
+          
+          {session.application && (
+            <>
+               <span className="capitalize px-2 py-0.5 rounded text-xs border border-border/50 bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium">
+                {session.application}
+              </span>
+              <span className="text-muted-foreground/40">•</span>
+            </>
+          )}
+
+          <span className="font-mono font-medium text-foreground bg-secondary/50 px-2 py-0.5 rounded text-xs border border-border/50">
             PIN: {session.game_pin}
           </span>
           <span>•</span>

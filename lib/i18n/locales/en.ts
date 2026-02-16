@@ -66,6 +66,8 @@ export const en: Record<string, string> = {
   "action.block": "Block",
   "action.unblock": "Unblock",
   "action.restore": "Restore",
+  "action.expand_all": "Expand All",
+  "action.collapse_all": "Collapse All",
 
   // Table Headers
   "table.name": "Name",
@@ -524,7 +526,7 @@ export const en: Record<string, string> = {
   "quiz.participants": "Participants",
   "quiz.avg_score": "Avg Score",
   "quiz.questions": "Questions",
-  "quiz.session_history": "Session History",
+  "quiz.session_history": "Game Sessions",
   "quiz.no_sessions": "No sessions yet",
   "quiz.no_questions": "No questions",
   "settings.save": "Save Changes",
@@ -695,4 +697,25 @@ export const en: Record<string, string> = {
   "master_dashboard.top_states": "Top States by Users",
   "master_dashboard.top_cities": "Top Cities by Users",
   "master_dashboard.users": "Users",
+
+  // Quiz Detail Statistics
+  "quiz.detail_title": "Quiz Detail",
+  "quiz.statistics": "Statistics",
+  "quiz.quiz_stats": "Statistics",
+  "quiz.total_plays_desc": "Total times played",
+  "quiz.total_participants_desc": "Unique players",
+  "quiz.avg_score_desc": "Average percentage",
+  "quiz.completion_rate": "Completion",
+  "quiz.session_status": "Session Status",
+  "quiz.finished": "Finished",
+  "quiz.waiting": "Waiting",
+  "quiz.active_status": "Active",
+  "quiz.score_insights": "Score Insights",
+  "quiz.best_score": "Best Score",
+  "quiz.lowest_score": "Lowest Score",
+  "quiz.avg_per_session": "Avg Players/Session",
+  "quiz.top_players": "Top Players",
+  "quiz.top_application": "Top Application",
+  "quiz.no_players": "No players yet",
+  "quiz.no_data": "No data yet",
 };
