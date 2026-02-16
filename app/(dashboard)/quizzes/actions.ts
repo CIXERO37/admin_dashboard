@@ -238,6 +238,7 @@ export interface QuizSession {
   created_at: string;
   started_at: string | null;
   ended_at: string | null;
+  application?: string;
   participants: Array<{
     user_id?: string;
     nickname?: string;
@@ -252,7 +253,7 @@ export async function fetchQuizSessions(quizId: string): Promise<QuizSession[]> 
 
   const { data, error } = await supabase
     .from("game_sessions")
-    .select("id, game_pin, status, created_at, started_at, ended_at, participants")
+    .select("id, game_pin, status, created_at, started_at, ended_at, participants, application")
     .eq("quiz_id", quizId)
     .order("created_at", { ascending: false })
 

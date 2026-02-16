@@ -149,8 +149,8 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage className="max-w-[200px] truncate" title={quiz.title}>
-                  {quiz.title}
+                <BreadcrumbPage title="Quiz Approval Detail">
+                  Quiz Approval Detail
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
