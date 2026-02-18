@@ -580,6 +580,11 @@ export const en: Record<string, string> = {
   "users.created_quizzes": "Created Quizzes",
   "users.no_created": "No quizzes created yet",
   "users.questions": "questions",
+  "users.sessions_hosted": "Sessions Hosted",
+  "users.games_played": "Games Played",
+  "users.recent_sessions": "Recent Sessions",
+  "users.no_sessions": "No sessions yet",
+  "users.activity_overview": "Activity Overview",
 
   // Quiz Detail
   "quiz.creator": "Creator",
