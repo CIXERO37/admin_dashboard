@@ -4,6 +4,7 @@ import {
   fetchProfileById,
   fetchUserQuizzes,
   fetchCreatedQuizzes,
+  fetchUserGameActivity,
 } from "../actions";
 import { UserDetailClient } from "./user-detail-client";
 
@@ -13,16 +14,18 @@ interface PageProps {
 
 export default async function ProfileDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const [profileResult, quizzesResult, createdQuizzesResult] =
+  const [profileResult, quizzesResult, createdQuizzesResult, gameActivityResult] =
     await Promise.all([
       fetchProfileById(id),
       fetchUserQuizzes(id),
       fetchCreatedQuizzes(id),
+      fetchUserGameActivity(id),
     ]);
 
   const { data: profile, error } = profileResult;
   const { data: userQuizzes } = quizzesResult;
   const { data: createdQuizzes } = createdQuizzesResult;
+  const { data: gameActivity } = gameActivityResult;
 
   if (error || !profile) {
     notFound();
@@ -33,6 +36,7 @@ export default async function ProfileDetailPage({ params }: PageProps) {
       profile={profile}
       userQuizzes={userQuizzes || []}
       createdQuizzes={createdQuizzes || []}
+      gameActivity={gameActivity}
     />
   );
 }

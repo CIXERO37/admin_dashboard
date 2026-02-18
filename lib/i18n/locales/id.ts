@@ -570,6 +570,11 @@ export const id: Record<string, string> = {
   "users.created_quizzes": "Kuis Dibuat",
   "users.no_created": "Belum ada kuis yang dibuat",
   "users.questions": "pertanyaan",
+  "users.sessions_hosted": "Sesi Dihosting",
+  "users.games_played": "Permainan Dimainkan",
+  "users.recent_sessions": "Sesi Terbaru",
+  "users.no_sessions": "Belum ada sesi",
+  "users.activity_overview": "Ringkasan Aktivitas",
 
   // Quiz Detail
   "quiz.creator": "Pembuat",

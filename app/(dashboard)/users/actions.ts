@@ -53,7 +53,7 @@ export async function fetchProfileById(id: string): Promise<{ data: Profile | nu
       .from("follows")
       .select("*", { count: "exact", head: true })
       .eq("follower_id", id)
-    
+
     if (!followingError && followingCount !== null) {
       following_count = followingCount
     }
@@ -62,7 +62,7 @@ export async function fetchProfileById(id: string): Promise<{ data: Profile | nu
       .from("follows")
       .select("*", { count: "exact", head: true })
       .eq("following_id", id)
-    
+
     if (!followersError && followersCount !== null) {
       followers_count = followersCount
     }
@@ -74,7 +74,7 @@ export async function fetchProfileById(id: string): Promise<{ data: Profile | nu
       .select("*", { count: "exact", head: true })
       .or(`user_id.eq.${id},friend_id.eq.${id}`)
       .eq("status", "accepted")
-    
+
     if (!friendsError && friendsCount !== null) {
       friends_count = friendsCount
     }
@@ -145,7 +145,7 @@ export async function fetchUserQuizzes(userId: string): Promise<{ data: UserQuiz
   }
 
   const quizStats: Record<string, { count: number; totalScore: number }> = {}
-  
+
   for (const session of sessions ?? []) {
     const participants = session.participants as Array<{ user_id: string; score?: number }> | null
     if (participants && Array.isArray(participants)) {
@@ -227,6 +227,86 @@ export async function fetchCreatedQuizzes(userId: string): Promise<{ data: Creat
   }))
 
   return { data: result, error: null }
+}
+
+export interface UserGameActivity {
+  total_sessions_hosted: number
+  total_games_played: number
+  top_applications: { name: string; count: number }[]
+  recent_sessions: {
+    id: string
+    game_pin: string
+    status: string
+    application?: string
+    created_at: string
+    participant_count: number
+  }[]
+}
+
+export async function fetchUserGameActivity(userId: string): Promise<{ data: UserGameActivity; error: string | null }> {
+  const supabase = await getSupabaseServerClient()
+
+  // Sessions hosted by this user
+  const { data: hostedSessions, error: hostError } = await supabase
+    .from("game_sessions")
+    .select("id, game_pin, status, application, created_at, participants")
+    .eq("host_id", userId)
+    .order("created_at", { ascending: false })
+
+  if (hostError) {
+    console.error("Error fetching hosted sessions:", hostError)
+  }
+
+  // Sessions where user participated
+  const { data: allSessions, error: allError } = await supabase
+    .from("game_sessions")
+    .select("id, participants, application")
+
+  if (allError) {
+    console.error("Error fetching all sessions:", allError)
+  }
+
+  let totalGamesPlayed = 0
+  const appCounts: Record<string, number> = {}
+
+  for (const session of allSessions ?? []) {
+    const participants = session.participants as Array<{ user_id: string }> | null
+    if (participants?.some(p => p.user_id === userId)) {
+      totalGamesPlayed++
+      const app = session.application || "Unknown"
+      appCounts[app] = (appCounts[app] || 0) + 1
+    }
+  }
+
+  // Also count hosted sessions for app stats
+  for (const session of hostedSessions ?? []) {
+    const app = session.application || "Unknown"
+    if (!appCounts[app]) appCounts[app] = 0
+  }
+
+  const topApplications = Object.entries(appCounts)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 5)
+    .map(([name, count]) => ({ name, count }))
+
+  const recentSessions = (hostedSessions ?? []).slice(0, 5).map(s => ({
+    id: s.id,
+    game_pin: s.game_pin,
+    status: s.status,
+    application: s.application,
+    created_at: s.created_at,
+    participant_count: Array.isArray(s.participants) ? s.participants.length : 0,
+  }))
+
+  return {
+    data: {
+      total_sessions_hosted: hostedSessions?.length ?? 0,
+      total_games_played: totalGamesPlayed,
+      top_applications: topApplications,
+      recent_sessions: recentSessions,
+    },
+    error: null,
+  }
 }
 
 export interface ProfilesResponse {
@@ -327,7 +407,7 @@ export async function deleteProfileAction(id: string) {
 
 export async function getAllProfiles() {
   const supabase = getSupabaseAdminClient()
-  
+
   // Fetch up to 5000 profiles for client-side caching
   const { data, error } = await supabase
     .from("profiles")
