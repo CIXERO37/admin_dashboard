@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Maximize2, X, Play, ChevronDown, ChevronUp } from "lucide-react";
+import { Maximize2, X, Play } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import { Button } from "@/components/ui/button";
+
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   Breadcrumb,
@@ -162,25 +162,20 @@ interface TopQuizzesListProps {
 
 export function TopQuizzesList({ quizzes }: TopQuizzesListProps) {
   const { t } = useTranslation();
-  const [showAll, setShowAll] = useState(false);
-  const INITIAL_COUNT = 3;
-
-  const displayedQuizzes = showAll ? quizzes : quizzes.slice(0, INITIAL_COUNT);
-  const hasMore = quizzes.length > INITIAL_COUNT;
 
   return (
-    <div className="space-y-3">
-      {displayedQuizzes.map((quiz, index) => (
+    <div className="max-h-[280px] overflow-y-auto space-y-2 pr-1 scrollbar-thin">
+      {quizzes.map((quiz, index) => (
         <div
           key={quiz.id}
-          className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50"
+          className="flex items-center gap-3 p-2 rounded-lg bg-muted/50"
         >
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm">
+          <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary font-bold text-xs shrink-0">
             {index + 1}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-medium truncate" title={quiz.title}>{quiz.title}</p>
-            <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+            <p className="font-medium truncate text-sm" title={quiz.title}>{quiz.title}</p>
+            <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
               <span>
                 {t("stats.average")}: {quiz.avg_score}
               </span>
@@ -194,26 +189,6 @@ export function TopQuizzesList({ quizzes }: TopQuizzesListProps) {
           </div>
         </div>
       ))}
-
-      {hasMore && (
-        <Button
-          variant="ghost"
-          className="w-full mt-2 text-muted-foreground hover:text-foreground"
-          onClick={() => setShowAll(!showAll)}
-        >
-          {showAll ? (
-            <>
-              <ChevronUp className="h-4 w-4 mr-2" />
-              {t("action.show_less")}
-            </>
-          ) : (
-            <>
-              <ChevronDown className="h-4 w-4 mr-2" />
-              {t("action.show_all")} ({quizzes.length})
-            </>
-          )}
-        </Button>
-      )}
     </div>
   );
 }

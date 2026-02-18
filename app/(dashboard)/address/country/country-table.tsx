@@ -84,7 +84,7 @@ export function CountryTable({
   };
 
   const handleIdClick = (countryCode: string) => {
-    router.push(`/master/address/state?country=${countryCode}`);
+    router.push(`/address/state?country=${countryCode}`);
   };
 
   const handleNameClick = async (id: number) => {
