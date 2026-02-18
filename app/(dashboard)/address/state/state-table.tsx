@@ -85,7 +85,7 @@ export function StateTable({
 
   const handleIdClick = (stateCode: string, countryCode: string) => {
     router.push(
-      `/master/address/city?state=${stateCode}&country=${countryCode}`
+      `/address/city?state=${stateCode}&country=${countryCode}`
     );
   };
 
