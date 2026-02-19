@@ -35,6 +35,7 @@ import {
   History,
   FileQuestion,
   FileCheck,
+  Dices,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -76,6 +77,11 @@ const navigation: NavItem[] = [
         title: "nav.dashboard",
         href: "/game/dashboard",
         icon: LayoutDashboard,
+      },
+      {
+        title: "nav.games",
+        href: "/games",
+        icon: Dices,
       },
       {
         title: "nav.game_sessions",
@@ -261,7 +267,7 @@ export function AppSidebar() {
       )}
     >
       {/* Header */}
-      <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
+      <div className="flex h-14 items-center justify-between border-b border-sidebar-border px-4">
         {!collapsed && (
           <Link href="/dashboard" className="flex items-center">
             <Image
@@ -452,24 +458,6 @@ export function AppSidebar() {
         })}
       </nav>
 
-      {/* Footer */}
-      <div className="border-t border-sidebar-border p-3">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-center text-sidebar-foreground hover:bg-secondary hover:text-foreground"
-          onClick={toggleSidebar}
-        >
-          {collapsed ? (
-            <PanelLeft className="h-4 w-4" />
-          ) : (
-            <>
-              <PanelLeftClose className="h-4 w-4 mr-2" />
-              <span>{t("nav.collapse")}</span>
-            </>
-          )}
-        </Button>
-      </div>
     </aside>
   );
 }
