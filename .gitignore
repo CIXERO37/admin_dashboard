@@ -14,12 +14,7 @@
 /coverage
 
 # next.js
-# .next logic for Standalone Build
-# Ignore everything inside .next...
-/.next/*
-# ...but allow these specific folders:
-!/.next/standalone/
-!/.next/static/
+/.next
 /out/
 
 # production

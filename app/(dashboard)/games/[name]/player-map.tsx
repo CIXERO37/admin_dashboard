@@ -7,7 +7,7 @@ import {
   Geography,
   Marker,
   ZoomableGroup,
-} from "react-simple-maps";
+} from "@vnedyalk0v/react19-simple-maps";
 import type { PlayerLocationData } from "./actions";
 
 const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
