@@ -9,8 +9,11 @@ import {
   isThisMonth,
   isThisYear,
   subWeeks,
+  subMonths,
   subYears,
   startOfWeek,
+  startOfMonth,
+  endOfMonth,
   endOfWeek,
   startOfYear,
   endOfYear,
@@ -145,6 +148,11 @@ export function QuizDetailView({ quiz, sessions }: QuizDetailViewProps) {
       return isWithinInterval(date, { start, end });
     }
     if (sessionFilter === "month") return isThisMonth(date);
+    if (sessionFilter === "last_month") {
+      const start = startOfMonth(subMonths(now, 1));
+      const end = endOfMonth(subMonths(now, 1));
+      return isWithinInterval(date, { start, end });
+    }
     if (sessionFilter === "year") return isThisYear(date);
     if (sessionFilter === "last_year") {
       const start = startOfYear(subYears(now, 1));
@@ -674,6 +682,9 @@ export function QuizDetailView({ quiz, sessions }: QuizDetailViewProps) {
                 </SelectItem>
                 <SelectItem value="month">
                   {t("master.this_month") || "This Month"}
+                </SelectItem>
+                <SelectItem value="last_month">
+                  {t("master.last_month") || "Last Month"}
                 </SelectItem>
                 <SelectItem value="year">
                   {t("master.this_year") || "This Year"}

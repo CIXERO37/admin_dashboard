@@ -2,6 +2,7 @@ export const id: Record<string, string> = {
   // Sidebar Navigation
   "nav.dashboard": "Dasbor",
   "nav.game": "Game",
+  "nav.games": "Games",
   "nav.game_sessions": "Sesi Game",
   "nav.quiz": "Kuis",
   "nav.support": "Dukungan",
