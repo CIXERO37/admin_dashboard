@@ -287,7 +287,7 @@ export function UserDetailClient({
                       </p>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
                         {quiz.category && (
-                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 capitalize">
                             {quiz.category}
                           </Badge>
                         )}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bell, User, LogOut, Settings } from "lucide-react";
+import { Bell, User, LogOut, Settings, PanelLeft, PanelLeftClose } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -41,7 +41,7 @@ export function Header() {
   const { user, loading } = useCurrentUser();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const { open } = useSidebar();
+  const { open, toggleSidebar } = useSidebar();
 
   useEffect(() => {
     setMounted(true);
@@ -74,9 +74,25 @@ export function Header() {
   const displayEmail = user?.email || "-";
 
   return (
-    <header className="flex h-14 items-center justify-between border-b border-border bg-card px-6">
-      <div className="flex items-center">
-        {/* Show logo only when sidebar is collapsed (!open) */}
+    <header className="flex h-14 items-center justify-between border-b border-border bg-card px-2">
+      <div className="flex items-center gap-2">
+        {/* Sidebar toggle - always visible */}
+        {mounted && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9"
+            onClick={toggleSidebar}
+            title={open ? "Collapse sidebar" : "Expand sidebar"}
+          >
+            {open ? (
+              <PanelLeftClose className="h-5 w-5" />
+            ) : (
+              <PanelLeft className="h-5 w-5" />
+            )}
+          </Button>
+        )}
+        {/* Show logo only when sidebar is collapsed */}
         {!open && mounted && (
           <Link href="/dashboard" className="flex items-center">
             <Image
@@ -98,11 +114,12 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="relative"
               suppressHydrationWarning
             >
-              <Bell className="h-5 w-5 text-muted-foreground" />
-              <Badge className="absolute -right-1 -top-1 h-2 w-2 rounded-full p-0 bg-red-500 border-2 border-background" />
+              <div className="relative">
+                <Bell className="h-5 w-5 text-muted-foreground" />
+                <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500 border-2 border-background" />
+              </div>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
