@@ -36,6 +36,7 @@ import {
 } from "date-fns";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { StatCard } from "@/components/dashboard/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -261,44 +262,26 @@ export default function GameDetailPage() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          {
-            label: "Sessions",
-            value: stats.total_sessions.toLocaleString(),
-            icon: Activity,
-            color: "text-blue-500",
-          },
-          {
-            label: "Players",
-            value: stats.total_players.toLocaleString(),
-            icon: Users,
-            color: "text-violet-500",
-          },
-          {
-            label: "Completion",
-            value: `${completionRate}%`,
-            icon: CheckCircle2,
-            color: "text-emerald-500",
-          },
-          {
-            label: "Avg Duration",
-            value: `${stats.avg_duration_minutes} min`,
-            icon: Timer,
-            color: "text-amber-500",
-          },
-        ].map((item) => (
-          <Card key={item.label}>
-            <CardContent className="pt-4 pb-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-muted-foreground font-medium">
-                  {item.label}
-                </span>
-                <item.icon className={`h-4 w-4 ${item.color}`} />
-              </div>
-              <p className="text-2xl font-bold tabular-nums">{item.value}</p>
-            </CardContent>
-          </Card>
-        ))}
+        <StatCard
+          title="Sessions"
+          value={stats.total_sessions.toLocaleString()}
+          icon={Activity}
+        />
+        <StatCard
+          title="Players"
+          value={stats.total_players.toLocaleString()}
+          icon={Users}
+        />
+        <StatCard
+          title="Completion"
+          value={`${completionRate}%`}
+          icon={CheckCircle2}
+        />
+        <StatCard
+          title="Avg Duration"
+          value={`${stats.avg_duration_minutes} min`}
+          icon={Timer}
+        />
       </div>
 
       {/* Middle: Top Quizzes + Session Status */}
