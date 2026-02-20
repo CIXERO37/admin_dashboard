@@ -90,7 +90,7 @@ export async function fetchGameSessions({
     }
 
     if (search) {
-      query = query.ilike("game_pin", `%${search}%`);
+      query = query.or(`game_pin.ilike.%${search}%,quiz_detail->>title.ilike.%${search}%`);
     }
 
     if (status && status !== "all") {
