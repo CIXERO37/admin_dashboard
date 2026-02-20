@@ -36,6 +36,7 @@ import {
   FileQuestion,
   FileCheck,
   Dices,
+  Trophy,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -113,6 +114,18 @@ const navigation: NavItem[] = [
     ],
   },
   {
+    title: "Competition",
+    href: "/competition",
+    icon: Trophy,
+    children: [
+      {
+        title: "nav.dashboard",
+        href: "/competition/dashboard",
+        icon: LayoutDashboard,
+      },
+    ],
+  },
+  {
     title: "nav.support",
     href: "/support",
     icon: Headphones,
@@ -123,6 +136,7 @@ const navigation: NavItem[] = [
         icon: LayoutDashboard,
       },
       { title: "nav.reports", href: "/reports", icon: FileText },
+      { title: "Manage Sessions", href: "/manage-sessions", icon: Sliders },
       { title: "nav.groups", href: "/groups", icon: Users },
     ],
   },
