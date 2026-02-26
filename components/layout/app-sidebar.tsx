@@ -125,7 +125,7 @@ const navigation: NavItem[] = [
         icon: LayoutDashboard,
       },
       {
-        title: "Manage Competitions",
+        title: "manage_competitions.title",
         href: "/manage-competitions",
         icon: ClipboardList,
       },
