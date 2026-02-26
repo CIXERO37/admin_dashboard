@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { useTranslation } from "@/lib/i18n";
+import { toast } from "sonner";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { generateXID } from "@/lib/id-generator";
 import {
   Plus,
   Search,
@@ -16,6 +19,8 @@ import {
   Users,
   Upload,
   X,
+  GraduationCap,
+  BookOpen,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -63,6 +68,8 @@ interface Competition {
   endDate: string;
   posterUrl: string | null;
   participantCount: number;
+  education?: string;
+  class?: string;
 }
 
 const DUMMY: Competition[] = [
@@ -111,16 +118,53 @@ const DUMMY: Competition[] = [
 export function ManageCompetitionsClient() {
   const router = useRouter();
   const { t } = useTranslation();
+  const supabase = getSupabaseBrowserClient();
+  
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [previewPoster, setPreviewPoster] = useState<{ url: string; title: string } | null>(null);
-  const [isAddOpen, setIsAddOpen] = useState(false);
 
-  // Form state (dummy, belum tersimpan ke DB)
-  const [formPosterPreview, setFormPosterPreview] = useState<string | null>(null);
+  // Delete state
+  const [deleteTarget, setDeleteTarget] = useState<Competition | null>(null);
+  const [deleteConfirmationPhrase, setDeleteConfirmationPhrase] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const statusConfig = {
+  useEffect(() => {
+    async function getCompetitions() {
+      const { data, error } = await supabase
+        .from("competitions")
+        .select(`
+          id, title, slug, start_date, end_date, poster_url, status, education, class,
+          participants:competition_participants(count)
+        `)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching competitions:", error);
+      } else {
+        const mapped = data?.map((d: any) => ({
+          id: d.id,
+          title: d.title,
+          slug: d.slug,
+          status: d.status,
+          startDate: d.start_date,
+          endDate: d.end_date,
+          posterUrl: d.poster_url,
+          participantCount: d.participants[0]?.count || 0,
+          education: d.education,
+          class: d.class,
+        })) || [];
+        setCompetitions(mapped);
+      }
+      setIsLoading(false);
+    }
+    getCompetitions();
+  }, [supabase]);
+
+  const statusConfig: Record<string, any> = {
     published: {
       label: t("comp_detail.status_published") || "Published",
       className: "bg-emerald-500/15 text-emerald-600 border-emerald-200 dark:text-emerald-400 dark:border-emerald-800",
@@ -133,9 +177,24 @@ export function ManageCompetitionsClient() {
       label: t("comp_detail.status_completed") || "Completed",
       className: "bg-blue-500/15 text-blue-600 border-blue-200 dark:text-blue-400 dark:border-blue-800",
     },
+    coming_soon: {
+      label: t("comp_detail.status_coming_soon") || "Coming Soon",
+      className: "bg-orange-500/15 text-orange-600 border-orange-200 dark:text-orange-400 dark:border-orange-800",
+    },
   };
 
-  const filtered = DUMMY.filter((c) =>
+  const getEducationLabel = (edu: string) => {
+    switch (edu) {
+      case "SD": return t("manage_competitions.form_education_sd") || "Elementary School";
+      case "SMP": return t("manage_competitions.form_education_smp") || "Junior High School";
+      case "SMA": return t("manage_competitions.form_education_sma") || "Senior High School";
+      case "College": return t("manage_competitions.form_education_college") || "College/University";
+      case "Others": return t("manage_competitions.form_education_others") || "Others";
+      default: return edu;
+    }
+  };
+
+  const filtered = competitions.filter((c) =>
     c.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -144,25 +203,29 @@ export function ManageCompetitionsClient() {
     if (e.key === "Enter") handleSearch();
   };
 
-  const handlePosterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setFormPosterPreview(reader.result as string);
-      reader.readAsDataURL(file);
+  const handleDeleteCompetition = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase.from("competitions").delete().eq("id", deleteTarget.id);
+      if (error) throw error;
+      setCompetitions(competitions.filter(c => c.id !== deleteTarget.id));
+      toast.success("Competition deleted successfully");
+      setDeleteTarget(null);
+      setDeleteConfirmationPhrase("");
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to delete competition");
+    } finally {
+      setIsDeleting(false);
     }
-  };
-
-  const handleCloseAdd = () => {
-    setIsAddOpen(false);
-    setFormPosterPreview(null);
   };
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-foreground">{t("manage_competitions.title") || "Manage Competitions"}</h1>
+        <h1 className="text-3xl font-bold text-foreground">{t("manage_competitions.title") || "Competitions"}</h1>
         <div className="flex items-center gap-3">
           <div className="relative">
             <Input
@@ -179,7 +242,7 @@ export function ManageCompetitionsClient() {
               <Search className="h-3.5 w-3.5" />
             </button>
           </div>
-          <Button className="gap-1.5" onClick={() => setIsAddOpen(true)}>
+          <Button className="gap-1.5" onClick={() => router.push("/manage-competitions/add")}>
             <Plus className="h-4 w-4" />
             {t("manage_competitions.add_button") || "Add Competition"}
           </Button>
@@ -200,7 +263,13 @@ export function ManageCompetitionsClient() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.length === 0 ? (
+            {isLoading ? (
+               <TableRow>
+                 <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                   Loading competitions...
+                 </TableCell>
+               </TableRow>
+            ) : filtered.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
                   {t("manage_competitions.no_found") || "No competitions found."}
@@ -228,13 +297,28 @@ export function ManageCompetitionsClient() {
                       </div>
                     </TableCell>
 
-                    {/* Title + Slug */}
+                    {/* Title */}
                     <TableCell>
-                      <div className="flex flex-col min-w-0">
-                        <span className="font-medium truncate max-w-[250px]" title={comp.title}>
+                      <div className="flex flex-col min-w-[200px]">
+                        <span className="font-medium truncate" title={comp.title}>
                           {comp.title}
                         </span>
-                        <span className="text-xs text-muted-foreground font-mono">/{comp.slug}</span>
+                        {(comp.education || comp.class) && (
+                          <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                            {comp.education && (
+                              <div className="flex items-center gap-1">
+                                <GraduationCap className="h-3 w-3" />
+                                <span>{getEducationLabel(comp.education)}</span>
+                              </div>
+                            )}
+                            {comp.class && (
+                              <div className="flex items-center gap-1">
+                                <BookOpen className="h-3 w-3" />
+                                <span>{t("manage_competitions.class_level") || "Grade"} {comp.class}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </TableCell>
 
@@ -247,11 +331,9 @@ export function ManageCompetitionsClient() {
 
                     {/* Schedule */}
                     <TableCell>
-                      <div className="flex items-center gap-1.5 text-xs whitespace-nowrap">
-                        <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span>{format(new Date(comp.startDate), "dd MMM yyyy")}</span>
-                        <span className="text-muted-foreground">—</span>
-                        <span>{format(new Date(comp.endDate), "dd MMM yyyy")}</span>
+                      <div className="flex flex-col gap-0.5 text-xs whitespace-nowrap">
+                        <span>{format(new Date(comp.startDate), "d MMM yyyy")}</span>
+                        <span className="text-muted-foreground">{format(new Date(comp.endDate), "d MMM yyyy")}</span>
                       </div>
                     </TableCell>
 
@@ -274,7 +356,11 @@ export function ManageCompetitionsClient() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem 
                             className="cursor-pointer text-destructive focus:bg-destructive focus:text-destructive-foreground"
-                            onClick={(e) => e.stopPropagation()}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteTarget(comp);
+                              setDeleteConfirmationPhrase("");
+                            }}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             {t("action.delete") || "Delete"}
@@ -307,141 +393,37 @@ export function ManageCompetitionsClient() {
         </DialogContent>
       </Dialog>
 
-      {/* Add Competition Dialog */}
-      <Dialog open={isAddOpen} onOpenChange={handleCloseAdd}>
-        <DialogContent className="sm:max-w-[550px] max-h-[85vh] overflow-y-auto">
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>{t("manage_competitions.add_dialog_title") || "Add Competition"}</DialogTitle>
+            <DialogTitle className="text-destructive">Delete Competition</DialogTitle>
           </DialogHeader>
-
-          <div className="grid gap-4 py-2">
-            {/* Title */}
-            <div className="grid gap-2">
-              <Label htmlFor="comp-title">{t("manage_competitions.form_title") || "Title"}</Label>
-              <Input id="comp-title" placeholder="e.g. Cerdas Cermat Online - Sains" />
-            </div>
-
-            {/* Description */}
-            <div className="grid gap-2">
-              <Label htmlFor="comp-desc">{t("manage_competitions.form_desc") || "Description"}</Label>
-              <Textarea
-                id="comp-desc"
-                placeholder="Write competition details, prizes..."
-                rows={4}
-              />
-            </div>
-
-            {/* Rules */}
-            <div className="grid gap-2">
-              <Label htmlFor="comp-rules">{t("manage_competitions.form_rules") || "Rules"}</Label>
-              <Textarea
-                id="comp-rules"
-                placeholder="1. Each participant may only register once&#10;2. ...&#10;3. ..."
-                rows={4}
-              />
-            </div>
-
-            {/* Poster Upload */}
-            <div className="grid gap-2">
-              <Label>{t("manage_competitions.form_poster") || "Poster"}</Label>
-              {formPosterPreview ? (
-                <div className="relative rounded-md overflow-hidden border bg-muted">
-                  <img
-                    src={formPosterPreview}
-                    alt="Poster preview"
-                    className="w-full max-h-48 object-contain"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setFormPosterPreview(null)}
-                    className="absolute top-2 right-2 h-6 w-6 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors cursor-pointer"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              ) : (
-                <label
-                  htmlFor="poster-upload"
-                  className="flex flex-col items-center justify-center h-32 rounded-md border-2 border-dashed border-muted-foreground/25 bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
-                >
-                  <Upload className="h-6 w-6 text-muted-foreground/50 mb-2" />
-                  <span className="text-sm text-muted-foreground">{t("manage_competitions.form_upload_poster") || "Click to upload poster"}</span>
-                  <span className="text-[11px] text-muted-foreground/60 mt-0.5">JPG, PNG up to 5MB</span>
-                  <input
-                    id="poster-upload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handlePosterChange}
-                  />
-                </label>
-              )}
-            </div>
-
-            {/* Dates */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="grid gap-2">
-                <Label htmlFor="comp-start">{t("manage_competitions.form_start_date") || "Start Date"}</Label>
-                <Input id="comp-start" type="date" />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="comp-end">{t("manage_competitions.form_end_date") || "End Date"}</Label>
-                <Input id="comp-end" type="date" />
-              </div>
-            </div>
-
-            {/* Status & Registration Fee & Total Prize */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="grid gap-2">
-                <Label>{t("manage_competitions.form_status") || "Status"}</Label>
-                <Select defaultValue="draft">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="draft">{t("comp_detail.status_draft") || "Draft"}</SelectItem>
-                    <SelectItem value="published">{t("comp_detail.status_published") || "Published"}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label>{t("manage_competitions.form_reg_fee") || "Registration Fee"}</Label>
-                <Select defaultValue="25000">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="25000">Rp 25.000</SelectItem>
-                    <SelectItem value="50000">Rp 50.000</SelectItem>
-                    <SelectItem value="100000">Rp 100.000</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label>{t("manage_competitions.form_prize") || "Total Prize"}</Label>
-                <Select defaultValue="5000000">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="5000000">Rp 5.000.000</SelectItem>
-                    <SelectItem value="10000000">Rp 10.000.000</SelectItem>
-                    <SelectItem value="20000000">Rp 20.000.000</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Registration Link */}
-            <div className="grid gap-2">
-              <Label htmlFor="comp-link">{t("manage_competitions.form_reg_link") || "Registration Link"} <span className="text-muted-foreground font-normal">{t("manage_competitions.form_reg_link_opt") || "(optional)"}</span></Label>
-              <Input id="comp-link" placeholder="https://..." />
-            </div>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground mb-4">
+              This action cannot be undone. This will permanently delete the <strong>{deleteTarget?.title}</strong> competition and remove all related data.
+            </p>
+            <Label className="text-sm font-medium mb-2 block">
+              Please type <span className="font-bold select-none">Delete Competition</span> to confirm.
+            </Label>
+            <Input
+              value={deleteConfirmationPhrase}
+              onChange={(e) => setDeleteConfirmationPhrase(e.target.value)}
+              placeholder="Type 'Delete Competition'"
+              autoComplete="off"
+            />
           </div>
-
           <DialogFooter>
-            <Button variant="outline" onClick={handleCloseAdd}>{t("action.cancel") || "Cancel"}</Button>
-            <Button onClick={handleCloseAdd}>{t("manage_competitions.form_save") || "Save Competition"}</Button>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={isDeleting}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleteConfirmationPhrase !== "Delete Competition" || isDeleting}
+              onClick={handleDeleteCompetition}
+            >
+              {isDeleting ? "Deleting..." : "Delete Permanently"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
