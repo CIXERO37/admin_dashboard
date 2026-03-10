@@ -56,23 +56,23 @@ export function LocalBracketView({ groups }: LocalBracketViewProps) {
   ];
 
   // Dynamic layout calculation
-  const COLUMN_WIDTH = 250;
-  const NODE_HEIGHT = 100;
-  const Y_GAP = 30; // Keep slightly larger vertical gap
-  const PADDING_X = 24; // Padding on left and right sides so it's not sticking to the edge
+  const COLUMN_WIDTH = 260; // Make cards slightly wider
+  const NODE_HEIGHT = 110;  // Slightly taller for breathing room
+  const Y_GAP = 50;         // Much wider vertical gap so nodes don't feel squashed
+  const PADDING_X = 40;     // Wider side padding to avoid edge hugging
 
-  // Distribute horizontal gap evenly using available width
-  const effectiveWidth = Math.max(containerWidth, 930); // fallback min width
+  // Distribute horizontal gap evenly using available width, pushing columns to edges
+  const effectiveWidth = Math.max(containerWidth, 1000); // fallback min width
   const availableWidthForGaps = effectiveWidth - (2 * PADDING_X) - (3 * COLUMN_WIDTH);
-  const X_GAP = Math.max(availableWidthForGaps / 2, 60);
+  const X_GAP = Math.max(availableWidthForGaps / 2, 80); // Minimum 80px gap between columns
 
   // Calculate height to comfortably fit the biggest column
   const maxRows = Math.max(semifinals.length, finals.length, champions.length, 1);
   const startY = 60; // Start area below the column header
-  const minPaddingBottom = 40; 
+  const minPaddingBottom = 60; 
   const requiredViewportHeight = maxRows * NODE_HEIGHT + Math.max(maxRows - 1, 0) * Y_GAP + startY + minPaddingBottom;
   
-  const svgHeight = Math.max(requiredViewportHeight, 400); // minimum 400 height
+  const svgHeight = Math.max(requiredViewportHeight, 450); // minimum height
   const svgWidth = Math.max((2 * PADDING_X) + (3 * COLUMN_WIDTH) + (2 * X_GAP), effectiveWidth);
 
   const nodeCenters: Record<string, { x: number, y: number, cx: number, cy: number }> = {};

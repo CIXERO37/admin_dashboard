@@ -72,8 +72,8 @@ export function PhaseGroupStage({
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupStage, setNewGroupStage] = useState("Semifinal");
   const [newGroupSources, setNewGroupSources] = useState<string[]>([]);
-  const [expandedGroup, setExpandedGroup] = useState<string | null>(
-    groups.length > 0 ? groups[0].id : null
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
+    new Set(groups.length > 0 ? [groups[0].id] : [])
   );
   const [assignDialog, setAssignDialog] = useState<LocalGroup | null>(null);
   const [quizDialog, setQuizDialog] = useState<LocalGroup | null>(null);
@@ -111,6 +111,7 @@ export function PhaseGroupStage({
     onGroupsChange([...groups, newGroup]);
     toast.success(`${t("competition.group_created") || "Group created"}: ${newGroupName}`);
     setNewGroupName("");
+    setNewGroupSources([]);
   };
 
   const handleDeleteGroup = (groupId: string) => {
@@ -214,7 +215,7 @@ export function PhaseGroupStage({
           className="w-[200px] h-9"
         />
         
-        <Select value={newGroupStage} onValueChange={setNewGroupStage}>
+        <Select value={newGroupStage} onValueChange={(val) => { setNewGroupStage(val); if (val === "Semifinal") setNewGroupSources([]); }}>
           <SelectTrigger className="w-[150px] h-9">
             <SelectValue placeholder="Stage" />
           </SelectTrigger>
@@ -225,7 +226,8 @@ export function PhaseGroupStage({
           </SelectContent>
         </Select>
 
-        <DropdownMenu>
+        {newGroupStage !== "Semifinal" && (
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="w-[180px] h-9 justify-between font-normal">
                 <span className="truncate">
@@ -260,6 +262,7 @@ export function PhaseGroupStage({
               )}
             </DropdownMenuContent>
           </DropdownMenu>
+        )}
 
         <Button onClick={handleAddGroup} className="gap-1.5 h-9 shrink-0 md:ml-auto">
           <Plus className="h-4 w-4" />
@@ -275,7 +278,7 @@ export function PhaseGroupStage({
       ) : (
         <div className="space-y-3">
           {groups.map((group) => {
-            const isExpanded = expandedGroup === group.id;
+            const isExpanded = expandedGroups.has(group.id);
             const groupAdvance = advanceSelected[group.id] || [];
             const advancedCount = group.members.filter((m) => m.isAdvanced).length;
 
@@ -284,7 +287,11 @@ export function PhaseGroupStage({
                 {/* Group Header */}
                 <div
                   className="flex items-center justify-between p-4 cursor-pointer select-none"
-                  onClick={() => setExpandedGroup(isExpanded ? null : group.id)}
+                  onClick={() => setExpandedGroups(prev => {
+                    const next = new Set(prev);
+                    if (isExpanded) next.delete(group.id); else next.add(group.id);
+                    return next;
+                  })}
                 >
                   <div className="flex items-center gap-3">
                     <h3 className="font-semibold text-sm">{group.name}</h3>
@@ -314,7 +321,7 @@ export function PhaseGroupStage({
                     </Button>
                     <Button size="sm" variant="outline" className="h-7 text-xs gap-1"
                       onClick={(e) => { e.stopPropagation(); setAssignDialog(group); }}>
-                      <UserPlus className="h-3 w-3" /> {t("competition.assign_participants")}
+                      <UserPlus className="h-3 w-3" /> {t("competition.assign_finalist")}
                     </Button>
                     <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive"
                       onClick={(e) => { e.stopPropagation(); handleDeleteGroup(group.id); }}>
@@ -348,8 +355,20 @@ export function PhaseGroupStage({
                                 }`}>
                                 <Checkbox
                                   checked={groupAdvance.includes(member.playerId) || member.isAdvanced}
-                                  disabled={member.isAdvanced}
-                                  onCheckedChange={() => toggleAdvance(group.id, member.playerId)}
+                                  onCheckedChange={() => {
+                                    if (member.isAdvanced) {
+                                      // Un-advance the player directly
+                                      onGroupsChange(
+                                        groups.map((g) =>
+                                          g.id === group.id
+                                            ? { ...g, members: g.members.map((m) => m.playerId === member.playerId ? { ...m, isAdvanced: false } : m) }
+                                            : g
+                                        )
+                                      );
+                                    } else {
+                                      toggleAdvance(group.id, member.playerId);
+                                    }
+                                  }}
                                   className="h-4 w-4"
                                 />
                                 <div className="flex items-center gap-2 min-w-0">
@@ -405,15 +424,42 @@ export function PhaseGroupStage({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <UserPlus className="h-5 w-5" />
-              {t("competition.assign_participants")} — {assignDialog?.name}
+              {t("competition.assign_finalist")} — {assignDialog?.name}
             </DialogTitle>
           </DialogHeader>
-          <div className="relative">
-            <SearchInput
-              placeholder={t("comp_detail.search_player")}
-              value={assignSearch}
-              onSearch={(val) => setAssignSearch(val)}
-            />
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <SearchInput
+                placeholder={t("comp_detail.search_finalist") || "Search finalist..."}
+                value={assignSearch}
+                onSearch={(val) => setAssignSearch(val)}
+              />
+            </div>
+            <Button
+              variant="outline"
+              className="shrink-0 h-9 px-3 text-xs"
+              onClick={() => {
+                const availableFinalists = finalists.filter(
+                  (f) => !allAssignedIds.includes(f.id) && f.name.toLowerCase().includes(assignSearch.toLowerCase())
+                );
+                
+                const allSelected = availableFinalists.length > 0 && availableFinalists.every((f) => assignSelected.includes(f.id));
+                
+                if (allSelected) {
+                  setAssignSelected([]);
+                } else {
+                  setAssignSelected(availableFinalists.map((f) => f.id));
+                }
+              }}
+            >
+              {(() => {
+                const availableFinalists = finalists.filter(
+                  (f) => !allAssignedIds.includes(f.id) && f.name.toLowerCase().includes(assignSearch.toLowerCase())
+                );
+                const allSelected = availableFinalists.length > 0 && availableFinalists.every((f) => assignSelected.includes(f.id));
+                return allSelected ? t("competition.deselect_all") : t("competition.select_all");
+              })()}
+            </Button>
           </div>
           <div className="max-h-64 overflow-y-auto space-y-1 border rounded-md p-2">
             {finalists
@@ -438,7 +484,7 @@ export function PhaseGroupStage({
             <span className="text-xs text-muted-foreground mr-auto">{assignSelected.length} {t("competition.selected")}</span>
             <Button variant="outline" onClick={() => { setAssignDialog(null); setAssignSelected([]); }}>{t("action.cancel")}</Button>
             <Button onClick={handleAssignPlayers} disabled={assignSelected.length === 0} className="gap-1.5">
-              <UserPlus className="h-4 w-4" /> {t("competition.assign_participants")}
+              <UserPlus className="h-4 w-4" /> {t("competition.assign_action")}
             </Button>
           </DialogFooter>
         </DialogContent>
