@@ -780,6 +780,7 @@ export const en: Record<string, string> = {
   "comp_detail.tab_daftar": "Registered",
   "comp_detail.tab_paid": "Paid",
   "comp_detail.search_player": "Search player...",
+  "comp_detail.search_finalist": "Search finalist...",
   "comp_detail.table_player": "Player",
   "comp_detail.table_games": "Games Played",
   "comp_detail.table_play": "Play",
@@ -848,6 +849,15 @@ export const en: Record<string, string> = {
   "receptionist.all_attended": "All participants have attended!",
   "receptionist.no_attendance": "No one has attended yet",
 
+  // Edit Group
+  "competition.edit_group": "Edit Group",
+  "competition.group_name": "Group Name",
+  "competition.stage": "Stage",
+  "competition.source_groups": "Source Groups",
+  "competition.select_source": "Select source...",
+  "competition.no_groups_yet": "No other groups available",
+  "competition.group_updated": "Group updated successfully",
+
   // Competition Bracket System
   "comp_detail.tab_participants": "Participants",
   "competition.rounds_title": "Competition Rounds",
@@ -858,7 +868,7 @@ export const en: Record<string, string> = {
   "competition.phase_group_stage": "Group Stage",
   "competition.phase_semifinal": "Semifinal",
   "competition.phase_final": "Final",
-  "competition.phase_completed": "Completed",
+  "competition.phase_completed": "Champion",
   "competition.add_round": "Add Round",
   "competition.round_name_placeholder": "e.g. Qualification, Semifinal, Final...",
   "competition.round_name_required": "Please enter a round name",
@@ -884,7 +894,11 @@ export const en: Record<string, string> = {
   "competition.more": "more",
   "competition.advancing": "advancing",
   "competition.no_bracket": "No bracket data yet. Create rounds and assign participants to visualize the competition bracket.",
-  "competition.assign_participants": "Assign Participants",
+  "competition.assign_participants": "Assign",
+  "competition.assign_finalist": "Assign Finalist",
+  "competition.assign_action": "Assign",
+  "competition.select_all": "Select All",
+  "competition.deselect_all": "Deselect All",
   "competition.assign_quiz": "Assign Quiz",
   "competition.advance_selected": "Advance Selected",
   "competition.select_quiz": "Select Quiz",
@@ -911,4 +925,13 @@ export const en: Record<string, string> = {
   "competition.winner_2nd": "2nd Place",
   "competition.winner_3rd": "3rd Place",
   "competition.participants_total": "participants",
+  "competition.public_quiz": "Public Quiz",
+  "competition.my_quiz": "My Quiz",
+  "competition.no_quizzes_found": "No quizzes found.",
+
+  // Un-advance Confirm Dialog
+  "common.are_you_sure": "Are you sure?",
+  "comp_detail.unadvance_confirm": "Are you sure you want to revoke {name}'s advanced status?",
+  "action.revoke": "Revoke",
+  "comp_detail.unadvance_success": "Advanced status revoked successfully",
 };

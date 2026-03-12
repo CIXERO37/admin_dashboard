@@ -780,6 +780,7 @@ export const id: Record<string, string> = {
   "comp_detail.tab_daftar": "Daftar",
   "comp_detail.tab_paid": "Lunas",
   "comp_detail.search_player": "Cari peserta...",
+  "comp_detail.search_finalist": "Cari finalis...",
   "comp_detail.table_player": "Peserta",
   "comp_detail.table_games": "Main",
   "comp_detail.table_play": "Main",
@@ -846,6 +847,15 @@ export const id: Record<string, string> = {
   "receptionist.no_participants": "Tidak ada peserta ditemukan",
   "receptionist.no_attendance": "Belum ada yang hadir",
 
+  // Edit Group
+  "competition.edit_group": "Edit Grup",
+  "competition.group_name": "Nama Grup",
+  "competition.stage": "Babak (Stage)",
+  "competition.source_groups": "Grup Sumber",
+  "competition.select_source": "Pilih grup sumber...",
+  "competition.no_groups_yet": "Tidak ada grup lain tersedia",
+  "competition.group_updated": "Berhasil memperbarui grup",
+
   // Sistem Bracket Kompetisi
   "comp_detail.tab_participants": "Peserta",
   "competition.rounds_title": "Babak Kompetisi",
@@ -856,7 +866,7 @@ export const id: Record<string, string> = {
   "competition.phase_group_stage": "Fase Grup",
   "competition.phase_semifinal": "Semifinal",
   "competition.phase_final": "Final",
-  "competition.phase_completed": "Selesai",
+  "competition.phase_completed": "Juara",
   "competition.add_round": "Tambah Babak",
   "competition.round_name_placeholder": "cth. Kualifikasi, Semifinal, Final...",
   "competition.round_name_required": "Silakan masukkan nama babak",
@@ -882,7 +892,11 @@ export const id: Record<string, string> = {
   "competition.more": "lainnya",
   "competition.advancing": "melaju",
   "competition.no_bracket": "Belum ada data bracket. Buat babak dan masukkan peserta untuk melihat bracket kompetisi.",
-  "competition.assign_participants": "Masukkan Peserta",
+  "competition.assign_participants": "Assign",
+  "competition.assign_finalist": "Assign Finalist",
+  "competition.assign_action": "Assign",
+  "competition.select_all": "Pilih Semua",
+  "competition.deselect_all": "Hapus Pilihan",
   "competition.assign_quiz": "Tetapkan Kuis",
   "competition.advance_selected": "Loloskan Terpilih",
   "competition.select_quiz": "Pilih Kuis",
@@ -909,4 +923,13 @@ export const id: Record<string, string> = {
   "competition.winner_2nd": "Juara 2",
   "competition.winner_3rd": "Juara 3",
   "competition.participants_total": "peserta",
+  "competition.public_quiz": "Kuis Publik",
+  "competition.my_quiz": "Kuis Saya",
+  "competition.no_quizzes_found": "Kuis tidak ditemukan.",
+
+  // Un-advance Confirm Dialog
+  "common.are_you_sure": "Apakah Anda yakin?",
+  "comp_detail.unadvance_confirm": "Apakah Anda yakin ingin mencabut status lolos {name}?",
+  "action.revoke": "Cabut Status",
+  "comp_detail.unadvance_success": "Status lolos berhasil dicabut",
 };
