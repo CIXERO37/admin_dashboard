@@ -71,6 +71,7 @@ export interface GroupMember {
 export interface DummyPlayer {
   id: string;
   name: string;
+  username?: string;
   avatar: string | null;
   gamesPlayed: number;
   avgScore: number;
