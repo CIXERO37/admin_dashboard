@@ -39,8 +39,8 @@ export function AssignParticipantsDialog({
   const available = players
     .filter((p) => !alreadyAssigned.includes(p.id) && p.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
-      if (b.avgScore !== a.avgScore) return b.avgScore - a.avgScore;
-      return b.gamesPlayed - a.gamesPlayed;
+      if (b.gamesPlayed !== a.gamesPlayed) return b.gamesPlayed - a.gamesPlayed;
+      return b.avgScore - a.avgScore;
     });
 
   const togglePlayer = (id: string) => {

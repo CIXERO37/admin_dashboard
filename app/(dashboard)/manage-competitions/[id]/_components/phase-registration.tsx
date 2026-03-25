@@ -25,8 +25,8 @@ export function PhaseRegistration({ players }: PhaseRegistrationProps) {
   );
 
   const sorted = [...filtered].sort((a, b) => {
-    if (b.avgScore !== a.avgScore) return b.avgScore - a.avgScore;
-    return b.gamesPlayed - a.gamesPlayed;
+    if (b.gamesPlayed !== a.gamesPlayed) return b.gamesPlayed - a.gamesPlayed;
+    return b.avgScore - a.avgScore;
   });
 
   return (
