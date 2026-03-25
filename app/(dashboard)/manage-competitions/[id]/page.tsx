@@ -38,43 +38,8 @@ import { PhaseQualification } from "./_components/phase-qualification";
 import { PhaseGroupStage, LocalGroup, GameApp } from "./_components/phase-group-stage";
 import { PhaseCompleted } from "./_components/phase-completed";
 
-// --- DUMMY DATA ---
-
-
-const DUMMY_PLAYERS: DummyPlayer[] = [
-  { id: "p1", name: "Muhammad Khoirul H.", avatar: null, gamesPlayed: 12, avgScore: 85.3, paid: true, registeredAt: "2026-01-15T10:30:00Z", isFinalist: true },
-  { id: "p2", name: "Aluna Kynan", avatar: null, gamesPlayed: 8, avgScore: 92.1, paid: true, registeredAt: "2026-01-16T08:15:00Z", isFinalist: true },
-  { id: "p3", name: "Apin Ridwan", avatar: null, gamesPlayed: 15, avgScore: 78.6, paid: false, registeredAt: "2026-01-18T14:00:00Z", isFinalist: true },
-  { id: "p4", name: "Kizuko Mellbringer", avatar: null, gamesPlayed: 5, avgScore: 91.0, paid: true, registeredAt: "2026-01-20T09:45:00Z", isFinalist: true },
-  { id: "p5", name: "Zubaidillah", avatar: null, gamesPlayed: 20, avgScore: 67.4, paid: true, registeredAt: "2026-01-22T11:20:00Z", isFinalist: true },
-  { id: "p6", name: "Lint More", avatar: null, gamesPlayed: 3, avgScore: 55.2, paid: false, registeredAt: "2026-01-25T16:30:00Z", isFinalist: true },
-  { id: "p7", name: "Siti Nurhaliza", avatar: null, gamesPlayed: 10, avgScore: 88.9, paid: true, registeredAt: "2026-02-01T07:50:00Z", isFinalist: true },
-  { id: "p8", name: "Budi Santoso", avatar: null, gamesPlayed: 7, avgScore: 73.5, paid: false, registeredAt: "2026-02-03T13:10:00Z", isFinalist: true },
-  { id: "p9", name: "Gatot Kaca", avatar: null, gamesPlayed: 11, avgScore: 82.5, paid: true, registeredAt: "2026-02-05T08:00:00Z", isFinalist: true },
-  { id: "p10", name: "Bima Sena", avatar: null, gamesPlayed: 4, avgScore: 89.2, paid: true, registeredAt: "2026-02-06T09:10:00Z", isFinalist: true },
-  { id: "p11", name: "Arjuna", avatar: null, gamesPlayed: 18, avgScore: 95.1, paid: true, registeredAt: "2026-02-07T10:20:00Z", isFinalist: true },
-  { id: "p12", name: "Yudistira", avatar: null, gamesPlayed: 6, avgScore: 81.0, paid: true, registeredAt: "2026-02-08T11:30:00Z", isFinalist: true },
-  { id: "p13", name: "Nakula", avatar: null, gamesPlayed: 9, avgScore: 87.5, paid: true, registeredAt: "2026-02-09T14:40:00Z", isFinalist: true },
-  { id: "p14", name: "Sadewa", avatar: null, gamesPlayed: 13, avgScore: 86.8, paid: true, registeredAt: "2026-02-10T15:50:00Z", isFinalist: true },
-  { id: "p15", name: "Srikandi", avatar: null, gamesPlayed: 16, avgScore: 93.4, paid: true, registeredAt: "2026-02-11T16:00:00Z", isFinalist: true },
-  { id: "p16", name: "Drupadi", avatar: null, gamesPlayed: 7, avgScore: 79.9, paid: true, registeredAt: "2026-02-12T08:15:00Z", isFinalist: true },
-  { id: "p17", name: "Andi Wijaya", avatar: null, gamesPlayed: 5, avgScore: 71.2, paid: true, registeredAt: "2026-02-13T09:00:00Z", isFinalist: true },
-  { id: "p18", name: "Ratna Sari", avatar: null, gamesPlayed: 14, avgScore: 88.5, paid: true, registeredAt: "2026-02-14T10:30:00Z", isFinalist: true },
-  { id: "p19", name: "Eko Prasetyo", avatar: null, gamesPlayed: 8, avgScore: 76.4, paid: true, registeredAt: "2026-02-15T11:45:00Z", isFinalist: true },
-  { id: "p20", name: "Lina Marlina", avatar: null, gamesPlayed: 19, avgScore: 94.2, paid: true, registeredAt: "2026-02-16T13:20:00Z", isFinalist: true },
-  { id: "p21", name: "Hendra Gunawan", avatar: null, gamesPlayed: 12, avgScore: 83.1, paid: true, registeredAt: "2026-02-17T14:10:00Z", isFinalist: true },
-  { id: "p22", name: "Maya Indah", avatar: null, gamesPlayed: 6, avgScore: 79.8, paid: true, registeredAt: "2026-02-18T15:55:00Z", isFinalist: true },
-  { id: "p23", name: "Rizky Firmansyah", avatar: null, gamesPlayed: 21, avgScore: 96.0, paid: true, registeredAt: "2026-02-19T16:40:00Z", isFinalist: true },
-  { id: "p24", name: "Siska Amelia", avatar: null, gamesPlayed: 11, avgScore: 85.7, paid: true, registeredAt: "2026-02-20T08:25:00Z", isFinalist: true },
-  { id: "p25", name: "Doni Setiawan", avatar: null, gamesPlayed: 9, avgScore: 74.3, paid: true, registeredAt: "2026-02-21T09:50:00Z", isFinalist: true },
-  { id: "p26", name: "Rini Wulandari", avatar: null, gamesPlayed: 17, avgScore: 91.5, paid: true, registeredAt: "2026-02-22T10:15:00Z", isFinalist: true },
-  { id: "p27", name: "Agus Maulana", avatar: null, gamesPlayed: 4, avgScore: 68.9, paid: true, registeredAt: "2026-02-23T11:05:00Z", isFinalist: true },
-  { id: "p28", name: "Dewi Lestari", avatar: null, gamesPlayed: 15, avgScore: 89.4, paid: true, registeredAt: "2026-02-24T12:30:00Z", isFinalist: true },
-  { id: "p29", name: "Bagus Permana", avatar: null, gamesPlayed: 10, avgScore: 80.6, paid: true, registeredAt: "2026-02-25T14:45:00Z", isFinalist: true },
-  { id: "p30", name: "Nia Ramadhani", avatar: null, gamesPlayed: 13, avgScore: 87.1, paid: true, registeredAt: "2026-02-26T16:20:00Z", isFinalist: true },
-];
-
 // --- MOCK QUIZZES ---
+
 const MOCK_QUIZZES: MockQuiz[] = [
   { id: "q1", title: "Sains Dasar", questionCount: 20, duration: 30 },
   { id: "q2", title: "Matematika Logika", questionCount: 15, duration: 25 },
@@ -92,7 +57,7 @@ export default function CompetitionDetailPage() {
 
   const [detail, setDetail] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [players, setPlayers] = useState<DummyPlayer[]>(DUMMY_PLAYERS);
+  const [players, setPlayers] = useState<DummyPlayer[]>([]);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
   const [rulesExpanded, setRulesExpanded] = useState(false);
@@ -119,6 +84,79 @@ export default function CompetitionDetailPage() {
       }
 
       setDetail(data);
+
+      // Fetch participants
+      const { data: participantsData, error: pError } = await supabase
+        .from("competition_participants")
+        .select("*")
+        .eq("competition_id", compId);
+
+      if (!pError && participantsData) {
+        const userIds = participantsData.map((p: any) => p.user_id).filter(Boolean);
+        let profilesMap: Record<string, any> = {};
+
+        // Fetch User Profiles
+        if (userIds.length > 0) {
+          const { data: profilesData, error: profError } = await supabase
+            .from("profiles")
+            .select("id, fullname, username, avatar_url")
+            .in("id", userIds);
+
+          if (!profError && profilesData) {
+            profilesMap = profilesData.reduce((acc: any, prof: any) => {
+              acc[prof.id] = prof;
+              return acc;
+            }, {});
+          }
+        }
+
+        // Fetch Game Sessions for Stats
+        let userStats: Record<string, { gamesPlayed: number, totalScore: number }> = {};
+        if (userIds.length > 0) {
+          const { data: sessionsData, error: sessionsError } = await supabase
+            .from("game_sessions")
+            .select("participants");
+          
+          if (!sessionsError && sessionsData) {
+            sessionsData.forEach((session: any) => {
+              if (Array.isArray(session.participants)) {
+                session.participants.forEach((p: any) => {
+                  if (p.user_id && userIds.includes(p.user_id)) {
+                    if (!userStats[p.user_id]) userStats[p.user_id] = { gamesPlayed: 0, totalScore: 0 };
+                    userStats[p.user_id].gamesPlayed += 1;
+                    userStats[p.user_id].totalScore += p.score || 0;
+                  }
+                });
+              }
+            });
+          }
+        }
+
+        const mappedPlayers: DummyPlayer[] = participantsData.map((p: any) => {
+          const prof = profilesMap[p.user_id] || {};
+          const stats = userStats[p.user_id] || { gamesPlayed: 0, totalScore: 0 };
+          const avgScore = stats.gamesPlayed > 0 ? Number((stats.totalScore / stats.gamesPlayed).toFixed(1)) : 0;
+          
+          return {
+            id: p.id,
+            name: prof.fullname || prof.username || "Unknown",
+            username: prof.username || p.user_id,
+            avatar: prof.avatar_url || null,
+            gamesPlayed: stats.gamesPlayed,
+            avgScore: avgScore,
+            paid: p.is_paid || false,
+            registeredAt: p.registered_at,
+            isFinalist: p.is_finalist || false,
+            category: p.category || undefined,
+          };
+        });
+        
+        setPlayers(mappedPlayers);
+      } else {
+        console.error("Error fetching participants:", pError);
+        setPlayers([]);
+      }
+
       setIsLoading(false);
     }
     getDetail();

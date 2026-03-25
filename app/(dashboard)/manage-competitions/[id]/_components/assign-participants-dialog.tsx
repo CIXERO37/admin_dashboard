@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, UserPlus } from "lucide-react";
 
 interface AssignParticipantsDialogProps {
@@ -36,9 +36,12 @@ export function AssignParticipantsDialog({
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
 
-  const available = players.filter(
-    (p) => !alreadyAssigned.includes(p.id) && p.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const available = players
+    .filter((p) => !alreadyAssigned.includes(p.id) && p.name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => {
+      if (b.avgScore !== a.avgScore) return b.avgScore - a.avgScore;
+      return b.gamesPlayed - a.gamesPlayed;
+    });
 
   const togglePlayer = (id: string) => {
     setSelected((prev) =>
@@ -108,12 +111,14 @@ export function AssignParticipantsDialog({
                     className="h-4 w-4 rounded border-border accent-primary"
                   />
                   <Avatar className="h-7 w-7">
+                    <AvatarImage src={player.avatar || ""} alt={player.name} className="object-cover" />
                     <AvatarFallback className="text-[10px]">
                       {player.name.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{player.name}</p>
+                    <p className="font-medium truncate leading-tight">{player.name}</p>
+                    <p className="text-[10px] text-muted-foreground truncate leading-tight">@{player.username || player.name.toLowerCase().replace(/\s+/g, '')}</p>
                   </div>
                   <span className="text-xs text-muted-foreground">
                     {player.avgScore.toFixed(1)} pts
