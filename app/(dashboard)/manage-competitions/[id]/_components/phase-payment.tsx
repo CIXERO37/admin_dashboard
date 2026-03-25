@@ -28,8 +28,8 @@ export function PhasePayment({ players }: PhasePaymentProps) {
 
   const sorted = [...filtered].sort((a, b) => {
     if (a.paid !== b.paid) return a.paid ? -1 : 1;
-    if (b.avgScore !== a.avgScore) return b.avgScore - a.avgScore;
-    return b.gamesPlayed - a.gamesPlayed;
+    if (b.gamesPlayed !== a.gamesPlayed) return b.gamesPlayed - a.gamesPlayed;
+    return b.avgScore - a.avgScore;
   });
 
   return (

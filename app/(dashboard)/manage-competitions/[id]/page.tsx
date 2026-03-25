@@ -118,7 +118,7 @@ export default function CompetitionDetailPage() {
           const { data: sessionsData, error: sessionsError } = await supabase
             .from("game_sessions")
             .select("participants");
-          
+
           if (!sessionsError && sessionsData) {
             sessionsData.forEach((session: any) => {
               if (Array.isArray(session.participants)) {
@@ -138,7 +138,7 @@ export default function CompetitionDetailPage() {
           const prof = profilesMap[p.user_id] || {};
           const stats = userStats[p.user_id] || { gamesPlayed: 0, totalScore: 0 };
           const avgScore = stats.gamesPlayed > 0 ? Number((stats.totalScore / stats.gamesPlayed).toFixed(1)) : 0;
-          
+
           return {
             id: p.id,
             name: prof.fullname || prof.username || "Unknown",
@@ -152,7 +152,7 @@ export default function CompetitionDetailPage() {
             category: p.category || undefined,
           };
         });
-        
+
         setPlayers(mappedPlayers);
       } else {
         console.error("Error fetching participants:", pError);
@@ -168,7 +168,7 @@ export default function CompetitionDetailPage() {
       const { data, error } = await supabase
         .rpc('get_distinct_applications')
         .select('*');
-      
+
       // Fallback: if RPC doesn't exist, query directly
       if (error) {
         const { data: rawData } = await supabase
@@ -283,7 +283,7 @@ export default function CompetitionDetailPage() {
       if (insertGroups.length > 0) {
         const { error: eg } = await supabase.from("competition_groups").insert(insertGroups);
         if (eg) throw eg;
-        
+
         let insertMembers: any[] = [];
         localGroups.forEach(g => {
           g.members.forEach((m, idx) => {
@@ -418,15 +418,15 @@ export default function CompetitionDetailPage() {
               </span>
             </div>
             <span>•</span>
-            <div 
-              className="flex items-center gap-1.5 cursor-help" 
+            <div
+              className="flex items-center gap-1.5 cursor-help"
               title={`${t("comp_detail.registration_fee") || "Registration Fee"}: ${formatCurrency(detail.registration_fee || 0)}`}
             >
               <Banknote className="h-4 w-4 text-yellow-500" />
               <span>{formatCurrency(detail.registration_fee || 0)}</span>
             </div>
             <span>•</span>
-            <div 
+            <div
               className="flex items-center gap-1.5 cursor-help"
               title={`${t("comp_detail.prize_pool") || "Prize Pool"}: ${formatCurrency(detail.prize_pool || 0)}`}
             >
@@ -448,7 +448,7 @@ export default function CompetitionDetailPage() {
       <div className="flex flex-col md:flex-row items-start gap-8">
         {/* Poster */}
         <div className="shrink-0">
-          <div 
+          <div
             className={`rounded-lg overflow-hidden border bg-muted/30 relative group transition-all duration-200 shadow-sm hover:shadow-md ${detail.poster_url ? "cursor-zoom-in" : ""}`}
             style={{ width: "160px", height: "120px" }}
             onClick={() => detail.poster_url && setIsImageModalOpen(true)}
