@@ -48,69 +48,32 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
-// --- DUMMY DATA ---
-interface Competition {
+// Match exactly with the database schema
+export interface Competition {
   id: string;
   title: string;
   slug: string;
-  status: "draft" | "published" | "completed" | "coming_soon" | "finished";
-  regStartDate: string;
-  regEndDate: string;
-  finalEndDate: string | null;
-  posterUrl: string | null;
-  participantCount: number;
+  description: string | null;
+  rules: string[] | null;
+  registration_start_date: string;
+  registration_end_date: string;
+  poster_url: string | null;
+  status: string; // "draft" | "published" | "completed" | "coming_soon" | "finished"
+  registration_fee: string | null;
+  prize_pool: string | null;
+  registration_link: string | null;
+  created_at: string;
+  created_by: string | null;
+  qualification_start_date: string | null;
+  qualification_end_date: string | null;
+  final_start_date: string | null;
+  final_end_date: string | null;
   category: string | null;
+  winners: any;
+  
+  // Custom for UI
+  participantCount?: number;
 }
-const DUMMY: Competition[] = [
-  {
-    id: "comp_1",
-    title: "Cerdas Cermat Online - Sains",
-    slug: "cerdas-cermat-online-sains",
-    status: "published",
-    regStartDate: "2026-03-10T08:00:00Z",
-    regEndDate: "2026-03-12T17:00:00Z",
-    finalEndDate: "2026-03-20T17:00:00Z",
-    posterUrl: "/images/poster1.jpg",
-    participantCount: 1542,
-    category: "SMP, SMA",
-  },
-  {
-    id: "comp_2",
-    title: "Cerdas Cermat Online - Matematika",
-    slug: "cerdas-cermat-online-matematika",
-    status: "published",
-    regStartDate: "2026-04-15T09:00:00Z",
-    regEndDate: "2026-04-17T15:00:00Z",
-    finalEndDate: "2026-04-25T15:00:00Z",
-    posterUrl: "/images/poster1.jpg",
-    participantCount: 870,
-    category: "SD",
-  },
-  {
-    id: "comp_3",
-    title: "Cerdas Cermat Online - Bahasa Inggris",
-    slug: "cerdas-cermat-online-bahasa-inggris",
-    status: "published",
-    regStartDate: "2026-05-20T10:00:00Z",
-    regEndDate: "2026-05-22T18:00:00Z",
-    finalEndDate: "2026-05-30T18:00:00Z",
-    posterUrl: "/images/poster1.jpg",
-    participantCount: 634,
-    category: "SMA, College",
-  },
-  {
-    id: "comp_4",
-    title: "Cerdas Cermat Online - IPS",
-    slug: "cerdas-cermat-online-ips",
-    status: "published",
-    regStartDate: "2026-06-01T09:00:00Z",
-    regEndDate: "2026-06-03T17:00:00Z",
-    finalEndDate: "2026-06-10T17:00:00Z",
-    posterUrl: "/images/poster1.jpg",
-    participantCount: 421,
-    category: "Others",
-  },
-];
 
 export function ManageCompetitionsClient() {
   const router = useRouter();
@@ -138,8 +101,8 @@ export function ManageCompetitionsClient() {
       const { data, error } = await supabase
         .from("competitions")
         .select(`
-          id, title, slug, status, registration_start_date, registration_end_date, final_end_date, poster_url, category,
-          participants:competition_participants(count)
+          *,
+          competition_participants(count)
         `)
         .order("created_at", { ascending: false });
 
@@ -147,16 +110,8 @@ export function ManageCompetitionsClient() {
         console.error("Error fetching competitions:", error);
       } else {
         const mapped = data?.map((d: any) => ({
-          id: d.id,
-          title: d.title,
-          slug: d.slug,
-          status: d.status,
-          regStartDate: d.registration_start_date,
-          regEndDate: d.registration_end_date,
-          finalEndDate: d.final_end_date,
-          posterUrl: d.poster_url,
-          category: d.category,
-          participantCount: d.participants[0]?.count || 0,
+          ...d,
+          participantCount: d.competition_participants?.[0]?.count || 0,
         })) || [];
         setCompetitions(mapped);
       }
@@ -206,19 +161,12 @@ export function ManageCompetitionsClient() {
     if (e.key === "Enter") handleSearch();
   };
 
-  const goToPage = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
-
   const compColumns = [
     {
       key: "poster",
       label: t("manage_competitions.table_poster") || "Poster",
       render: (value: unknown, row: Record<string, unknown>) => {
-        const posterUrl = row.posterUrl as string | null;
+        const posterUrl = row.poster_url as string | null;
         const title = row.title as string;
         return (
           <div
@@ -282,7 +230,7 @@ export function ManageCompetitionsClient() {
       render: (value: unknown) => (
         <div className="flex items-center gap-1 text-muted-foreground">
           <Users className="h-3.5 w-3.5" />
-          <span>{(value as number).toLocaleString("id-ID")}</span>
+          <span>{(value as number || 0).toLocaleString("id-ID")}</span>
         </div>
       ),
     },
@@ -321,12 +269,12 @@ export function ManageCompetitionsClient() {
     const catLabels = comp.category
       ? comp.category.split(',').map((c: string) => c.trim()).join(', ')
       : null;
-    const scheduleStart = comp.regStartDate ? format(new Date(comp.regStartDate), "d MMM yyyy") : "\u2014";
-    const scheduleEnd = (comp.finalEndDate || comp.regEndDate) ? format(new Date(comp.finalEndDate || comp.regEndDate), "d MMM yyyy") : "\u2014";
+    const scheduleStart = comp.registration_start_date ? format(new Date(comp.registration_start_date), "d MMM yyyy") : "\u2014";
+    const scheduleEnd = (comp.final_end_date || comp.registration_end_date) ? format(new Date(comp.final_end_date || comp.registration_end_date), "d MMM yyyy") : "\u2014";
     return {
       id: comp.id,
       poster: null,
-      posterUrl: comp.posterUrl,
+      poster_url: comp.poster_url,
       title: comp.title,
       categoryDisplay: catLabels,
       status: comp.status,

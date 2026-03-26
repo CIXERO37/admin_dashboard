@@ -4,7 +4,7 @@ import { useTranslation } from "@/lib/i18n";
 import { DummyPlayer } from "@/types/competition";
 import { CreditCard, Gamepad2, Trophy, Search, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { SearchInput } from "@/components/shared/search-input";
 import {
@@ -27,8 +27,9 @@ export function PhasePayment({ players }: PhasePaymentProps) {
   );
 
   const sorted = [...filtered].sort((a, b) => {
-    if (a.paid === b.paid) return b.avgScore - a.avgScore;
-    return a.paid ? -1 : 1;
+    if (a.paid !== b.paid) return a.paid ? -1 : 1;
+    if (b.gamesPlayed !== a.gamesPlayed) return b.gamesPlayed - a.gamesPlayed;
+    return b.avgScore - a.avgScore;
   });
 
   return (
@@ -75,14 +76,15 @@ export function PhasePayment({ players }: PhasePaymentProps) {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Avatar className="h-7 w-7">
+                        <AvatarImage src={player.avatar || ""} alt={player.name} className="object-cover" />
                         <AvatarFallback className="text-[10px]">
                           {player.name.substring(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col min-w-0">
                         <span className="font-medium text-sm truncate" title={player.name}>{player.name}</span>
-                        <span className="text-[10px] text-muted-foreground truncate" title={`@${player.name.toLowerCase().replace(/\s+/g, '')}`}>
-                          @{player.name.toLowerCase().replace(/\s+/g, '')}
+                        <span className="text-[10px] text-muted-foreground truncate" title={`@${player.username || player.name}`}>
+                          @{player.username || player.name.toLowerCase().replace(/\s+/g, '')}
                         </span>
                       </div>
                     </div>

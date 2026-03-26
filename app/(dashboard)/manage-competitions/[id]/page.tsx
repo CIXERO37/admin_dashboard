@@ -18,6 +18,7 @@ import {
   Banknote,
   Gift,
   Image as ImageIcon,
+  Save,
 } from "lucide-react";
 
 import {
@@ -29,6 +30,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { DummyPlayer, MockQuiz, CompetitionPhase } from "@/types/competition";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -38,43 +40,8 @@ import { PhaseQualification } from "./_components/phase-qualification";
 import { PhaseGroupStage, LocalGroup, GameApp } from "./_components/phase-group-stage";
 import { PhaseCompleted } from "./_components/phase-completed";
 
-// --- DUMMY DATA ---
-
-
-const DUMMY_PLAYERS: DummyPlayer[] = [
-  { id: "p1", name: "Muhammad Khoirul H.", avatar: null, gamesPlayed: 12, avgScore: 85.3, paid: true, registeredAt: "2026-01-15T10:30:00Z", isFinalist: true },
-  { id: "p2", name: "Aluna Kynan", avatar: null, gamesPlayed: 8, avgScore: 92.1, paid: true, registeredAt: "2026-01-16T08:15:00Z", isFinalist: true },
-  { id: "p3", name: "Apin Ridwan", avatar: null, gamesPlayed: 15, avgScore: 78.6, paid: false, registeredAt: "2026-01-18T14:00:00Z", isFinalist: true },
-  { id: "p4", name: "Kizuko Mellbringer", avatar: null, gamesPlayed: 5, avgScore: 91.0, paid: true, registeredAt: "2026-01-20T09:45:00Z", isFinalist: true },
-  { id: "p5", name: "Zubaidillah", avatar: null, gamesPlayed: 20, avgScore: 67.4, paid: true, registeredAt: "2026-01-22T11:20:00Z", isFinalist: true },
-  { id: "p6", name: "Lint More", avatar: null, gamesPlayed: 3, avgScore: 55.2, paid: false, registeredAt: "2026-01-25T16:30:00Z", isFinalist: true },
-  { id: "p7", name: "Siti Nurhaliza", avatar: null, gamesPlayed: 10, avgScore: 88.9, paid: true, registeredAt: "2026-02-01T07:50:00Z", isFinalist: true },
-  { id: "p8", name: "Budi Santoso", avatar: null, gamesPlayed: 7, avgScore: 73.5, paid: false, registeredAt: "2026-02-03T13:10:00Z", isFinalist: true },
-  { id: "p9", name: "Gatot Kaca", avatar: null, gamesPlayed: 11, avgScore: 82.5, paid: true, registeredAt: "2026-02-05T08:00:00Z", isFinalist: true },
-  { id: "p10", name: "Bima Sena", avatar: null, gamesPlayed: 4, avgScore: 89.2, paid: true, registeredAt: "2026-02-06T09:10:00Z", isFinalist: true },
-  { id: "p11", name: "Arjuna", avatar: null, gamesPlayed: 18, avgScore: 95.1, paid: true, registeredAt: "2026-02-07T10:20:00Z", isFinalist: true },
-  { id: "p12", name: "Yudistira", avatar: null, gamesPlayed: 6, avgScore: 81.0, paid: true, registeredAt: "2026-02-08T11:30:00Z", isFinalist: true },
-  { id: "p13", name: "Nakula", avatar: null, gamesPlayed: 9, avgScore: 87.5, paid: true, registeredAt: "2026-02-09T14:40:00Z", isFinalist: true },
-  { id: "p14", name: "Sadewa", avatar: null, gamesPlayed: 13, avgScore: 86.8, paid: true, registeredAt: "2026-02-10T15:50:00Z", isFinalist: true },
-  { id: "p15", name: "Srikandi", avatar: null, gamesPlayed: 16, avgScore: 93.4, paid: true, registeredAt: "2026-02-11T16:00:00Z", isFinalist: true },
-  { id: "p16", name: "Drupadi", avatar: null, gamesPlayed: 7, avgScore: 79.9, paid: true, registeredAt: "2026-02-12T08:15:00Z", isFinalist: true },
-  { id: "p17", name: "Andi Wijaya", avatar: null, gamesPlayed: 5, avgScore: 71.2, paid: true, registeredAt: "2026-02-13T09:00:00Z", isFinalist: true },
-  { id: "p18", name: "Ratna Sari", avatar: null, gamesPlayed: 14, avgScore: 88.5, paid: true, registeredAt: "2026-02-14T10:30:00Z", isFinalist: true },
-  { id: "p19", name: "Eko Prasetyo", avatar: null, gamesPlayed: 8, avgScore: 76.4, paid: true, registeredAt: "2026-02-15T11:45:00Z", isFinalist: true },
-  { id: "p20", name: "Lina Marlina", avatar: null, gamesPlayed: 19, avgScore: 94.2, paid: true, registeredAt: "2026-02-16T13:20:00Z", isFinalist: true },
-  { id: "p21", name: "Hendra Gunawan", avatar: null, gamesPlayed: 12, avgScore: 83.1, paid: true, registeredAt: "2026-02-17T14:10:00Z", isFinalist: true },
-  { id: "p22", name: "Maya Indah", avatar: null, gamesPlayed: 6, avgScore: 79.8, paid: true, registeredAt: "2026-02-18T15:55:00Z", isFinalist: true },
-  { id: "p23", name: "Rizky Firmansyah", avatar: null, gamesPlayed: 21, avgScore: 96.0, paid: true, registeredAt: "2026-02-19T16:40:00Z", isFinalist: true },
-  { id: "p24", name: "Siska Amelia", avatar: null, gamesPlayed: 11, avgScore: 85.7, paid: true, registeredAt: "2026-02-20T08:25:00Z", isFinalist: true },
-  { id: "p25", name: "Doni Setiawan", avatar: null, gamesPlayed: 9, avgScore: 74.3, paid: true, registeredAt: "2026-02-21T09:50:00Z", isFinalist: true },
-  { id: "p26", name: "Rini Wulandari", avatar: null, gamesPlayed: 17, avgScore: 91.5, paid: true, registeredAt: "2026-02-22T10:15:00Z", isFinalist: true },
-  { id: "p27", name: "Agus Maulana", avatar: null, gamesPlayed: 4, avgScore: 68.9, paid: true, registeredAt: "2026-02-23T11:05:00Z", isFinalist: true },
-  { id: "p28", name: "Dewi Lestari", avatar: null, gamesPlayed: 15, avgScore: 89.4, paid: true, registeredAt: "2026-02-24T12:30:00Z", isFinalist: true },
-  { id: "p29", name: "Bagus Permana", avatar: null, gamesPlayed: 10, avgScore: 80.6, paid: true, registeredAt: "2026-02-25T14:45:00Z", isFinalist: true },
-  { id: "p30", name: "Nia Ramadhani", avatar: null, gamesPlayed: 13, avgScore: 87.1, paid: true, registeredAt: "2026-02-26T16:20:00Z", isFinalist: true },
-];
-
 // --- MOCK QUIZZES ---
+
 const MOCK_QUIZZES: MockQuiz[] = [
   { id: "q1", title: "Sains Dasar", questionCount: 20, duration: 30 },
   { id: "q2", title: "Matematika Logika", questionCount: 15, duration: 25 },
@@ -92,13 +59,29 @@ export default function CompetitionDetailPage() {
 
   const [detail, setDetail] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [players, setPlayers] = useState<DummyPlayer[]>(DUMMY_PLAYERS);
+  const [players, setPlayers] = useState<DummyPlayer[]>([]);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isSavingGroups, setIsSavingGroups] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
   const [rulesExpanded, setRulesExpanded] = useState(false);
 
   // Wizard phase state
   const [activePhase, setActivePhase] = useState<CompetitionPhase>("registration");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedPhase = localStorage.getItem(`comp_phase_${compId}`) as CompetitionPhase;
+      if (savedPhase) setActivePhase(savedPhase);
+    }
+  }, [compId]);
+
+  const handlePhaseChange = (val: string) => {
+    const phase = val as CompetitionPhase;
+    setActivePhase(phase);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(`comp_phase_${compId}`, phase);
+    }
+  };
 
   // Group Stage local state
   const [localGroups, setLocalGroups] = useState<LocalGroup[]>([]);
@@ -119,6 +102,79 @@ export default function CompetitionDetailPage() {
       }
 
       setDetail(data);
+
+      // Fetch participants
+      const { data: participantsData, error: pError } = await supabase
+        .from("competition_participants")
+        .select("*")
+        .eq("competition_id", compId);
+
+      if (!pError && participantsData) {
+        const userIds = participantsData.map((p: any) => p.user_id).filter(Boolean);
+        let profilesMap: Record<string, any> = {};
+
+        // Fetch User Profiles
+        if (userIds.length > 0) {
+          const { data: profilesData, error: profError } = await supabase
+            .from("profiles")
+            .select("id, fullname, username, avatar_url")
+            .in("id", userIds);
+
+          if (!profError && profilesData) {
+            profilesMap = profilesData.reduce((acc: any, prof: any) => {
+              acc[prof.id] = prof;
+              return acc;
+            }, {});
+          }
+        }
+
+        // Fetch Game Sessions for Stats
+        let userStats: Record<string, { gamesPlayed: number, totalScore: number }> = {};
+        if (userIds.length > 0) {
+          const { data: sessionsData, error: sessionsError } = await supabase
+            .from("game_sessions")
+            .select("participants");
+
+          if (!sessionsError && sessionsData) {
+            sessionsData.forEach((session: any) => {
+              if (Array.isArray(session.participants)) {
+                session.participants.forEach((p: any) => {
+                  if (p.user_id && userIds.includes(p.user_id)) {
+                    if (!userStats[p.user_id]) userStats[p.user_id] = { gamesPlayed: 0, totalScore: 0 };
+                    userStats[p.user_id].gamesPlayed += 1;
+                    userStats[p.user_id].totalScore += p.score || 0;
+                  }
+                });
+              }
+            });
+          }
+        }
+
+        const mappedPlayers: DummyPlayer[] = participantsData.map((p: any) => {
+          const prof = profilesMap[p.user_id] || {};
+          const stats = userStats[p.user_id] || { gamesPlayed: 0, totalScore: 0 };
+          const avgScore = stats.gamesPlayed > 0 ? Number((stats.totalScore / stats.gamesPlayed).toFixed(1)) : 0;
+
+          return {
+            id: p.id,
+            name: prof.fullname || prof.username || "Unknown",
+            username: prof.username || p.user_id,
+            avatar: prof.avatar_url || null,
+            gamesPlayed: stats.gamesPlayed,
+            avgScore: avgScore,
+            paid: p.is_paid || false,
+            registeredAt: p.registered_at,
+            isFinalist: p.is_finalist || false,
+            category: p.category || undefined,
+          };
+        });
+
+        setPlayers(mappedPlayers);
+      } else {
+        console.error("Error fetching participants:", pError);
+        setPlayers([]);
+      }
+
       setIsLoading(false);
     }
     getDetail();
@@ -128,7 +184,7 @@ export default function CompetitionDetailPage() {
       const { data, error } = await supabase
         .rpc('get_distinct_applications')
         .select('*');
-      
+
       // Fallback: if RPC doesn't exist, query directly
       if (error) {
         const { data: rawData } = await supabase
@@ -149,7 +205,127 @@ export default function CompetitionDetailPage() {
       }
     }
     fetchGames();
+
+    async function fetchPlayers() {
+      // 1. Ambil pendaftar dari db sesuai competition_id
+      const { data: participants, error: pErr } = await supabase
+        .from("competition_participants")
+        .select("*")
+        .eq("competition_id", compId);
+
+      if (pErr || !participants || participants.length === 0) return;
+
+      // 2. Karena tidak ada explicit FK antara user_id dan profiles.id, kita ambil manual
+      const userIds = participants.map((p: any) => p.user_id);
+      const { data: profiles, error: prErr } = await supabase
+        .from("profiles")
+        .select("id, fullname, avatar_url, nickname")
+        .in("id", userIds);
+
+      // 3. Gabungkan datanya dan mapping ke interface UI (DummyPlayer)
+      const formattedPlayers: DummyPlayer[] = participants.map((p: any) => {
+        const prof = (profiles || []).find((x: any) => x.id === p.user_id);
+        return {
+          id: p.id,
+          name: prof?.fullname || prof?.nickname || "Unknown Player",
+          avatar: prof?.avatar_url || null,
+          gamesPlayed: Math.floor(Math.random() * 20), // Masih hardcoded dummy sampai game_sessions hitungan rilis
+          avgScore: Math.floor(Math.random() * 50) + 50, // Dummy score
+          paid: p.is_paid || false,
+          registeredAt: p.registered_at,
+          isFinalist: p.is_finalist || false,
+        };
+      });
+
+      setPlayers(formattedPlayers);
+
+      // 4. Ambil dan susun Group configuration yang sudah di-save ke DB
+      const { data: dbGroups } = await supabase
+        .from("competition_groups")
+        .select(`
+          id, name, stage, quiz_ids, game_ids, source_group_ids,
+          competition_group_members(participant_id, score, time_seconds, is_advanced)
+        `)
+        .eq("competition_id", compId);
+
+      if (dbGroups) {
+        const loadedGroups: LocalGroup[] = dbGroups.map((g: any) => ({
+          id: g.id,
+          name: g.name,
+          stage: g.stage || "",
+          sources: g.source_group_ids || [],
+          quizIds: g.quiz_ids || [],
+          gameIds: g.game_ids || [],
+          members: (g.competition_group_members || []).map((m: any) => {
+            const memInfo = formattedPlayers.find(p => p.id === m.participant_id);
+            return {
+              playerId: m.participant_id,
+              playerName: memInfo?.name || m.participant_id,
+              score: Number(m.score) || 0,
+              timeSeconds: m.time_seconds || 0,
+              isAdvanced: m.is_advanced || false,
+            };
+          })
+        }));
+        setLocalGroups(loadedGroups);
+      }
+    }
+    fetchPlayers();
   }, [compId, supabase, router]);
+
+  // --- Database Sync for Groups ---
+  const handleSaveGroupsToDb = async () => {
+    setIsSavingGroups(true);
+    try {
+      // 1. Dapatkan daftar grup lama untuk dihapus anak-anak isinya (manual cascade)
+      const { data: oldGroups } = await supabase.from("competition_groups").select("id").eq("competition_id", compId);
+      if (oldGroups && oldGroups.length > 0) {
+        const oldIds = oldGroups.map((g: any) => g.id);
+        await supabase.from("competition_group_members").delete().in("group_id", oldIds);
+        await supabase.from("competition_groups").delete().in("id", oldIds);
+      }
+
+      // 2. Tulis Batch Grup Baru
+      const insertGroups = localGroups.map(g => ({
+        id: g.id,
+        competition_id: compId,
+        name: g.name,
+        stage: g.stage || "",
+        quiz_ids: g.quizIds || [],
+        game_ids: g.gameIds || [],
+        source_group_ids: g.sources || []
+      }));
+
+      if (insertGroups.length > 0) {
+        const { error: eg } = await supabase.from("competition_groups").insert(insertGroups);
+        if (eg) throw eg;
+
+        let insertMembers: any[] = [];
+        localGroups.forEach(g => {
+          g.members.forEach((m, idx) => {
+            insertMembers.push({
+              id: `${g.id}-${m.playerId}-${idx}`, // memastikan unik meski salah logika
+              group_id: g.id,
+              participant_id: m.playerId,
+              score: m.score,
+              time_seconds: m.timeSeconds,
+              is_advanced: m.isAdvanced
+            });
+          });
+        });
+
+        if (insertMembers.length > 0) {
+          const { error: em } = await supabase.from("competition_group_members").insert(insertMembers);
+          if (em) throw em;
+        }
+      }
+      toast.success(t("competition.groups_saved") || "Group Configuration Saved Successfully!");
+    } catch (e: any) {
+      toast.error("Failed to save config: " + e.message);
+    } finally {
+      setIsSavingGroups(false);
+    }
+  };
 
   // --- Player Management ---
   const handleToggleFinalist = (playerId: string) => {
@@ -190,8 +366,58 @@ export default function CompetitionDetailPage() {
 
   if (isLoading || !detail) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <p className="text-muted-foreground animate-pulse">Loading competition details...</p>
+      <div className="space-y-6 animate-pulse">
+        {/* Breadcrumb Skeleton */}
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-4 w-4 shrink-0" />
+          <Skeleton className="h-4 w-40" />
+        </div>
+
+        {/* Title & Edit Button Skeleton */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <Skeleton className="h-10 w-3/4 md:w-1/2" />
+          <Skeleton className="h-9 w-24" />
+        </div>
+
+        {/* Badges / Info Skeleton */}
+        <div className="flex flex-wrap gap-4 border-y border-border py-4">
+          <Skeleton className="h-6 w-24 rounded-full" />
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-4 w-48" />
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-4 w-32" />
+        </div>
+
+        {/* Poster & Description Skeleton */}
+        <div className="flex flex-col md:flex-row gap-8">
+          <Skeleton className="h-[120px] w-[160px] rounded-lg shrink-0" />
+          <div className="space-y-5 flex-1 w-full">
+            <div className="space-y-2">
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-5 w-24" />
+              <Skeleton className="h-4 w-2/3" />
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Tabs Skeleton */}
+        <div className="space-y-6 pt-2">
+          <div className="flex gap-4 border-b border-border pb-0 w-full overflow-x-hidden">
+             <Skeleton className="h-9 w-28 rounded-b-none" />
+             <Skeleton className="h-9 w-24 rounded-b-none" />
+             <Skeleton className="h-9 w-32 rounded-b-none" />
+             <Skeleton className="h-9 w-32 rounded-b-none" />
+          </div>
+          <Skeleton className="h-[400px] w-full rounded-xl" />
+        </div>
       </div>
     );
   }
@@ -258,15 +484,15 @@ export default function CompetitionDetailPage() {
               </span>
             </div>
             <span>•</span>
-            <div 
-              className="flex items-center gap-1.5 cursor-help" 
+            <div
+              className="flex items-center gap-1.5 cursor-help"
               title={`${t("comp_detail.registration_fee") || "Registration Fee"}: ${formatCurrency(detail.registration_fee || 0)}`}
             >
               <Banknote className="h-4 w-4 text-yellow-500" />
               <span>{formatCurrency(detail.registration_fee || 0)}</span>
             </div>
             <span>•</span>
-            <div 
+            <div
               className="flex items-center gap-1.5 cursor-help"
               title={`${t("comp_detail.prize_pool") || "Prize Pool"}: ${formatCurrency(detail.prize_pool || 0)}`}
             >
@@ -288,7 +514,7 @@ export default function CompetitionDetailPage() {
       <div className="flex flex-col md:flex-row items-start gap-8">
         {/* Poster */}
         <div className="shrink-0">
-          <div 
+          <div
             className={`rounded-lg overflow-hidden border bg-muted/30 relative group transition-all duration-200 shadow-sm hover:shadow-md ${detail.poster_url ? "cursor-zoom-in" : ""}`}
             style={{ width: "160px", height: "120px" }}
             onClick={() => detail.poster_url && setIsImageModalOpen(true)}
@@ -378,7 +604,7 @@ export default function CompetitionDetailPage() {
       <Separator />
 
       {/* === WIZARD PHASE TABS === */}
-      <Tabs value={activePhase} onValueChange={(val) => setActivePhase(val as CompetitionPhase)} className="w-full relative z-0">
+      <Tabs value={activePhase} onValueChange={handlePhaseChange} className="w-full relative z-0">
         <TabsList className="mb-4 w-full justify-start h-auto bg-transparent p-0 gap-2 overflow-x-auto rounded-none border-b no-scrollbar">
           <TabsTrigger value="registration" className="relative h-9 rounded-none border-b-2 border-b-transparent bg-transparent px-4 pb-3 pt-2 font-medium text-muted-foreground shadow-none transition-none data-[state=active]:border-b-primary data-[state=active]:text-foreground data-[state=active]:shadow-none cursor-pointer">
             {t("competition.phase_registration") || "Registration"}
@@ -420,6 +646,8 @@ export default function CompetitionDetailPage() {
             quizzes={MOCK_QUIZZES}
             games={availableGames}
             onGroupsChange={setLocalGroups}
+            onSave={handleSaveGroupsToDb}
+            isSaving={isSavingGroups}
           />
         </TabsContent>
 

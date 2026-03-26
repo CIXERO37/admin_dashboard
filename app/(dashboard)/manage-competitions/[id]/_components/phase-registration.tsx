@@ -6,7 +6,7 @@ import { Users, Gamepad2, Trophy, Search } from "lucide-react";
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { id as idLocale, enUS } from "date-fns/locale";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SearchInput } from "@/components/shared/search-input";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -24,7 +24,10 @@ export function PhaseRegistration({ players }: PhaseRegistrationProps) {
     p.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const sorted = [...filtered].sort((a, b) => b.avgScore - a.avgScore);
+  const sorted = [...filtered].sort((a, b) => {
+    if (b.gamesPlayed !== a.gamesPlayed) return b.gamesPlayed - a.gamesPlayed;
+    return b.avgScore - a.avgScore;
+  });
 
   return (
     <div className="space-y-4">
@@ -93,14 +96,15 @@ export function PhaseRegistration({ players }: PhaseRegistrationProps) {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Avatar className="h-7 w-7">
+                          <AvatarImage src={player.avatar || ""} alt={player.name} className="object-cover" />
                           <AvatarFallback className="text-[10px]">
                             {player.name.substring(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col min-w-0">
                           <span className="font-medium text-sm truncate" title={player.name}>{player.name}</span>
-                          <span className="text-[10px] text-muted-foreground truncate" title={`@${player.name.toLowerCase().replace(/\s+/g, '')}`}>
-                            @{player.name.toLowerCase().replace(/\s+/g, '')}
+                          <span className="text-[10px] text-muted-foreground truncate" title={`@${player.username || player.name}`}>
+                            @{player.username || player.name.toLowerCase().replace(/\s+/g, '')}
                           </span>
                         </div>
                       </div>
