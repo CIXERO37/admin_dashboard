@@ -173,6 +173,37 @@ export default function CompetitionDetailPage() {
         });
 
         setPlayers(mappedPlayers);
+
+        // Fetch saved LocalGroups configurations
+        const { data: dbGroups } = await supabase
+          .from("competition_groups")
+          .select(`
+            id, name, stage, quiz_ids, game_ids, source_group_ids,
+            competition_group_members(participant_id, score, time_seconds, is_advanced)
+          `)
+          .eq("competition_id", compId);
+
+        if (dbGroups) {
+          const loadedGroups: LocalGroup[] = dbGroups.map((g: any) => ({
+            id: g.id,
+            name: g.name,
+            stage: g.stage || "",
+            sources: g.source_group_ids || [],
+            quizIds: g.quiz_ids || [],
+            gameIds: g.game_ids || [],
+            members: (g.competition_group_members || []).map((m: any) => {
+              const memInfo = mappedPlayers.find(p => p.id === m.participant_id);
+              return {
+                playerId: m.participant_id,
+                playerName: memInfo?.name || m.participant_id,
+                score: Number(m.score) || 0,
+                timeSeconds: m.time_seconds || 0,
+                isAdvanced: m.is_advanced || false,
+              };
+            })
+          }));
+          setLocalGroups(loadedGroups);
+        }
       } else {
         console.error("Error fetching participants:", pError);
         setPlayers([]);
@@ -233,71 +264,6 @@ export default function CompetitionDetailPage() {
     }
     fetchGames();
 
-    async function fetchPlayers() {
-      // 1. Ambil pendaftar dari db sesuai competition_id
-      const { data: participants, error: pErr } = await supabase
-        .from("competition_participants")
-        .select("*")
-        .eq("competition_id", compId);
-
-      if (pErr || !participants || participants.length === 0) return;
-
-      // 2. Karena tidak ada explicit FK antara user_id dan profiles.id, kita ambil manual
-      const userIds = participants.map((p: any) => p.user_id);
-      const { data: profiles, error: prErr } = await supabase
-        .from("profiles")
-        .select("id, fullname, avatar_url, nickname")
-        .in("id", userIds);
-
-      // 3. Gabungkan datanya dan mapping ke interface UI (DummyPlayer)
-      const formattedPlayers: DummyPlayer[] = participants.map((p: any) => {
-        const prof = (profiles || []).find((x: any) => x.id === p.user_id);
-        return {
-          id: p.id,
-          name: prof?.fullname || prof?.nickname || "Unknown Player",
-          avatar: prof?.avatar_url || null,
-          gamesPlayed: Math.floor(Math.random() * 20), // Masih hardcoded dummy sampai game_sessions hitungan rilis
-          avgScore: Math.floor(Math.random() * 50) + 50, // Dummy score
-          paid: p.is_paid || false,
-          registeredAt: p.registered_at,
-          isFinalist: p.is_finalist || false,
-        };
-      });
-
-      setPlayers(formattedPlayers);
-
-      // 4. Ambil dan susun Group configuration yang sudah di-save ke DB
-      const { data: dbGroups } = await supabase
-        .from("competition_groups")
-        .select(`
-          id, name, stage, quiz_ids, game_ids, source_group_ids,
-          competition_group_members(participant_id, score, time_seconds, is_advanced)
-        `)
-        .eq("competition_id", compId);
-
-      if (dbGroups) {
-        const loadedGroups: LocalGroup[] = dbGroups.map((g: any) => ({
-          id: g.id,
-          name: g.name,
-          stage: g.stage || "",
-          sources: g.source_group_ids || [],
-          quizIds: g.quiz_ids || [],
-          gameIds: g.game_ids || [],
-          members: (g.competition_group_members || []).map((m: any) => {
-            const memInfo = formattedPlayers.find(p => p.id === m.participant_id);
-            return {
-              playerId: m.participant_id,
-              playerName: memInfo?.name || m.participant_id,
-              score: Number(m.score) || 0,
-              timeSeconds: m.time_seconds || 0,
-              isAdvanced: m.is_advanced || false,
-            };
-          })
-        }));
-        setLocalGroups(loadedGroups);
-      }
-    }
-    fetchPlayers();
   }, [compId, supabase, router]);
 
   // --- Database Sync for Groups ---
