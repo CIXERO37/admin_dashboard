@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SearchInput } from "@/components/shared/search-input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Link from "next/link";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -50,6 +51,17 @@ export function PhaseQualification({
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
+  };
+
+  const selectableIds = sorted.filter(p => !p.isFinalist).map(p => p.id);
+  const allSelected = selectableIds.length > 0 && selectableIds.every(id => selectedIds.includes(id));
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedIds(prev => prev.filter(id => !selectableIds.includes(id)));
+    } else {
+      setSelectedIds(prev => Array.from(new Set([...prev, ...selectableIds])));
+    }
   };
 
   const handleBatchMove = () => {
@@ -121,7 +133,18 @@ export function PhaseQualification({
         <Table>
           <TableHeader>
             <TableRow>
-              {subTab === "paid" && <TableHead className="w-[40px]" />}
+              {subTab === "paid" && (
+                <TableHead className="w-[40px] px-0 text-center">
+                  <div className="flex justify-center w-full">
+                    <Checkbox 
+                      checked={selectableIds.length > 0 && allSelected} 
+                      onCheckedChange={toggleSelectAll} 
+                      disabled={selectableIds.length === 0}
+                      className="h-4 w-4 border-muted-foreground/50"
+                    />
+                  </div>
+                </TableHead>
+              )}
               <TableHead className="w-[50px] text-center">#</TableHead>
               <TableHead>{t("comp_detail.table_player")}</TableHead>
               <TableHead className="text-center">{t("comp_detail.table_play")}</TableHead>
@@ -145,10 +168,15 @@ export function PhaseQualification({
                 return (
                   <TableRow
                     key={player.id}
-                    className={isFinalist && subTab === "paid" ? "bg-emerald-500/5" : ""}
+                    className={`${isFinalist && subTab === "paid" ? "bg-emerald-500/5" : ""} ${subTab === "paid" && !isFinalist ? "cursor-pointer hover:bg-muted/50 transition-colors" : ""}`}
+                    onClick={() => {
+                      if (subTab === "paid" && !isFinalist) {
+                        toggleSelect(player.id);
+                      }
+                    }}
                   >
                     {subTab === "paid" && (
-                      <TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
                         <Checkbox
                           checked={isSelected || !!isFinalist}
                           disabled={!!isFinalist}
@@ -169,20 +197,25 @@ export function PhaseQualification({
                       )}
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-7 w-7">
+                      <Link 
+                        href={`/users/${player.username || player.id}`}
+                        target="_blank"
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center gap-2 group w-fit"
+                      >
+                        <Avatar className="h-7 w-7 transition-all group-hover:ring-2 group-hover:ring-emerald-500/50">
                           <AvatarImage src={player.avatar || ""} alt={player.name} className="object-cover" />
                           <AvatarFallback className="text-[10px]">
                             {player.name.substring(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col min-w-0">
-                          <span className="font-medium text-sm truncate" title={player.name}>{player.name}</span>
+                          <span className="font-medium text-sm truncate transition-colors group-hover:text-emerald-500" title={player.name}>{player.name}</span>
                           <span className="text-[10px] text-muted-foreground truncate" title={`@${player.username || player.name}`}>
                             @{player.username || player.name.toLowerCase().replace(/\s+/g, '')}
                           </span>
                         </div>
-                      </div>
+                      </Link>
                     </TableCell>
                     <TableCell className="text-center">
                       <div className="flex items-center justify-center gap-1 text-muted-foreground">
@@ -214,7 +247,8 @@ export function PhaseQualification({
                           size="sm"
                           variant="ghost"
                           className="h-7 text-xs gap-1 text-primary hover:text-primary"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             onToggleFinalist(player.id);
                             toast.success(`${player.name} → ${t("competition.finalist")}`);
                           }}
@@ -228,7 +262,8 @@ export function PhaseQualification({
                           size="sm"
                           variant="ghost"
                           className="h-7 text-xs gap-1 text-destructive hover:text-destructive"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             onToggleFinalist(player.id);
                             toast.success(`${player.name} → ${t("comp_detail.paid")}`);
                           }}
