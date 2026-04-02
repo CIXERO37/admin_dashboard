@@ -71,6 +71,7 @@ export async function startRoundSession(params: StartRoundParams) {
       description: "Match Lobby",
       creator_id: params.hostId,
       members: members,
+      settings: { status: "private" },
     };
 
     // 3. Prepare Notifications for all users EXCEPT the host
@@ -84,7 +85,7 @@ export async function startRoundSession(params: StartRoundParams) {
       entity_type: "session",
       entity_id: sessionXId,
       from_group_id: newMainGroupId,
-      status: "pending",
+      status: null,
       content: null
     }));
 
