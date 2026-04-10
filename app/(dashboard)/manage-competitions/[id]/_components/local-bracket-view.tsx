@@ -143,30 +143,97 @@ export function LocalBracketView({ groups, quizzes = [], games = [], competition
     y: number 
   }> = [];
 
-  columns.forEach((colData, colIdx) => {
-    const xOffset = PADDING_X + colIdx * (COLUMN_WIDTH + X_GAP);
-    const numItems = colData.data.length;
-    
-    const blockHeight = numItems * NODE_HEIGHT + Math.max(numItems - 1, 0) * Y_GAP;
-    const availableHeight = svgHeight - startY;
-    const blockStartY = startY + (availableHeight - blockHeight) / 2;
-    
-    colData.data.forEach((group, rowIdx) => {
-      const y = blockStartY + rowIdx * (NODE_HEIGHT + Y_GAP);
-      const x = xOffset;
-      const centerY = y + NODE_HEIGHT / 2;
-      
-      const node = {
-         group, col: colIdx, row: rowIdx,
-         x, y, 
-         cx: xOffset + COLUMN_WIDTH / 2, 
-         cy: centerY 
-      };
+    // === SMART POSITIONING: Align targets to their sources ===
+    // Step 1: Position Semifinal column evenly (this is the source of truth)
+    const xOffset0 = PADDING_X;
+    const numSemis = semifinals.length;
+    const blockH = numSemis * NODE_HEIGHT + Math.max(numSemis - 1, 0) * Y_GAP;
+    const blockStart = startY + Math.max((svgHeight - startY - blockH) / 2, 0);
 
+    semifinals.forEach((group, rowIdx) => {
+      const y = blockStart + rowIdx * (NODE_HEIGHT + Y_GAP);
+      const node = {
+        group, col: 0, row: rowIdx, x: xOffset0, y,
+        cx: xOffset0 + COLUMN_WIDTH / 2, cy: y + NODE_HEIGHT / 2
+      };
       renderNodes.push(node);
       nodeCenters[group.id] = node;
     });
-  });
+
+    // Step 2: Position Final column — each card at the average Y of its sources
+    const xOffset1 = PADDING_X + (COLUMN_WIDTH + X_GAP);
+    finals.forEach((group, rowIdx) => {
+      let y: number;
+      if (group.sources && group.sources.length > 0) {
+        const sourceYs = group.sources
+          .map((sid: string) => nodeCenters[sid]?.cy)
+          .filter((v: number | undefined): v is number => v !== undefined);
+        if (sourceYs.length > 0) {
+          const avgCy = sourceYs.reduce((a: number, b: number) => a + b, 0) / sourceYs.length;
+          y = avgCy - NODE_HEIGHT / 2;
+        } else {
+          y = blockStart + rowIdx * (NODE_HEIGHT + Y_GAP);
+        }
+      } else {
+        y = blockStart + rowIdx * (NODE_HEIGHT + Y_GAP);
+      }
+      const node = {
+        group, col: 1, row: rowIdx, x: xOffset1, y,
+        cx: xOffset1 + COLUMN_WIDTH / 2, cy: y + NODE_HEIGHT / 2
+      };
+      renderNodes.push(node);
+      nodeCenters[group.id] = node;
+    });
+
+    // Step 3: Position Champion column — each card at the Y of its source Final
+    const xOffset2 = PADDING_X + 2 * (COLUMN_WIDTH + X_GAP);
+    champions.forEach((group, rowIdx) => {
+      let y: number;
+      if (group.sources && group.sources.length > 0) {
+        const sourceYs = group.sources
+          .map((sid: string) => nodeCenters[sid]?.cy)
+          .filter((v: number | undefined): v is number => v !== undefined);
+        if (sourceYs.length > 0) {
+          const avgCy = sourceYs.reduce((a: number, b: number) => a + b, 0) / sourceYs.length;
+          y = avgCy - NODE_HEIGHT / 2;
+        } else {
+          y = blockStart + rowIdx * (NODE_HEIGHT + Y_GAP);
+        }
+      } else {
+        y = blockStart + rowIdx * (NODE_HEIGHT + Y_GAP);
+      }
+      const node = {
+        group, col: 2, row: rowIdx, x: xOffset2, y,
+        cx: xOffset2 + COLUMN_WIDTH / 2, cy: y + NODE_HEIGHT / 2
+      };
+      renderNodes.push(node);
+      nodeCenters[group.id] = node;
+    });
+
+    // Step 4: Enforce minimum gap — prevent overlapping cards in same column
+    const enforceMinGap = (colIdx: number) => {
+      const colNodes = renderNodes
+        .filter(n => n.col === colIdx)
+        .sort((a, b) => a.y - b.y);
+      for (let i = 1; i < colNodes.length; i++) {
+        const prev = colNodes[i - 1];
+        const curr = colNodes[i];
+        const minY = prev.y + NODE_HEIGHT + Y_GAP;
+        if (curr.y < minY) {
+          const shift = minY - curr.y;
+          curr.y = minY;
+          curr.cy = curr.y + NODE_HEIGHT / 2;
+          // Also update nodeCenters
+          nodeCenters[curr.group.id] = curr;
+        }
+      }
+    };
+    enforceMinGap(1); // Fix Finals overlap
+    enforceMinGap(2); // Fix Champions overlap
+
+    // Recalculate svgHeight based on actual node positions
+    const maxNodeBottom = Math.max(...renderNodes.map(n => n.y + NODE_HEIGHT), svgHeight);
+    const dynamicSvgHeight = maxNodeBottom + minPaddingBottom;
 
   return (
     <div className="space-y-4">
@@ -180,7 +247,7 @@ export function LocalBracketView({ groups, quizzes = [], games = [], competition
         className="overflow-x-auto pb-4 rounded-xl bg-card border shadow-sm w-full"
       >
          {/* Container specifically with exactly the width calculated so it can scroll */}
-         <div className="relative mx-auto" style={{ width: svgWidth, minHeight: svgHeight }}>
+         <div className="relative mx-auto" style={{ width: svgWidth, minHeight: typeof dynamicSvgHeight !== "undefined" ? dynamicSvgHeight : svgHeight }}>
            
            {/* Column Outlines and Headers */}
            {columns.map((col, colIdx) => (
@@ -204,70 +271,72 @@ export function LocalBracketView({ groups, quizzes = [], games = [], competition
            ))}
 
            {/* SVG Lines - merged bracket connectors */}
-           <svg className="absolute inset-0 pointer-events-none" width={svgWidth} height={svgHeight} style={{ zIndex: 0 }}>
+           <svg className="absolute inset-0 pointer-events-none" width={svgWidth} height={typeof dynamicSvgHeight !== "undefined" ? dynamicSvgHeight : svgHeight} style={{ zIndex: 0 }}>
              {(() => {
-               // Group all sources by their target node to draw proper merged bracket lines
-               const targetMap = new Map<string, { target: typeof renderNodes[0]; sourceNodes: (typeof renderNodes[0])[] }>();
-               
-               renderNodes.forEach(node => {
-                 if (node.group.sources && node.group.sources.length > 0) {
-                   const validSources = node.group.sources
-                     .map(sid => nodeCenters[sid])
-                     .filter(Boolean) as (typeof renderNodes[0])[];
-                   if (validSources.length > 0) {
-                     targetMap.set(node.group.id, { target: node, sourceNodes: validSources });
-                   }
-                 }
-               });
+                // Build connections and draw bracket lines
+                const allConnections: Array<{
+                  targetId: string;
+                  target: typeof renderNodes[0];
+                  sourceNodes: (typeof renderNodes[0])[];
+                }> = [];
 
-               return Array.from(targetMap.entries()).map(([targetId, { target, sourceNodes }]) => {
-                 const endX = target.x;
-                 const endY = target.cy;
-                 const startXBase = sourceNodes[0].x + COLUMN_WIDTH;
-                 const midX = startXBase + (endX - startXBase) / 2;
+                renderNodes.forEach(node => {
+                  if (node.group.sources && node.group.sources.length > 0) {
+                    const validSources = node.group.sources
+                      .map((sid: string) => nodeCenters[sid])
+                      .filter(Boolean) as (typeof renderNodes[0])[];
+                    if (validSources.length > 0) {
+                      allConnections.push({
+                        targetId: node.group.id,
+                        target: node,
+                        sourceNodes: validSources,
+                      });
+                    }
+                  }
+                });
 
-                 if (sourceNodes.length === 1) {
-                   // Single source: simple orthogonal line
-                   const sx = sourceNodes[0].x + COLUMN_WIDTH;
-                   const sy = sourceNodes[0].cy;
-                   return (
-                     <path 
-                       key={`line-${targetId}`}
-                       d={`M ${sx} ${sy} L ${midX} ${sy} L ${midX} ${endY} L ${endX} ${endY}`}
-                       stroke="currentColor" strokeWidth="2" fill="none"
-                       className="text-primary/30"
-                       strokeLinecap="round" strokeLinejoin="round"
-                     />
-                   );
-                 } else {
-                   // Multiple sources: merge into single bracket connector
-                   const sourceYs = sourceNodes.map(s => s.cy).sort((a, b) => a - b);
-                   const topY = sourceYs[0];
-                   const bottomY = sourceYs[sourceYs.length - 1];
-                   const mergeY = (topY + bottomY) / 2;
+                return allConnections.map(({ targetId, target, sourceNodes }) => {
+                  const endX = target.x;
+                  const endY = target.cy;
+                  const startXBase = sourceNodes[0].x + COLUMN_WIDTH;
+                  const midX = startXBase + (endX - startXBase) / 2;
 
-                   const parts: string[] = [];
-                   // 1. Horizontal stub from each source to midX
-                   sourceNodes.forEach(s => {
-                     parts.push(`M ${s.x + COLUMN_WIDTH} ${s.cy} L ${midX} ${s.cy}`);
-                   });
-                   // 2. Vertical merge bar connecting only from top source to bottom source
-                   parts.push(`M ${midX} ${topY} L ${midX} ${bottomY}`);
-                   // 3. Horizontal connector from merge center to target
-                   parts.push(`M ${midX} ${mergeY} L ${endX} ${endY}`);
+                  if (sourceNodes.length === 1) {
+                    const sx = sourceNodes[0].x + COLUMN_WIDTH;
+                    const sy = sourceNodes[0].cy;
+                    return (
+                      <path
+                        key={`line-${targetId}`}
+                        d={`M ${sx} ${sy} L ${midX} ${sy} L ${midX} ${endY} L ${endX} ${endY}`}
+                        stroke="currentColor" strokeWidth="2" fill="none"
+                        className="text-primary/30"
+                        strokeLinecap="round" strokeLinejoin="round"
+                      />
+                    );
+                  } else {
+                    const sourceYs = sourceNodes.map(s => s.cy);
+                    const topY = Math.min(...sourceYs);
+                    const bottomY = Math.max(...sourceYs);
 
-                   return (
-                     <path 
-                       key={`line-${targetId}`}
-                       d={parts.join(' ')}
-                       stroke="currentColor" strokeWidth="2" fill="none"
-                       className="text-primary/30"
-                       strokeLinecap="round" strokeLinejoin="round"
-                     />
-                   );
-                 }
-               });
-             })()}
+                    const parts: string[] = [];
+                    sourceNodes.forEach(s => {
+                      parts.push(`M ${s.x + COLUMN_WIDTH} ${s.cy} L ${midX} ${s.cy}`);
+                    });
+                    parts.push(`M ${midX} ${topY} L ${midX} ${bottomY}`);
+                    parts.push(`M ${midX} ${endY} L ${endX} ${endY}`);
+
+                    return (
+                      <path
+                        key={`line-${targetId}`}
+                        d={parts.join(' ')}
+                        stroke="currentColor" strokeWidth="2" fill="none"
+                        className="text-primary/30"
+                        strokeLinecap="round" strokeLinejoin="round"
+                      />
+                    );
+                  }
+                });
+              })()}
            </svg>
 
            {/* HTML Nodes - rendered securely above SVG lines */}
