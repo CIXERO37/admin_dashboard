@@ -11,12 +11,12 @@ deploy_proyek:
     - npm run build
     
     # 1. Kirim file
-    - rsync -az --delete --exclude '.git' --exclude 'node_modules' ./ root@192.168.1.157:/www/wwwroot/Memory-Game/
+    - rsync -az --delete --exclude '.git' --exclude 'node_modules' ./ root@192.168.1.157:/www/wwwroot/admin_dashboard/
     
     # 2. Perbaiki Permission & Restart via sudo -u www
     - ssh -o StrictHostKeyChecking=no root@192.168.1.157 "
-        chown -R www:www /www/wwwroot/Memory-Game && 
-        cd /www/wwwroot/Memory-Game && 
+        chown -R www:www /www/wwwroot/admin_dashboard && 
+        cd /www/wwwroot/admin_dashboard && 
         sudo -u www npm install --production --no-audit && 
         sudo -u www pm2 startOrReload ecosystem.config.js --update-env &&
         echo '✅ Deploy Berhasil via User www!'
