@@ -154,7 +154,7 @@ export function PhaseGroupStage({
       initialMembers = sourceGrps.flatMap(sourceGrp => 
         sourceGrp.members
           .filter((m) => m.isAdvanced)
-          .map((m) => ({ ...m, isAdvanced: false, score: 0, timeSeconds: 0 }))
+          .map((m) => ({ ...m, isAdvanced: false, score: m.score, timeSeconds: m.timeSeconds }))
       );
     }
 
@@ -204,11 +204,23 @@ export function PhaseGroupStage({
     if (!assignDialog || assignSelected.length === 0) return;
     const newMembers: LocalGroupMember[] = assignSelected.map((pId) => {
       const player = finalists.find((f) => f.id === pId);
+      
+      let prevScore = 0;
+      let prevTime = 0;
+      for (let i = groups.length - 1; i >= 0; i--) {
+        const memMatch = groups[i].members.find(m => m.playerId === pId);
+        if (memMatch && memMatch.score > 0) {
+           prevScore = memMatch.score;
+           prevTime = memMatch.timeSeconds;
+           break;
+        }
+      }
+
       return {
         playerId: pId,
         playerName: player?.name || pId,
-        score: 0,
-        timeSeconds: 0,
+        score: prevScore,
+        timeSeconds: prevTime,
         isAdvanced: false,
       };
     });
@@ -653,7 +665,10 @@ export function PhaseGroupStage({
                   ) : (() => {
                     const visibleMembers = [...group.members]
                       .filter(m => m.playerName.toLowerCase().includes(detailSearch.toLowerCase()))
-                      .sort((a, b) => b.score - a.score);
+                      .sort((a, b) => {
+                        if (b.score !== a.score) return b.score - a.score;
+                        return a.timeSeconds - b.timeSeconds;
+                      });
                     
                     const availableToAdvance = visibleMembers.filter(m => !m.isAdvanced);
                     const allSelected = availableToAdvance.length > 0 && availableToAdvance.every(m => groupAdvance.includes(m.playerId));
@@ -884,7 +899,9 @@ export function PhaseGroupStage({
                   availableRaw = finalists.filter((f) => !allAssignedIds.includes(f.id));
                 }
 
-                const availableFiltered = availableRaw.filter(f => f.name.toLowerCase().includes(assignSearch.toLowerCase()));
+                const availableFiltered = availableRaw
+                  .filter(f => f.name.toLowerCase().includes(assignSearch.toLowerCase()))
+                  .sort((a, b) => b.avgScore - a.avgScore);
                 const assignableFiltered = availableFiltered; // Option 2: Allow all assignments
                 const allSelected = assignableFiltered.length > 0 && assignableFiltered.every((f) => assignSelected.includes(f.id));
                 
@@ -925,7 +942,9 @@ export function PhaseGroupStage({
                 availableRaw = finalists.filter((f) => !allAssignedIds.includes(f.id));
               }
 
-              const availableFiltered = availableRaw.filter(f => f.name.toLowerCase().includes(assignSearch.toLowerCase()));
+              const availableFiltered = availableRaw
+                .filter(f => f.name.toLowerCase().includes(assignSearch.toLowerCase()))
+                .sort((a, b) => b.avgScore - a.avgScore);
 
               if (availableFiltered.length === 0) {
                 return <p className="text-sm text-muted-foreground text-center py-4">{t("comp_detail.no_players")}</p>;
@@ -968,7 +987,6 @@ export function PhaseGroupStage({
                               {player.category}
                             </Badge>
                           )}
-                          <span className="text-xs text-muted-foreground whitespace-nowrap font-mono">{player.avgScore.toFixed(1)} <span className="text-[10px]">pts</span></span>
                         </div>
                       </div>
                     );
