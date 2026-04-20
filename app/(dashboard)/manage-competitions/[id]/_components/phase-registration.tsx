@@ -4,8 +4,7 @@ import { useTranslation } from "@/lib/i18n";
 import { DummyPlayer } from "@/types/competition";
 import { Users, Gamepad2, Trophy, Search } from "lucide-react";
 import { useState } from "react";
-import { formatDistanceToNow } from "date-fns";
-import { id as idLocale, enUS } from "date-fns/locale";
+import { TimeAgo } from "@/components/shared/time-ago";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SearchInput } from "@/components/shared/search-input";
 import { Badge } from "@/components/ui/badge";
@@ -67,21 +66,6 @@ export function PhaseRegistration({ players }: PhaseRegistrationProps) {
               </TableRow>
             ) : (
               sorted.map((player, idx) => {
-                const registeredDate = new Date(player.registeredAt);
-                const dateLocale = locale === "id" ? idLocale : enUS;
-
-                const timeAgo = formatDistanceToNow(registeredDate, {
-                  addSuffix: true,
-                  locale: dateLocale,
-                })
-                  .replace(/^about /i, "")
-                  .replace(/^sekitar /i, "");
-
-                const fullDate = registeredDate.toLocaleString(
-                  locale === "id" ? "id-ID" : "en-US",
-                  { dateStyle: "full", timeStyle: "short" }
-                );
-
                 return (
                   <TableRow key={player.id}>
                     <TableCell className="text-center">
@@ -133,12 +117,7 @@ export function PhaseRegistration({ players }: PhaseRegistrationProps) {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <span
-                        title={fullDate}
-                        className="text-xs text-muted-foreground cursor-help decoration-dashed decoration-muted-foreground/50 underline-offset-4 hover:underline"
-                      >
-                        {timeAgo}
-                      </span>
+                      <TimeAgo date={player.registeredAt} className="text-xs text-muted-foreground" />
                     </TableCell>
                   </TableRow>
                 );

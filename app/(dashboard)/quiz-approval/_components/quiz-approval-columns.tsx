@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Check, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { TimeAgo } from "@/components/shared/time-ago";
 
 interface GetQuizApprovalColumnsProps {
   t: (key: string) => string;
@@ -85,7 +86,11 @@ export function getQuizApprovalColumns({
         </span>
       ),
     },
-    { key: "createdAt", label: t("table.created") },
+    {
+      key: "createdAt",
+      label: t("table.created"),
+      render: (value: unknown) => <TimeAgo date={value as string} />,
+    },
     {
       key: "actions",
       label: t("table.actions"),

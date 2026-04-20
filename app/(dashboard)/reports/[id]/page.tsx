@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
+import { TimeAgo } from "@/components/shared/time-ago";
 import {
   Send,
   Calendar,
@@ -242,7 +243,7 @@ export default function ReportDetailPage({ params }: PageProps) {
                             )}
                           >
                             <p className="text-sm">{msg.content}</p>
-                            <p
+                            <div
                               className={cn(
                                 "text-xs mt-1",
                                 msg.sender_type === "admin"
@@ -250,8 +251,8 @@ export default function ReportDetailPage({ params }: PageProps) {
                                   : "text-muted-foreground"
                               )}
                             >
-                              {format(new Date(msg.created_at), "HH:mm")}
-                            </p>
+                              <TimeAgo date={msg.created_at} />
+                            </div>
                           </div>
                           {msg.sender_type === "admin" && (
                             <button
@@ -349,11 +350,11 @@ export default function ReportDetailPage({ params }: PageProps) {
                   <Calendar className="h-3.5 w-3.5" />
                   {t("quiz.created_at")}
                 </p>
-                <p className="font-medium">
+                <div className="font-medium">
                   {report.created_at
-                    ? format(new Date(report.created_at), "dd MMM yyyy, HH:mm")
+                    ? <TimeAgo date={report.created_at} />
                     : "-"}
-                </p>
+                </div>
               </div>
 
               {report.resolved_at && (
@@ -364,12 +365,9 @@ export default function ReportDetailPage({ params }: PageProps) {
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       {t("reports.resolved")}
                     </p>
-                    <p className="font-medium">
-                      {format(
-                        new Date(report.resolved_at),
-                        "dd MMM yyyy, HH:mm"
-                      )}
-                    </p>
+                    <div className="font-medium">
+                      <TimeAgo date={report.resolved_at} />
+                    </div>
                   </div>
                 </>
               )}
