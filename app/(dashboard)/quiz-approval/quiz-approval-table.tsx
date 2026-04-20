@@ -1,7 +1,6 @@
 "use client";
 
 import { FileQuestion, SlidersHorizontal } from "lucide-react";
-import { format } from "date-fns";
 import { DataTable } from "@/components/dashboard/data-table";
 import { useTranslation } from "@/lib/i18n";
 
@@ -71,9 +70,7 @@ export function QuizApprovalTable({
     category: quiz.category ?? "-",
     questions: Array.isArray(quiz.questions) ? quiz.questions.length : 0,
     language: quiz.language ?? "ID",
-    createdAt: quiz.created_at
-      ? format(new Date(quiz.created_at), "d MMM yyyy")
-      : "-",
+    createdAt: quiz.created_at || "-",
     actions: null,
   }));
 

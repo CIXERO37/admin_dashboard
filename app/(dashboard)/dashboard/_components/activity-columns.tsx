@@ -1,7 +1,13 @@
+import { TimeAgo } from "@/components/shared/time-ago";
+
 export const getActivityColumns = (t: (key: string) => string) => [
   { key: "action", label: t("table.actions") },
   { key: "user", label: t("stats.users") },
-  { key: "time", label: t("table.created") },
+  { 
+    key: "time", 
+    label: t("table.created"),
+    render: (value: unknown) => <TimeAgo date={value as string} className="text-xs" />
+  },
   {
     key: "type",
     label: "Type",

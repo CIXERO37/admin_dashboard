@@ -114,13 +114,13 @@ export function useDashboardStats() {
     const activities: RecentActivity[] = []
 
     // Get recent reports
-    reports.slice(0, 3).forEach((report) => {
+      reports.slice(0, 3).forEach((report) => {
       const reporterName = report.reporter?.fullname || report.reporter?.username || "Unknown"
       activities.push({
         id: `report-${report.id}`,
         action: report.title || "Report submitted",
         user: reporterName,
-        time: formatTimeAgo(report.created_at),
+        time: report.created_at || "",
         type: "support",
       })
     })
@@ -134,7 +134,7 @@ export function useDashboardStats() {
           id: `quiz-${quiz.id}`,
           action: `Quiz created: ${quiz.title || "Untitled"}`,
           user: "Creator",
-          time: formatTimeAgo(quiz.created_at),
+          time: quiz.created_at || "",
           type: "content",
         })
       })
@@ -149,7 +149,7 @@ export function useDashboardStats() {
           id: `user-${index}`,
           action: "User active",
           user: (profile.fullname as string) || (profile.username as string) || (profile.email as string) || "Unknown",
-          time: formatTimeAgo(profile.last_active as string | null),
+          time: (profile.last_active as string) || "",
           type: "user",
         })
       })

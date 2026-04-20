@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { format } from "date-fns";
 import { Eye, MessageSquare, MoreVertical, Trash2, User, FileText, ChevronDown } from "lucide-react";
+import { TimeAgo } from "@/components/shared/time-ago";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -178,9 +178,9 @@ export const getReportColumns = (
     key: "date",
     label: t("table.created"),
     render: (value: unknown) => (
-      <span className="text-sm text-muted-foreground">
-        {value ? format(new Date(value as string), "dd MMM yyyy") : "—"}
-      </span>
+      <div className="text-sm text-muted-foreground">
+        {value ? <TimeAgo date={value as string} /> : "—"}
+      </div>
     ),
   },
   {
