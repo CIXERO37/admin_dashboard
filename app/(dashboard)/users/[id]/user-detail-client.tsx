@@ -24,7 +24,7 @@ import {
   Monitor,
   Clock,
 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { TimeAgo } from "@/components/shared/time-ago";
 
 interface Profile {
   fullname?: string | null;
@@ -405,9 +405,7 @@ export function UserDetailClient({
                         </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {formatDistanceToNow(new Date(session.created_at), {
-                          addSuffix: true,
-                        })}
+                        <TimeAgo date={session.created_at} />
                       </p>
                     </div>
                     <div className="text-right shrink-0 ml-3">

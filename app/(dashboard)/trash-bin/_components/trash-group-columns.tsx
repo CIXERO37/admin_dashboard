@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { getAvatarUrl } from "@/lib/utils";
 import { type DeletedGroup } from "@/types/trash-bin";
-import { getDaysUntilPermanentDelete, formatDeletedDate } from "../_hooks/use-trash-table";
+import { getDaysUntilPermanentDelete } from "../_hooks/use-trash-table";
+import { TimeAgo } from "@/components/shared/time-ago";
 
 export const getTrashGroupColumns = (
   t: (key: string) => string,
@@ -75,7 +76,7 @@ export const getTrashGroupColumns = (
     label: t("trash.deleted_at"),
     render: (value: unknown) => (
       <span className="text-sm text-muted-foreground">
-        {formatDeletedDate(value as string, locale)}
+        <TimeAgo date={value as string} />
       </span>
     ),
   },

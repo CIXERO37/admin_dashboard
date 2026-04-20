@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { format } from "date-fns";
+import { TimeAgo } from "@/components/shared/time-ago";
 import {
   CheckCircle,
   XCircle,
@@ -280,11 +280,11 @@ export default function QuizApprovalDetailPage({ params }: PageProps) {
                 <Calendar className="h-4 w-4" />
                 {t("quiz.created_at")}
               </div>
-              <p className="font-medium">
+              <div className="font-medium">
                 {quiz.created_at
-                  ? format(new Date(quiz.created_at), "d MMM yyyy, HH:mm")
+                  ? <TimeAgo date={quiz.created_at} />
                   : "-"}
-              </p>
+              </div>
             </div>
           </div>
         </div>
