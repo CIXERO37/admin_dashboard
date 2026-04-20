@@ -528,6 +528,36 @@ export default function CompetitionDetailPage() {
     }
   };
 
+  const handleTogglePayment = async (playerId: string) => {
+    // Optimistic update
+    const targetPlayer = players.find(p => p.id === playerId);
+    const newStatus = targetPlayer ? !targetPlayer.paid : true;
+    
+    setPlayers((prev: DummyPlayer[]) =>
+      prev.map((p: DummyPlayer) =>
+        p.id === playerId ? { ...p, paid: newStatus } : p
+      )
+    );
+
+    // Save to DB
+    const { error } = await supabase
+      .from("competition_participants")
+      .update({ is_paid: newStatus })
+      .eq("id", playerId);
+      
+    if (error) {
+      toast.error((t("competition.payment_update_failed") || "Failed to update payment status") + ": " + error.message);
+      // Revert optimistic update
+      setPlayers((prev: DummyPlayer[]) =>
+        prev.map((p: DummyPlayer) =>
+          p.id === playerId ? { ...p, paid: !newStatus } : p
+        )
+      );
+    } else {
+      toast.success(newStatus ? (t("competition.payment_marked_paid") || "Marked as Paid") : (t("competition.payment_marked_unpaid") || "Marked as Unpaid"));
+    }
+  };
+
   const handleBatchFinalist = async (playerIds: string[]) => {
     // Optimistic update
     setPlayers((prev: DummyPlayer[]) =>
@@ -832,7 +862,7 @@ export default function CompetitionDetailPage() {
         </TabsContent>
 
         <TabsContent value="payment" className="mt-0 outline-none">
-          <PhasePayment players={players} />
+          <PhasePayment players={players} onTogglePayment={handleTogglePayment} />
         </TabsContent>
 
         <TabsContent value="qualification" className="mt-0 outline-none">
