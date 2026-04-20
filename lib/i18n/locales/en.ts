@@ -805,6 +805,13 @@ export const en: Record<string, string> = {
   "comp_detail.add_confirm_title": "Move to Finalist?",
   "comp_detail.remove_confirm_desc": "Are you sure you want to remove {{name}} from the finalist list?",
   "comp_detail.add_confirm_desc": "Are you sure you want to move {{name}} to the finalist list?",
+  "competition.payment_status_confirm": "Are you sure you want to change the payment status for",
+  "competition.become": "to become",
+  "competition.payment_update_failed": "Failed to update payment status",
+  "competition.payment_marked_paid": "Participant successfully marked as Paid",
+  "competition.payment_marked_unpaid": "Participant successfully marked as Unpaid",
+  "competition.change_payment_status": "Change Payment Status",
+  "action.change_status": "Yes, Change Status",
 
   // Competition phases
   "manage_competitions.phase_registration": "Registration",
