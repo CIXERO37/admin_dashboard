@@ -805,6 +805,13 @@ export const id: Record<string, string> = {
   "comp_detail.add_confirm_title": "Pindahkan ke Finalis?",
   "comp_detail.remove_confirm_desc": "Apakah Anda yakin ingin menghapus {{name}} dari daftar finalis?",
   "comp_detail.add_confirm_desc": "Apakah Anda yakin ingin memindahkan {{name}} ke daftar finalis?",
+  "competition.payment_status_confirm": "Apakah Anda yakin ingin mengubah status pembayaran untuk",
+  "competition.become": "menjadi",
+  "competition.payment_update_failed": "Gagal mengubah status pembayaran",
+  "competition.payment_marked_paid": "Peserta berhasil diubah menjadi Lunas",
+  "competition.payment_marked_unpaid": "Peserta berhasil diubah menjadi Belum Lunas",
+  "competition.change_payment_status": "Ubah Status Pembayaran",
+  "action.change_status": "Ya, Ubah Status",
 
   // Competition phases
   "manage_competitions.phase_registration": "Registrasi",
