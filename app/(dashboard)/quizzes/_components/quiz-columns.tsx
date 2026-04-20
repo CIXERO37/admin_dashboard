@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { TimeAgo } from "@/components/shared/time-ago";
 
 export const visibilityColors: Record<string, string> = {
   Public: "bg-[var(--success)]/20 text-[var(--success)] border-[var(--success)]/30",
@@ -128,7 +129,11 @@ export function getQuizColumns({
         );
       },
     },
-    { key: "createdAt", label: t("table.created") },
+    {
+      key: "createdAt",
+      label: t("table.created"),
+      render: (value: unknown) => <TimeAgo date={value as string} />,
+    },
     {
       key: "status",
       label: t("table.status"),
