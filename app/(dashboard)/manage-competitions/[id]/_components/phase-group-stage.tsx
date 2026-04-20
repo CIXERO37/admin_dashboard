@@ -154,7 +154,15 @@ export function PhaseGroupStage({
       initialMembers = sourceGrps.flatMap(sourceGrp => 
         sourceGrp.members
           .filter((m) => m.isAdvanced)
-          .map((m) => ({ ...m, isAdvanced: false, score: m.score, timeSeconds: m.timeSeconds }))
+          .map((m) => {
+            const isChampion = newGroupStage === "Champion" || newGroupName.trim().toLowerCase().includes("juara");
+            return { 
+              ...m, 
+              isAdvanced: false, 
+              score: isChampion ? m.score : 0, 
+              timeSeconds: isChampion ? m.timeSeconds : 0 
+            };
+          })
       );
     }
 
@@ -207,12 +215,17 @@ export function PhaseGroupStage({
       
       let prevScore = 0;
       let prevTime = 0;
-      for (let i = groups.length - 1; i >= 0; i--) {
-        const memMatch = groups[i].members.find(m => m.playerId === pId);
-        if (memMatch && memMatch.score > 0) {
-           prevScore = memMatch.score;
-           prevTime = memMatch.timeSeconds;
-           break;
+      
+      const isChampion = assignDialog?.stage === "Champion" || assignDialog?.name.toLowerCase().includes("juara");
+      
+      if (isChampion) {
+        for (let i = groups.length - 1; i >= 0; i--) {
+          const memMatch = groups[i].members.find(m => m.playerId === pId);
+          if (memMatch && memMatch.score > 0) {
+             prevScore = memMatch.score;
+             prevTime = memMatch.timeSeconds;
+             break;
+          }
         }
       }
 
@@ -675,7 +688,7 @@ export function PhaseGroupStage({
 
                     return (
                     <div className="border rounded-md overflow-hidden">
-                      <div className={`grid ${group.stage === "Champion" ? "grid-cols-[32px_1fr_110px_80px_80px_40px]" : "grid-cols-[28px_1fr_110px_80px_80px_40px_28px]"} gap-2 px-4 py-2 items-center text-[11px] font-medium text-muted-foreground border-b bg-muted/30`}>
+                      <div className={`grid ${group.stage === "Champion" ? "grid-cols-[32px_1fr_110px_80px_80px_40px_28px]" : "grid-cols-[28px_1fr_110px_80px_80px_40px_28px]"} gap-2 px-4 py-2 items-center text-[11px] font-medium text-muted-foreground border-b bg-muted/30`}>
                         {group.stage === "Champion" ? <span className="text-center">#</span> : (
                           <div className="flex items-center">
                             <Checkbox 
@@ -705,7 +718,7 @@ export function PhaseGroupStage({
                         <span className="text-center">{t("comp_detail.table_avg") || "Score"}</span>
                         <span className="text-center">{t("competition.time") || "Time"}</span>
                         <span />
-                        {group.stage !== "Champion" && <span />}
+                        <span />
                       </div>
                       <div className="max-h-[50vh] overflow-y-auto w-full">
                         {visibleMembers
@@ -714,7 +727,7 @@ export function PhaseGroupStage({
                               
                               return (
                             <div key={member.playerId}
-                              className={`grid ${group.stage === "Champion" ? "grid-cols-[32px_1fr_110px_80px_80px_40px]" : "grid-cols-[28px_1fr_110px_80px_80px_40px_28px]"} gap-2 items-center px-4 py-2.5 text-sm border-b last:border-b-0 transition-colors ${
+                              className={`grid ${group.stage === "Champion" ? "grid-cols-[32px_1fr_110px_80px_80px_40px_28px]" : "grid-cols-[28px_1fr_110px_80px_80px_40px_28px]"} gap-2 items-center px-4 py-2.5 text-sm border-b last:border-b-0 transition-colors ${
                                 member.isAdvanced ? "bg-emerald-500/5" : groupAdvance.includes(member.playerId) ? "bg-primary/5" : ""
                               } ${group.stage !== "Champion" ? "cursor-pointer hover:bg-muted/40" : ""}`}
                               onClick={() => {
@@ -795,7 +808,6 @@ export function PhaseGroupStage({
                                   </span>
                                 )}
                               </div>
-                              {group.stage !== "Champion" && (
                                 <div className="flex justify-center" onClick={(e) => e.stopPropagation()}>
                                   <Button
                                     size="icon"
@@ -814,7 +826,6 @@ export function PhaseGroupStage({
                                     <Trash2 className="h-3 w-3" />
                                   </Button>
                                 </div>
-                              )}
                             </div>
                           );
                         })}
@@ -901,7 +912,23 @@ export function PhaseGroupStage({
 
                 const availableFiltered = availableRaw
                   .filter(f => f.name.toLowerCase().includes(assignSearch.toLowerCase()))
-                  .sort((a, b) => b.avgScore - a.avgScore);
+                  .sort((a, b) => {
+                    const isChampion = assignDialog?.stage === "Champion" || assignDialog?.name.toLowerCase().includes("juara");
+                    if (isChampion) {
+                      const getStats = (pId: string) => {
+                        for (let i = groups.length - 1; i >= 0; i--) {
+                          const m = groups[i].members.find(x => x.playerId === pId);
+                          if (m && m.score > 0) return { s: m.score, t: m.timeSeconds };
+                        }
+                        return { s: 0, t: 0 };
+                      };
+                      const sA = getStats(a.id);
+                      const sB = getStats(b.id);
+                      if (sB.s !== sA.s) return sB.s - sA.s;
+                      return sA.t - sB.t;
+                    }
+                    return b.avgScore - a.avgScore;
+                  });
                 const assignableFiltered = availableFiltered; // Option 2: Allow all assignments
                 const allSelected = assignableFiltered.length > 0 && assignableFiltered.every((f) => assignSelected.includes(f.id));
                 
@@ -944,7 +971,23 @@ export function PhaseGroupStage({
 
               const availableFiltered = availableRaw
                 .filter(f => f.name.toLowerCase().includes(assignSearch.toLowerCase()))
-                .sort((a, b) => b.avgScore - a.avgScore);
+                .sort((a, b) => {
+                  const isChampion = assignDialog?.stage === "Champion" || assignDialog?.name.toLowerCase().includes("juara");
+                  if (isChampion) {
+                    const getStats = (pId: string) => {
+                      for (let i = groups.length - 1; i >= 0; i--) {
+                        const m = groups[i].members.find(x => x.playerId === pId);
+                        if (m && m.score > 0) return { s: m.score, t: m.timeSeconds };
+                      }
+                      return { s: 0, t: 0 };
+                    };
+                    const sA = getStats(a.id);
+                    const sB = getStats(b.id);
+                    if (sB.s !== sA.s) return sB.s - sA.s;
+                    return sA.t - sB.t;
+                  }
+                  return b.avgScore - a.avgScore;
+                });
 
               if (availableFiltered.length === 0) {
                 return <p className="text-sm text-muted-foreground text-center py-4">{t("comp_detail.no_players")}</p>;
