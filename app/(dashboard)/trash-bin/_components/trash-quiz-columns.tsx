@@ -8,7 +8,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { type DeletedQuiz } from "@/types/trash-bin";
-import { getDaysUntilPermanentDelete, formatDeletedDate } from "../_hooks/use-trash-table";
+import { getDaysUntilPermanentDelete } from "../_hooks/use-trash-table";
+import { TimeAgo } from "@/components/shared/time-ago";
 
 export const getTrashQuizColumns = (
   t: (key: string) => string,
@@ -58,7 +59,7 @@ export const getTrashQuizColumns = (
     label: t("trash.deleted_at"),
     render: (value: unknown) => (
       <span className="text-sm text-muted-foreground">
-        {formatDeletedDate(value as string, locale)}
+        <TimeAgo date={value as string} />
       </span>
     ),
   },

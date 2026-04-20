@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { format, formatDistanceToNow } from "date-fns";
-import { id as idLocale, enUS } from "date-fns/locale";
 import { Clock, Users, FileQuestion, Globe } from "lucide-react";
+import { TimeAgo } from "@/components/shared/time-ago";
 
 import { Badge } from "@/components/ui/badge";
 import { type GameSession } from "@/types/game-session";
@@ -180,35 +179,7 @@ export const getGameSessionColumns = (
       render: (value: unknown) => {
         const dateStr = value as string;
         if (!dateStr) return "-";
-        const date = new Date(dateStr);
-        const dateLocale = locale === "id" ? idLocale : enUS;
-
-        try {
-          const timeAgo = formatDistanceToNow(date, {
-            addSuffix: true,
-            locale: dateLocale,
-          })
-            .replace(/^about /i, "")
-            .replace(/^sekitar /i, "");
-
-          const dateFormatStr =
-            locale === "id"
-              ? "EEEE d MMMM yyyy 'jam' HH.mm"
-              : "EEEE, d MMM yyyy 'at' HH:mm";
-
-          const fullDate = format(date, dateFormatStr, { locale: dateLocale });
-
-          return (
-            <span
-              title={fullDate}
-              className="cursor-help decoration-dashed decoration-muted-foreground/50 underline-offset-4 hover:underline"
-            >
-              {timeAgo}
-            </span>
-          );
-        } catch (e) {
-          return <span>{dateStr}</span>;
-        }
+        return <TimeAgo date={dateStr} />;
       },
     },
   ];
