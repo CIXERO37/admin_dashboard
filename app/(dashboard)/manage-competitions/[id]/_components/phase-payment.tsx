@@ -11,13 +11,17 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 
+import { ConfirmActionDialog } from "@/components/shared/confirm-action-dialog";
+
 interface PhasePaymentProps {
   players: DummyPlayer[];
+  onTogglePayment: (playerId: string) => void;
 }
 
-export function PhasePayment({ players }: PhasePaymentProps) {
+export function PhasePayment({ players, onTogglePayment }: PhasePaymentProps) {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
+  const [paymentToggleDialog, setPaymentToggleDialog] = useState<DummyPlayer | null>(null);
 
   const paidPlayers = players.filter((p) => p.paid);
   const unpaidPlayers = players.filter((p) => !p.paid);
@@ -112,16 +116,21 @@ export function PhasePayment({ players }: PhasePaymentProps) {
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
-                    {player.paid ? (
-                      <Badge variant="outline" className="text-[11px] bg-emerald-500/10 text-emerald-600 border-emerald-300">
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                        {t("competition.paid_label")}
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-[11px] bg-red-500/10 text-red-500 border-red-300">
-                        {t("competition.unpaid_label")}
-                      </Badge>
-                    )}
+                    <button 
+                      onClick={() => setPaymentToggleDialog(player)}
+                      className="cursor-pointer hover:opacity-80 transition-opacity bg-transparent border-none p-0 outline-none"
+                    >
+                      {player.paid ? (
+                        <Badge variant="outline" className="text-[11px] bg-emerald-500/10 text-emerald-600 border-emerald-300">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          {t("competition.paid_label") || "Paid"}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-[11px] bg-red-500/10 text-red-500 border-red-300">
+                          {t("competition.unpaid_label") || "Unpaid"}
+                        </Badge>
+                      )}
+                    </button>
                   </TableCell>
                 </TableRow>
               ))
@@ -129,6 +138,21 @@ export function PhasePayment({ players }: PhasePaymentProps) {
           </TableBody>
         </Table>
       </div>
+
+      <ConfirmActionDialog
+        open={!!paymentToggleDialog}
+        onOpenChange={(open) => !open && setPaymentToggleDialog(null)}
+        title={t("competition.change_payment_status") || "Ubah Status Pembayaran"}
+        description={`${t("competition.payment_status_confirm") || "Apakah Anda yakin ingin mengubah status pembayaran untuk"} ${paymentToggleDialog?.name} ${t("competition.become") || "menjadi"} ${!paymentToggleDialog?.paid ? (t("competition.paid_label") || "Lunas") : (t("competition.unpaid_label") || "Belum Lunas")}?`}
+        onConfirm={() => {
+           if (paymentToggleDialog) {
+             onTogglePayment(paymentToggleDialog.id);
+             setPaymentToggleDialog(null);
+           }
+        }}
+        confirmText={t("action.change") || "Ubah"}
+        cancelText={t("action.cancel") || "Batal"}
+      />
     </div>
   );
 }
