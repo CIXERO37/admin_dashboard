@@ -35,9 +35,11 @@ export async function middleware(request: NextRequest) {
 
   const isLoginPage = request.nextUrl.pathname === "/login"
   const isWebhook = request.nextUrl.pathname.startsWith("/api/githubWebhook")
+  const isPaymentWebhook = request.nextUrl.pathname.startsWith("/api/payment/webhook") 
+  const isCreateInvoice = request.nextUrl.pathname.startsWith("/api/payment/create-invoice")
 
   // If not logged in and not on login page (and not webhook), redirect to login
-  if (!user && !isLoginPage && !isWebhook) {
+  if (!user && !isLoginPage && !isWebhook && !isPaymentWebhook && !isCreateInvoice) {
     const url = request.nextUrl.clone()
     url.pathname = "/login"
     return NextResponse.redirect(url)
@@ -55,6 +57,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|api/githubWebhook|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|api/githubWebhook|api/payment/webhook|api/payment/create-invoice|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 }
