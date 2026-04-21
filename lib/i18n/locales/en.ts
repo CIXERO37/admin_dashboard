@@ -999,4 +999,21 @@ export const en: Record<string, string> = {
   "competition.assign_game": "Assign Game",
   "competition.search_game": "Search game...",
   "competition.no_games_found": "No games found.",
+
+  // Manage Games
+  "manage_games.title": "Manage Games",
+  "manage_games.search_placeholder": "Search by title...",
+  "manage_games.table_cover": "Cover",
+  "manage_games.table_title": "Title",
+  "manage_games.table_application": "Application",
+  "manage_games.table_genre": "Genre",
+  "manage_games.table_played": "Played",
+  "manage_games.table_favorite": "Favorite",
+  "manage_games.favorite": "Favorite",
+  "manage_games.image_preview": "Image Preview",
+  "manage_games.delete_confirm_title": "Delete Game",
+  "manage_games.delete_confirm_desc": "This action cannot be undone. Are you sure you want to delete {{name}}?",
+  "manage_games.delete_confirm_instruction": "Please type Delete Game to confirm.",
+  "manage_games.delete_phrase": "Delete Game",
+  "manage_games.no_found": "No games found.",
 };
