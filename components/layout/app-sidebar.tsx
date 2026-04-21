@@ -86,6 +86,11 @@ const navigation: NavItem[] = [
         icon: Dices,
       },
       {
+        title: "manage_games.title",
+        href: "/manage-games",
+        icon: ClipboardList,
+      },
+      {
         title: "nav.game_sessions",
         href: "/game-sessions",
         icon: History,

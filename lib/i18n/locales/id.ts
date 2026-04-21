@@ -997,4 +997,21 @@ export const id: Record<string, string> = {
   "competition.assign_game": "Tugaskan Game",
   "competition.search_game": "Cari game...",
   "competition.no_games_found": "Game tidak ditemukan.",
+
+  // Manage Games
+  "manage_games.title": "Kelola Game",
+  "manage_games.search_placeholder": "Cari berdasarkan judul...",
+  "manage_games.table_cover": "Cover",
+  "manage_games.table_title": "Judul",
+  "manage_games.table_application": "Aplikasi",
+  "manage_games.table_genre": "Genre",
+  "manage_games.table_played": "Dimainkan",
+  "manage_games.table_favorite": "Favorit",
+  "manage_games.favorite": "Favorit",
+  "manage_games.image_preview": "Pratinjau Gambar",
+  "manage_games.delete_confirm_title": "Hapus Game",
+  "manage_games.delete_confirm_desc": "Tindakan ini tidak dapat dibatalkan. Apakah Anda yakin ingin menghapus {{name}}?",
+  "manage_games.delete_confirm_instruction": "Ketik Hapus Game untuk mengonfirmasi.",
+  "manage_games.delete_phrase": "Hapus Game",
+  "manage_games.no_found": "Game tidak ditemukan.",
 };
