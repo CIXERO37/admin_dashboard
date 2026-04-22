@@ -52,7 +52,7 @@ export const getManageGameColumns = (
     key: "application",
     label: t("manage_games.table_application") || "Application",
     render: (value: unknown) => (
-      <Badge variant="outline" className="font-mono text-xs">
+      <Badge variant="outline" className="font-mono text-xs capitalize">
         {(value as string) || "—"}
       </Badge>
     ),
@@ -62,7 +62,7 @@ export const getManageGameColumns = (
     label: t("manage_games.table_genre") || "Genre",
     render: (value: unknown) => {
       const genre = value as string;
-      return genre ? <Badge variant="secondary">{genre}</Badge> : "—";
+      return genre ? <Badge variant="secondary" className="capitalize">{genre}</Badge> : "—";
     },
   },
   {

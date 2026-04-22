@@ -1,10 +1,9 @@
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { MasterGame, MasterGameInput } from "@/types/master-game";
 
-const supabase = getSupabaseBrowserClient();
-
 export const masterGamesService = {
   async getGames(): Promise<MasterGame[]> {
+    const supabase = getSupabaseBrowserClient();
     const { data, error } = await supabase
       .from("master_games")
       .select("*")
@@ -15,6 +14,7 @@ export const masterGamesService = {
   },
 
   async getGameById(id: string): Promise<MasterGame> {
+    const supabase = getSupabaseBrowserClient();
     const { data, error } = await supabase
       .from("master_games")
       .select("*")
@@ -26,6 +26,7 @@ export const masterGamesService = {
   },
 
   async createGame(input: MasterGameInput): Promise<MasterGame> {
+    const supabase = getSupabaseBrowserClient();
     const { data, error } = await supabase
       .from("master_games")
       .insert(input)
@@ -37,6 +38,7 @@ export const masterGamesService = {
   },
 
   async updateGame(id: string, input: Partial<MasterGameInput>): Promise<MasterGame> {
+    const supabase = getSupabaseBrowserClient();
     const { data, error } = await supabase
       .from("master_games")
       .update({ ...input, updated_at: new Date().toISOString() })
@@ -49,6 +51,7 @@ export const masterGamesService = {
   },
 
   async deleteGame(id: string): Promise<void> {
+    const supabase = getSupabaseBrowserClient();
     const { error } = await supabase.from("master_games").delete().eq("id", id);
     if (error) throw error;
   },
