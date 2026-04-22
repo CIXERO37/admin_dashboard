@@ -6,6 +6,7 @@ import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTable } from "@/components/dashboard/data-table";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { useManageGamesTable } from "./_hooks/use-manage-games-table";
 import { getManageGameColumns } from "./_components/manage-games-columns";
@@ -76,9 +77,7 @@ export function ManageGamesClient() {
 
       {/* Table */}
       {isLoading ? (
-        <div className="rounded-xl border border-border bg-card overflow-hidden p-12 text-center text-muted-foreground animate-pulse">
-          {t("msg.loading") || "Loading..."}
-        </div>
+        <Skeleton className="h-[600px] w-full rounded-xl" />
       ) : (
         <DataTable
           columns={gameColumns}
