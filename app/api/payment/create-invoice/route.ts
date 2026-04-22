@@ -32,8 +32,8 @@ export async function POST(req: NextRequest) {
           invoiceCreated: ['email'],
           invoicePaid: ['email'],
         },
-        successRedirectUrl: `${process.env.NEXT_PUBLIC_ADMIN_URL}/payment/success`,
-        failureRedirectUrl: `${process.env.NEXT_PUBLIC_ADMIN_URL}/payment/failed`,
+        successRedirectUrl: `${process.env.NEXT_PUBLIC_LANDING_URL}/payment/success`,
+        failureRedirectUrl: `${process.env.NEXT_PUBLIC_LANDING_URL}/payment/failed`,
       }
     });
 
