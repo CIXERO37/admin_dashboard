@@ -6,6 +6,7 @@ import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTable } from "@/components/dashboard/data-table";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { useCompetitionsTable } from "./_hooks/use-competitions-table";
 import { getCompetitionColumns } from "./_components/competition-columns";
@@ -76,9 +77,7 @@ export function ManageCompetitionsClient() {
 
       {/* Table */}
       {isLoading ? (
-        <div className="rounded-xl border border-border bg-card overflow-hidden p-12 text-center text-muted-foreground animate-pulse">
-          Loading competitions...
-        </div>
+        <Skeleton className="h-[600px] w-full rounded-xl" />
       ) : (
         <DataTable
           columns={compColumns}
