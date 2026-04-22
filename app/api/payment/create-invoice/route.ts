@@ -3,17 +3,42 @@
 import { Invoice } from '@/lib/xendit';
 import { NextRequest, NextResponse } from 'next/server';
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://gameforsmart.com",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-};
+// === Production-only CORS (untuk deploy, uncomment ini & comment blok bawah) ===
+// const corsHeaders = {
+//   "Access-Control-Allow-Origin": "https://gameforsmart.com",
+//   "Access-Control-Allow-Methods": "POST, OPTIONS",
+//   "Access-Control-Allow-Headers": "Content-Type",
+// };
 
-export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders });
+// === Local testing: dynamic CORS ===
+const allowedOrigins = [
+  "https://gameforsmart.com",
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "http://localhost:5173",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:3001",
+  "http://127.0.0.1:5173",
+];
+
+function getCorsHeaders(origin?: string | null) {
+  const resolvedOrigin = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+  return {
+    "Access-Control-Allow-Origin": resolvedOrigin,
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  };
+}
+
+export async function OPTIONS(req: NextRequest) {
+  const origin = req.headers.get("origin");
+  return NextResponse.json({}, { headers: getCorsHeaders(origin) });
 }
 
 export async function POST(req: NextRequest) {
+  const origin = req.headers.get("origin");
+  const corsHeaders = getCorsHeaders(origin);
+
   try {
     const { pesertaId, nama, email, amount } = await req.json();
 
