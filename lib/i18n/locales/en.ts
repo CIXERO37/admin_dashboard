@@ -14,6 +14,7 @@ export const en: Record<string, string> = {
   "nav.settings": "Settings",
   "nav.quizzes": "Quizzes",
   "nav.reports": "Reports",
+  "manage_blog.title": "Manage Blog",
   "nav.quiz_approval": "Quiz Approval",
   "nav.groups": "Groups",
   "nav.address": "Address",
