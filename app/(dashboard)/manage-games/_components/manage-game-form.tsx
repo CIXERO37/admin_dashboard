@@ -312,7 +312,7 @@ export function ManageGameForm({ initialData, gameId }: { initialData?: any; gam
           <div className="rounded-xl border bg-card p-6 space-y-5">
             <div className="flex items-center justify-between border-b pb-2">
               <h2 className="font-semibold text-lg">{t("manage_games.section_how_to_play") || "How to Play"}</h2>
-              <Button size="sm" variant="outline" onClick={() => setHowToPlay([...howToPlay, { step: "", description: "" }])}>
+              <Button size="sm" variant="outline" onClick={() => setHowToPlay([...howToPlay, { step: "", title: "", description: "" }])}>
                 <Plus className="h-4 w-4 mr-2" /> Add Step
               </Button>
             </div>
@@ -324,13 +324,23 @@ export function ManageGameForm({ initialData, gameId }: { initialData?: any; gam
                 howToPlay.map((item, idx) => (
                   <div key={idx} className="flex gap-4 items-start p-4 border rounded-lg bg-muted/20">
                     <div className="grid gap-3 flex-1">
-                      <div className="grid gap-2">
-                        <Label>Step Title / Number</Label>
-                        <Input value={item.step || ""} onChange={(e) => {
-                          const newArr = [...howToPlay];
-                          newArr[idx].step = e.target.value;
-                          setHowToPlay(newArr);
-                        }} />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label>Step Number</Label>
+                          <Input value={item.step || ""} onChange={(e) => {
+                            const newArr = [...howToPlay];
+                            newArr[idx].step = e.target.value;
+                            setHowToPlay(newArr);
+                          }} placeholder="e.g. 1" />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label>Title</Label>
+                          <Input value={item.title || ""} onChange={(e) => {
+                            const newArr = [...howToPlay];
+                            newArr[idx].title = e.target.value;
+                            setHowToPlay(newArr);
+                          }} placeholder="e.g. Buat ruang atau gabung" />
+                        </div>
                       </div>
                       <div className="grid gap-2">
                         <Label>Description</Label>
