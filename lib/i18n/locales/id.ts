@@ -14,6 +14,7 @@ export const id: Record<string, string> = {
   "nav.settings": "Pengaturan",
   "nav.quizzes": "Kuis",
   "nav.reports": "Laporan",
+  "manage_blog.title": "Kelola Blog",
   "nav.quiz_approval": "Persetujuan Kuis",
   "nav.groups": "Grup",
   "nav.address": "Alamat",

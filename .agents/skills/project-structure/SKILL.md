@@ -19,13 +19,15 @@ Follow this structure to ensure the project remains "Clean, Modular, and Easy to
 └── styles/               # Global CSS and Tailwind theme configs
 ```
 
-## 2. The `app/` Directory (App Router)
-Use **Colocation**. If a component or hook is ONLY used in one route, put it inside an `_components` or `_hooks` folder within that route.
+## 2. The `app/` Directory (App Router) & Colocation
+Use **Colocation** extensively. Keep route-specific components, hooks, and server actions closely coupled to the route where they belong.
 
 ```txt
-app/(dashboard)/receptionist/
-├── page.tsx              # Main Page
-├── _components/          # Private components (e.g., QRScanner)
+app/(dashboard)/users/
+├── page.tsx              # Main Page (Server/Client Component)
+├── actions.ts            # Next.js Server Actions specific to this route
+├── _components/          # Private UI components (e.g., user-table.tsx)
+├── _hooks/               # Private hooks (e.g., use-users-table.ts)
 └── [id]/                 # Nested Route
     └── page.tsx
 ```
@@ -33,7 +35,7 @@ app/(dashboard)/receptionist/
 ## 3. The `lib/` Directory (The Logic Hub)
 Avoid putting business logic in the `app/` directory.
 
-- **`lib/services/`**: Centralized data fetching (Supabase queries).
+- **`lib/services/`**: Centralized, reusable data fetching services. If logic is only for ONE route, prefer putting it in an `actions.ts` inside that route folder instead of here.
 - **`lib/utils.ts`**: Helper functions (date formatting, currency, etc.).
 - **`lib/supabase/`**: Supabase client configurations (browser/server).
 - **`lib/i18n/`**: Localization setup.
