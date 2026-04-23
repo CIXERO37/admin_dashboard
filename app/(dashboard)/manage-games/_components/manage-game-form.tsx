@@ -10,8 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Upload, X, ChevronRight, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MasterGameInput } from "@/types/master-game";
 
 export function ManageGameForm({ initialData, gameId }: { initialData?: any; gameId?: string }) {
@@ -30,6 +32,7 @@ export function ManageGameForm({ initialData, gameId }: { initialData?: any; gam
   const [formVideoUrl, setFormVideoUrl] = useState(initialData?.video_url || "");
   const [formDesc, setFormDesc] = useState(initialData?.description || "");
   const [isFavorite, setIsFavorite] = useState(initialData?.is_favorite || false);
+  const [status, setStatus] = useState(initialData?.status || "DRAFT");
 
   // JSONB Arrays
   const [features, setFeatures] = useState<any[]>(initialData?.features || []);
@@ -160,6 +163,7 @@ export function ManageGameForm({ initialData, gameId }: { initialData?: any; gam
         hashtags: hashtagsArray.length > 0 ? hashtagsArray : null,
         screenshots: finalScreenshots.length > 0 ? finalScreenshots : null,
         is_favorite: isFavorite,
+        status: status,
       };
 
       if (gameId) {
@@ -423,7 +427,33 @@ export function ManageGameForm({ initialData, gameId }: { initialData?: any; gam
         </div>
 
         {/* Right Column: Media & Toggles */}
-        <div className="space-y-6">
+        <div className="space-y-6 xl:sticky xl:top-24 xl:max-h-[calc(100vh-120px)] xl:overflow-y-auto xl:pr-2 xl:pb-4 scrollbar-thin">
+          <div className="rounded-xl border bg-card p-6 space-y-5">
+            <h2 className="font-semibold text-lg border-b pb-2">{t("manage_games.section_publishing") || "Publishing"}</h2>
+            <div className="grid gap-2">
+              <Label>{t("manage_games.form_status") || "Status"}</Label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="PUBLISHED">{t("manage_games.status_published") || "Published"}</SelectItem>
+                  <SelectItem value="DRAFT">{t("manage_games.status_draft") || "Draft"}</SelectItem>
+                  <SelectItem value="COMING_SOON">{t("manage_games.status_coming_soon") || "Coming Soon"}</SelectItem>
+                  <SelectItem value="MAINTENANCE">{t("manage_games.status_maintenance") || "Maintenance"}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex items-center justify-between mt-4">
+              <div className="space-y-0.5">
+                <Label>{t("manage_games.table_favorite") || "Favorite"}</Label>
+                <p className="text-xs text-muted-foreground">Tandai game ini sebagai favorit (Pilihan Editor).</p>
+              </div>
+              <Switch checked={isFavorite} onCheckedChange={setIsFavorite} />
+            </div>
+          </div>
+
           <div className="rounded-xl border bg-card p-6 space-y-5">
             <h2 className="font-semibold text-lg border-b pb-2">{t("manage_games.section_media") || "Media"}</h2>
             

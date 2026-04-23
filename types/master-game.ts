@@ -19,6 +19,7 @@ export interface MasterGame {
   hashtags: string[] | null;
   screenshots: string[] | null;
   is_favorite: boolean;
+  status: string;
   played_count: number;
   created_at: string;
   updated_at: string;
