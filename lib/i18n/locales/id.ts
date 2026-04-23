@@ -1046,4 +1046,8 @@ export const id: Record<string, string> = {
   "manage_games.form_hashtags": "Hashtag Pencarian",
   "manage_games.form_hashtags_placeholder": "misal. #space, #shooter, #3d",
   "manage_games.section_features": "Fitur Utama Game",
+  "manage_games.unsaved_changes": "Perubahan belum disimpan",
+  "manage_games.unsaved_dialog_title": "Perubahan Belum Disimpan",
+  "manage_games.unsaved_dialog_desc": "Anda memiliki perubahan yang belum disimpan. Apakah Anda yakin ingin meninggalkan halaman ini? Perubahan Anda akan hilang.",
+  "manage_games.leave_page": "Tinggalkan Halaman",
 };
