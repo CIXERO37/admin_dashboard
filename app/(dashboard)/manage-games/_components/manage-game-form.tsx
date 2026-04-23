@@ -228,6 +228,34 @@ export function ManageGameForm({ initialData, gameId }: { initialData?: any; gam
       if (gameId) {
         const { error } = await supabase.from("master_games").update(gameData).eq("id", gameId);
         if (error) throw error;
+
+        // Reset snapshot to current values so isDirty becomes false
+        initialSnapshot.current = {
+          title: formTitle,
+          application: formApp,
+          genre: formGenre,
+          type: formType,
+          platform: formPlatform,
+          categories: categoriesStr,
+          hashtags: hashtagsStr,
+          play_url: formPlayUrl,
+          video_url: formVideoUrl,
+          description: formDesc,
+          is_favorite: isFavorite,
+          status: status,
+          features: JSON.stringify(features),
+          how_to_play: JSON.stringify(howToPlay),
+          characters: JSON.stringify(characters),
+          characters_title: charactersTitle,
+          screenshots: JSON.stringify(finalScreenshots),
+        };
+        // Clear file states (already uploaded)
+        setCoverFile(null);
+        setLogoFile(null);
+        setScreenshotFiles([]);
+        setScreenshotPreviews([]);
+        setExistingScreenshots(finalScreenshots);
+
         toast.success(t("manage_games.edit_success") || "Game updated successfully!");
         router.push(`/manage-games/${gameId}`);
       } else {
