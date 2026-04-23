@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useNavigationGuard } from "@/contexts/navigation-guard";
 import { format } from "date-fns";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -60,6 +61,12 @@ export default function CompetitionDetailPage() {
   const savedGroupsSnapshot = useRef<string>("");
   const [refreshKey, setRefreshKey] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const { setDirty } = useNavigationGuard();
+
+  // Sync group dirty state with global navigation guard
+  useEffect(() => {
+    setDirty(isGroupsDirty && !isSavingGroups);
+  }, [isGroupsDirty, isSavingGroups, setDirty]);
 
   // Wizard phase state
   const [activePhase, setActivePhase] = useState<CompetitionPhase>("registration");

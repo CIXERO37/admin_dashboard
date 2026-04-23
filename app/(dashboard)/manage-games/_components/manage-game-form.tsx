@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/lib/i18n";
 import { toast } from "sonner";
@@ -11,15 +11,17 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Upload, X, ChevronRight, Plus, Trash2 } from "lucide-react";
+import { Upload, X, ChevronRight, Plus, Trash2, Save } from "lucide-react";
 import Link from "next/link";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MasterGameInput } from "@/types/master-game";
+import { useNavigationGuard } from "@/contexts/navigation-guard";
 
 export function ManageGameForm({ initialData, gameId }: { initialData?: any; gameId?: string }) {
   const { t } = useTranslation();
   const router = useRouter();
   const supabase = getSupabaseBrowserClient();
+  const { setDirty } = useNavigationGuard();
 
   const [formTitle, setFormTitle] = useState(initialData?.title || "");
   const [formApp, setFormApp] = useState(initialData?.application || "");
@@ -52,6 +54,63 @@ export function ManageGameForm({ initialData, gameId }: { initialData?: any; gam
   const [screenshotPreviews, setScreenshotPreviews] = useState<string[]>([]);
 
   const [isSaving, setIsSaving] = useState(false);
+
+  // --- Dirty Tracking ---
+  const initialSnapshot = useRef({
+    title: initialData?.title || "",
+    application: initialData?.application || "",
+    genre: initialData?.genre || "",
+    type: initialData?.type || "",
+    platform: initialData?.platform || "",
+    categories: initialData?.categories ? initialData.categories.join(", ") : "",
+    hashtags: initialData?.hashtags ? initialData.hashtags.join(", ") : "",
+    play_url: initialData?.play_url || "",
+    video_url: initialData?.video_url || "",
+    description: initialData?.description || "",
+    is_favorite: initialData?.is_favorite || false,
+    status: initialData?.status || "DRAFT",
+    features: JSON.stringify(initialData?.features || []),
+    how_to_play: JSON.stringify(initialData?.how_to_play || []),
+    characters: JSON.stringify(initialData?.characters || []),
+    characters_title: initialData?.characters_title || "",
+    screenshots: JSON.stringify(initialData?.screenshots || []),
+  });
+
+  const isDirty = useMemo(() => {
+    const snap = initialSnapshot.current;
+    return (
+      formTitle !== snap.title ||
+      formApp !== snap.application ||
+      formGenre !== snap.genre ||
+      formType !== snap.type ||
+      formPlatform !== snap.platform ||
+      categoriesStr !== snap.categories ||
+      hashtagsStr !== snap.hashtags ||
+      formPlayUrl !== snap.play_url ||
+      formVideoUrl !== snap.video_url ||
+      formDesc !== snap.description ||
+      isFavorite !== snap.is_favorite ||
+      status !== snap.status ||
+      JSON.stringify(features) !== snap.features ||
+      JSON.stringify(howToPlay) !== snap.how_to_play ||
+      JSON.stringify(characters) !== snap.characters ||
+      charactersTitle !== snap.characters_title ||
+      JSON.stringify(existingScreenshots) !== snap.screenshots ||
+      coverFile !== null ||
+      logoFile !== null ||
+      screenshotFiles.length > 0
+    );
+  }, [
+    formTitle, formApp, formGenre, formType, formPlatform,
+    categoriesStr, hashtagsStr, formPlayUrl, formVideoUrl, formDesc,
+    isFavorite, status, features, howToPlay, characters, charactersTitle,
+    existingScreenshots, coverFile, logoFile, screenshotFiles,
+  ]);
+
+  // Sync dirty state with global navigation guard
+  useEffect(() => {
+    setDirty(isDirty && !isSaving);
+  }, [isDirty, isSaving, setDirty]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'cover' | 'logo') => {
     const file = e.target.files?.[0];
@@ -192,7 +251,7 @@ export function ManageGameForm({ initialData, gameId }: { initialData?: any; gam
   return (
     <div className="space-y-6">
       {/* Breadcrumb Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between sticky -top-6 z-50 bg-background/95 backdrop-blur-sm py-4 -mx-6 px-6 border-b mb-6 shadow-sm">
         <div className="space-y-1">
           <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <Link href="/manage-games" className="hover:text-foreground transition-colors cursor-pointer">
@@ -203,7 +262,24 @@ export function ManageGameForm({ initialData, gameId }: { initialData?: any; gam
           </nav>
           <h1 className="text-2xl font-bold tracking-tight">{gameId ? t("manage_games.edit_title") || "Edit Game" : t("manage_games.add_title") || "Add Game"}</h1>
         </div>
-        <Button onClick={handleSave} disabled={isSaving} className="cursor-pointer">{gameId ? t("action.save") || "Save" : t("action.add") || "Add"}</Button>
+        <div className="flex items-center gap-2 shrink-0">
+          {isDirty && !isSaving && (
+            <span className="text-xs text-amber-500 dark:text-amber-400 animate-pulse font-medium hidden sm:inline">
+              ● {t("manage_games.unsaved_changes") || "Unsaved changes"}
+            </span>
+          )}
+          <Button onClick={handleSave} disabled={isSaving} className={`gap-1.5 cursor-pointer transition-all relative ${isDirty && !isSaving ? 'ring-2 ring-amber-500/50 ring-offset-1 ring-offset-background' : ''}`}>
+            {isSaving ? (
+              <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            {gameId ? t("action.save") || "Save" : t("action.add") || "Add"}
+            {isDirty && !isSaving && (
+              <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-amber-500 animate-pulse" />
+            )}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">

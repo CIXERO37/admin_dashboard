@@ -1048,4 +1048,8 @@ export const en: Record<string, string> = {
   "manage_games.form_hashtags": "Search Hashtags",
   "manage_games.form_hashtags_placeholder": "e.g. #space, #shooter, #3d",
   "manage_games.section_features": "Game Features",
+  "manage_games.unsaved_changes": "Unsaved changes",
+  "manage_games.unsaved_dialog_title": "Unsaved Changes",
+  "manage_games.unsaved_dialog_desc": "You have unsaved changes. Are you sure you want to leave this page? Your changes will be lost.",
+  "manage_games.leave_page": "Leave Page",
 };
