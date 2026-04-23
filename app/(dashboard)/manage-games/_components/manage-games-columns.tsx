@@ -66,6 +66,24 @@ export const getManageGameColumns = (
     },
   },
   {
+    key: "status",
+    label: t("manage_games.table_status") || "Status",
+    render: (value: unknown) => {
+      const status = (value as string) || "DRAFT";
+      switch (status) {
+        case "PUBLISHED":
+          return <Badge variant="default" className="bg-green-500 hover:bg-green-600 border-0">{t("manage_games.status_published") || "Published"}</Badge>;
+        case "COMING_SOON":
+          return <Badge variant="secondary" className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-0">{t("manage_games.status_coming_soon") || "Coming Soon"}</Badge>;
+        case "MAINTENANCE":
+          return <Badge variant="destructive">{t("manage_games.status_maintenance") || "Maintenance"}</Badge>;
+        case "DRAFT":
+        default:
+          return <Badge variant="outline" className="text-muted-foreground">{t("manage_games.status_draft") || "Draft"}</Badge>;
+      }
+    },
+  },
+  {
     key: "played_count",
     label: t("manage_games.table_played") || "Played",
     render: (value: unknown) => (
