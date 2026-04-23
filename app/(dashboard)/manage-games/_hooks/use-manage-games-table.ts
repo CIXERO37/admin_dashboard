@@ -68,6 +68,7 @@ export function useManageGamesTable() {
       title: game.title,
       application: game.application,
       genre: game.genre,
+      status: game.status,
       played_count: game.played_count,
       is_favorite: game.is_favorite,
     }));
