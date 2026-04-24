@@ -84,8 +84,8 @@ const gfsIntegration: GameIntegration = {
   }
 };
 
-const zigmaSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL_ZIGMA;
-const zigmaSupabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY_ZIGMA;
+const zigmaSupabaseUrl = process.env.NEXT_PUBLIC_B_SUPABASE_URL;
+const zigmaSupabaseKey = process.env.NEXT_PUBLIC_B_SUPABASE_ANON_KEY;
 
 export const zigmaSupabase = 
   zigmaSupabaseUrl && zigmaSupabaseKey 
@@ -124,13 +124,9 @@ const zigmaIntegration: GameIntegration = {
   },
 
   getRedirectUrl: (context) => {
-    // Return standard Zigma host URL format defined securely matching user specification 
-    // They requested: `https://zigma.gameforsmart.com/host/settings` with pin usually
-    // By matching Axiom pattern we send them to targetPin/settings or generatedId 
-    // Wait, the user specifically wrote: `https://zigma.gameforsmart.com/host/settings`
-    // So let's provide exactly that, but standard is `host/[session_or_pin]/settings`.
-    // If Zigma doesn't need ID in URL path:
+    // The user mentioned: https://zigma.gameforsmart.com/host/settings -> .../lobby
     const targetPin = context.gamePin || "INVALID_PIN";
+    // Usually if it needs to go to setting first but has a PIN, it's either:
     return `https://zigma.gameforsmart.com/host/${targetPin}/settings`;
   }
 };
