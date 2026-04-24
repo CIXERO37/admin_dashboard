@@ -344,7 +344,12 @@ export function LocalBracketView({ groups, quizzes = [], games = [], competition
            {renderNodes.map(node => {
               const group = node.group;
               const advancedCount = group.members.filter((m) => m.isAdvanced).length;
-              const sortedMembers = [...group.members].sort((a,b) => b.score - a.score);
+              const sortedMembers = [...group.members].sort((a, b) => {
+                if (b.score === a.score) {
+                  return a.timeSeconds - b.timeSeconds;
+                }
+                return b.score - a.score;
+              });
 
               return (
                  <div
@@ -561,7 +566,12 @@ export function LocalBracketView({ groups, quizzes = [], games = [], competition
                 <div className="max-h-[50vh] overflow-y-auto w-full" onWheelCapture={(e) => e.stopPropagation()} onTouchMoveCapture={(e) => e.stopPropagation()}>
                   {[...(selectedGroup?.members || [])]
                     .filter(m => m.playerName.toLowerCase().includes(searchQuery.toLowerCase()))
-                    .sort((a, b) => b.score - a.score)
+                    .sort((a, b) => {
+                      if (b.score === a.score) {
+                        return a.timeSeconds - b.timeSeconds;
+                      }
+                      return b.score - a.score;
+                    })
                     .map((member, idx) => {
                       const categoryText = finalists.find(f => f.id === member.playerId)?.category;
                       return (
