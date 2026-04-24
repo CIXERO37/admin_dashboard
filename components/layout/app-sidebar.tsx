@@ -153,6 +153,19 @@ const navigation: NavItem[] = [
     ],
   },
   {
+    title: "nav.blog",
+    href: "/blog",
+    icon: Newspaper,
+    children: [
+      {
+        title: "nav.dashboard",
+        href: "/blog/dashboard",
+        icon: LayoutDashboard,
+      },
+      { title: "manage_blog.title", href: "/manage-blog", icon: ClipboardList },
+    ],
+  },
+  {
     title: "nav.support",
     href: "/support",
     icon: Headphones,
@@ -163,7 +176,6 @@ const navigation: NavItem[] = [
         icon: LayoutDashboard,
       },
       { title: "nav.reports", href: "/reports", icon: FileText },
-      { title: "manage_blog.title", href: "/manage-blog", icon: Newspaper },
       { title: "Manage Sessions", href: "/manage-sessions", icon: Sliders },
       { title: "nav.groups", href: "/groups", icon: Users },
     ],
