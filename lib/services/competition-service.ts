@@ -56,9 +56,52 @@ export const competitionService = {
     },
 
     /**
-     * Delete a competition by ID
+     * Delete a competition by ID (including full cleanup of related tables)
      */
     async deleteCompetition(id: string): Promise<void> {
+        let groupIds: string[] = [];
+        let lobbyIds: string[] = [];
+
+        // 1. Get all groups for this competition
+        const { data: groups } = await supabase
+            .from("competition_groups")
+            .select("id, rounds")
+            .eq("competition_id", id);
+        
+        if (groups && groups.length > 0) {
+            groupIds = groups.map((g: any) => g.id);
+            
+            // Extract lobby_ids from JSONB rounds
+            groups.forEach((g: any) => {
+                if (g.rounds && Array.isArray(g.rounds)) {
+                    g.rounds.forEach((r: any) => {
+                        if (r.lobby_id) lobbyIds.push(r.lobby_id);
+                    });
+                }
+            });
+        }
+
+        // Execute deletions in sequence to avoid foreign key or orphan issues
+        
+        // 2. Delete competition_group_members
+        if (groupIds.length > 0) {
+            await supabase.from("competition_group_members").delete().in("group_id", groupIds);
+        }
+
+        // 3. Delete Lobby Groups from `groups` table
+        if (lobbyIds.length > 0) {
+            await supabase.from("groups").delete().in("id", lobbyIds);
+        }
+
+        // 4. Delete competition_participants
+        await supabase.from("competition_participants").delete().eq("competition_id", id);
+
+        // 5. Delete competition_groups
+        if (groupIds.length > 0) {
+            await supabase.from("competition_groups").delete().in("id", groupIds);
+        }
+
+        // 6. Finally delete the competition itself
         const { error } = await supabase.from("competitions").delete().eq("id", id);
         if (error) throw error;
     },
