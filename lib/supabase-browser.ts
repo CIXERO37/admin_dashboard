@@ -10,6 +10,15 @@ export const getSupabaseBrowserClient = () => {
     throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY")
   }
 
-  return createBrowserClient(url, key)
+  const isProd = typeof window !== "undefined" && window.location.hostname.endsWith("gameforsmart.com");
+
+  return createBrowserClient(url, key, {
+      cookieOptions: {
+          domain: isProd ? ".gameforsmart.com" : undefined,
+          path: "/",
+          sameSite: "lax",
+          secure: isProd,
+      }
+  })
 }
 
