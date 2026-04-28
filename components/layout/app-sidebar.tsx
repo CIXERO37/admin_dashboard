@@ -38,6 +38,7 @@ import {
   Dices,
   Trophy,
   ClipboardList,
+  Newspaper,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -149,6 +150,20 @@ const navigation: NavItem[] = [
         href: "/receptionist",
         icon: Users,
       },
+    ],
+  },
+  {
+    title: "nav.blog",
+    href: "/blog",
+    icon: Newspaper,
+    children: [
+      {
+        title: "nav.dashboard",
+        href: "/blog/dashboard",
+        icon: LayoutDashboard,
+      },
+      { title: "manage_blog.title", href: "/manage-blog", icon: ClipboardList },
+      { title: "nav.blog_category", href: "/blog-category", icon: Sliders },
     ],
   },
   {

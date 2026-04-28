@@ -52,7 +52,7 @@ export const getManageGameColumns = (
     key: "application",
     label: t("manage_games.table_application") || "Application",
     render: (value: unknown) => (
-      <Badge variant="outline" className="font-mono text-xs">
+      <Badge variant="outline" className="font-mono text-xs capitalize">
         {(value as string) || "—"}
       </Badge>
     ),
@@ -62,7 +62,38 @@ export const getManageGameColumns = (
     label: t("manage_games.table_genre") || "Genre",
     render: (value: unknown) => {
       const genre = value as string;
-      return genre ? <Badge variant="secondary">{genre}</Badge> : "—";
+      return genre ? <Badge variant="secondary" className="capitalize">{genre}</Badge> : "—";
+    },
+  },
+  {
+    key: "status",
+    label: t("manage_games.table_status") || "Status",
+    render: (value: unknown) => {
+      const status = (value as string) || "DRAFT";
+      const statusConfig: Record<string, { label: string; className: string }> = {
+        PUBLISHED: {
+          label: t("manage_games.status_published") || "Published",
+          className: "bg-emerald-500/15 text-emerald-600 border-emerald-200 dark:text-emerald-400 dark:border-emerald-800",
+        },
+        COMING_SOON: {
+          label: t("manage_games.status_coming_soon") || "Coming Soon",
+          className: "bg-orange-500/15 text-orange-600 border-orange-200 dark:text-orange-400 dark:border-orange-800",
+        },
+        MAINTENANCE: {
+          label: t("manage_games.status_maintenance") || "Maintenance",
+          className: "bg-red-500/15 text-red-600 border-red-200 dark:text-red-400 dark:border-red-800",
+        },
+        DRAFT: {
+          label: t("manage_games.status_draft") || "Draft",
+          className: "bg-gray-500/15 text-gray-500 border-gray-200 dark:text-gray-400 dark:border-gray-700",
+        },
+      };
+      const cfg = statusConfig[status] || statusConfig.DRAFT;
+      return (
+        <Badge variant="outline" className={`capitalize border ${cfg.className}`}>
+          {cfg.label}
+        </Badge>
+      );
     },
   },
   {

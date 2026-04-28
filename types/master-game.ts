@@ -16,8 +16,10 @@ export interface MasterGame {
   characters_title: string | null;
   characters: any[] | null;
   categories: string[] | null;
+  hashtags: string[] | null;
   screenshots: string[] | null;
   is_favorite: boolean;
+  status: string;
   played_count: number;
   created_at: string;
   updated_at: string;

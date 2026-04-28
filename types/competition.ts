@@ -68,6 +68,15 @@ export interface GroupMember {
 
 // ===== Dummy Player (for local mockup testing) =====
 
+export interface PlayerSession {
+  id: string;
+  application?: string;
+  quizTitle?: string;
+  score: number;
+  timeSeconds: number;
+  createdAt: string;
+}
+
 export interface DummyPlayer {
   id: string;
   userId?: string;
@@ -81,6 +90,7 @@ export interface DummyPlayer {
   isFinalist?: boolean;
   isPresent?: boolean;
   category?: string;
+  sessions?: PlayerSession[];
 }
 
 // ===== Mock Quiz (for local mockup testing) =====

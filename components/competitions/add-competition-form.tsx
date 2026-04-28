@@ -46,6 +46,7 @@ export function AddCompetitionForm({ initialData, compId }: { initialData?: any;
   const [formCategories, setFormCategories] = useState<string[]>(
     initialData?.category ? initialData.category.split(",").map((s: string) => s.trim()).filter(Boolean) : []
   );
+
   const toggleCategory = (cat: string) => {
     setFormCategories((prev) =>
       prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
@@ -95,9 +96,14 @@ export function AddCompetitionForm({ initialData, compId }: { initialData?: any;
     }
   };
 
-  const handleSave = async () => {
-    if (!formTitle || !regStart || !regEnd) {
-      toast.error("Please fill required fields: title, registration dates");
+  const handleFormSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!formTitle) {
+      toast.error(t("manage_competitions.error_missing_title") || "Please fill required field: Title");
+      return;
+    }
+    if (!regStart || !regEnd) {
+      toast.error(t("manage_competitions.error_missing_registration") || "Please set the Schedule: Registration Start & End dates are required");
       return;
     }
 
@@ -174,6 +180,61 @@ export function AddCompetitionForm({ initialData, compId }: { initialData?: any;
           registration_link: formLink || null,
         });
         if (error) throw error;
+
+        // Auto-generate competition groups based on categories
+        if (formCategories.length > 0) {
+          const groupsToInsert: any[] = [];
+
+          for (const cat of formCategories) {
+            const count = 2; // Hardcode to 2 semifinal groups standard per category
+            // Create semifinal groups
+            const semiIds: string[] = [];
+            for (let i = 1; i <= count; i++) {
+              const semiId = generateXID();
+              semiIds.push(semiId);
+              groupsToInsert.push({
+                id: semiId,
+                name: count > 1 ? `Semifinal ${cat} Group ${i}` : `Semifinal ${cat}`,
+                competition_id: newId,
+                stage: "Semifinal",
+                source_group_ids: null,
+                rounds: [],
+                category: cat,
+              });
+            }
+
+            // Create final group
+            const finalId = generateXID();
+            groupsToInsert.push({
+              id: finalId,
+              name: `Final ${cat}`,
+              competition_id: newId,
+              stage: "Final",
+              source_group_ids: semiIds,
+              rounds: [],
+              category: cat,
+            });
+
+            // Create champion group
+            const champId = generateXID();
+            groupsToInsert.push({
+              id: champId,
+              name: `Juara ${cat}`,
+              competition_id: newId,
+              stage: "Champion",
+              source_group_ids: [finalId],
+              rounds: [],
+              category: cat,
+            });
+          }
+
+          const { error: groupErr } = await supabase.from("competition_groups").insert(groupsToInsert);
+          if (groupErr) {
+            console.error("Failed to auto-generate groups:", groupErr.message);
+            toast.warning("Competition created but failed to generate groups: " + groupErr.message);
+          }
+        }
+
         toast.success(t("manage_competitions.form_save") + " Success!");
         router.push("/manage-competitions");
       }
@@ -218,15 +279,15 @@ export function AddCompetitionForm({ initialData, compId }: { initialData?: any;
           </nav>
           <h1 className="text-2xl font-bold tracking-tight">{compId ? t("comp_detail.edit") || "Edit Competition" : t("manage_competitions.add_title") || "Add Competition"}</h1>
         </div>
-        <Button onClick={handleSave} disabled={isSaving} className="cursor-pointer">{compId ? t("action.save") || "Save" : t("action.add") || "Add"}</Button>
+        <Button type="submit" form="add-competition-form" disabled={isSaving} className="cursor-pointer">{compId ? t("action.save") || "Save" : t("action.add") || "Add"}</Button>
       </div>
 
       {/* Form Card */}
-      <div className="rounded-xl border bg-card p-6 space-y-5">
+      <form id="add-competition-form" onSubmit={handleFormSubmit} className="rounded-xl border bg-card p-6 space-y-5">
         {/* Title */}
         <div className="grid gap-2">
-          <Label htmlFor="comp-title">{t("manage_competitions.form_title") || "Title"}</Label>
-          <Input id="comp-title" placeholder="e.g. Cerdas Cermat Online - Sains" value={formTitle} onChange={(e) => setFormTitle(e.target.value)} />
+          <Label htmlFor="comp-title">{t("manage_competitions.form_title") || "Title"} <span className="text-red-500">*</span></Label>
+          <Input id="comp-title" required placeholder="e.g. Cerdas Cermat Online - Sains" value={formTitle} onChange={(e) => setFormTitle(e.target.value)} />
         </div>
 
         {/* Description */}
@@ -294,7 +355,7 @@ export function AddCompetitionForm({ initialData, compId }: { initialData?: any;
           <div className="flex flex-col justify-start gap-4">
             {/* Schedule Trigger */}
             <div className="grid gap-2">
-              <Label>{t("manage_competitions.form_schedule") || "Schedule"}</Label>
+              <Label>{t("manage_competitions.form_schedule") || "Schedule"} <span className="text-red-500">*</span></Label>
               <button
                 type="button"
                 onClick={() => setScheduleOpen(true)}
@@ -387,7 +448,7 @@ export function AddCompetitionForm({ initialData, compId }: { initialData?: any;
           <Label htmlFor="comp-link">{t("manage_competitions.form_reg_link") || "Registration Link"} <span className="text-muted-foreground font-normal">{t("manage_competitions.form_reg_link_opt") || "(optional)"}</span></Label>
           <Input id="comp-link" placeholder="https://..." value={formLink} onChange={(e) => setFormLink(e.target.value)} />
         </div>
-      </div>
+      </form>
 
       {/* Schedule Dialog */}
       <Dialog open={scheduleOpen} onOpenChange={setScheduleOpen}>
@@ -401,7 +462,7 @@ export function AddCompetitionForm({ initialData, compId }: { initialData?: any;
           <div className="space-y-5 py-2">
             <div className="space-y-2">
               <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                {t("manage_competitions.phase_registration") || "Registration"}
+                {t("manage_competitions.phase_registration") || "Registration"} <span className="text-red-500">*</span>
               </Label>
               <div className="flex items-center gap-2">
                 <Input type="date" value={regStart} onChange={(e) => setRegStart(e.target.value)} className="flex-1" />

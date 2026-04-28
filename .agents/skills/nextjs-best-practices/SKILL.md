@@ -58,3 +58,19 @@ As per Project Manager Briefing (Poin 3), UI state like pagination, search, and 
 - **Pattern**: Use `useSearchParams`, `usePathname`, and `useRouter` to synchronize UI state with the URL.
 - **Rule**: Avoid keeping filtering state only in local `useState` if it affects the data list.
 
+## 7. Next.js 15 Specifics (Crucial)
+Starting in Next.js 15, route parameters (`params` and `searchParams`) are passed as **Promises**. You MUST await them before accessing their values.
+
+```tsx
+// ❌ BAD: Synchronous access (will error in Next 15)
+export default function Page({ params }: { params: { id: string } }) {
+  const id = params.id;
+}
+
+// ✅ GOOD: Asynchronous access
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  // or using React.use(params) in client components
+}
+```
+

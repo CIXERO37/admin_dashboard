@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useNavigationGuard } from "@/contexts/navigation-guard";
 import { format } from "date-fns";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -60,6 +61,12 @@ export default function CompetitionDetailPage() {
   const savedGroupsSnapshot = useRef<string>("");
   const [refreshKey, setRefreshKey] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const { setDirty } = useNavigationGuard();
+
+  // Sync group dirty state with global navigation guard
+  useEffect(() => {
+    setDirty(isGroupsDirty && !isSavingGroups);
+  }, [isGroupsDirty, isSavingGroups, setDirty]);
 
   // Wizard phase state
   const [activePhase, setActivePhase] = useState<CompetitionPhase>("registration");
@@ -139,7 +146,7 @@ export default function CompetitionDetailPage() {
         const { data: dbGroups } = await supabase
           .from("competition_groups")
           .select(`
-            id, name, stage, rounds, source_group_ids,
+            id, name, stage, rounds, source_group_ids, category,
             competition_group_members(participant_id, score, time_seconds, is_advanced)
           `)
           .eq("competition_id", compId)
@@ -183,7 +190,7 @@ export default function CompetitionDetailPage() {
           }
         });
 
-        let qualStats: Record<string, { gamesPlayed: number; totalScore: number }> = {};
+        let qualStats: Record<string, { gamesPlayed: number; totalScore: number; sessions: any[] }> = {};
 
         if (userIds.length > 0) {
           // Find the earliest player registration time — use as lower bound
@@ -196,8 +203,9 @@ export default function CompetitionDetailPage() {
           // Fetch finished sessions created AFTER the earliest player registered
           let qualQuery = supabase
             .from("game_sessions")
-            .select("id, participants, created_at, status")
-            .eq("status", "finished");
+            .select("id, participants, created_at, status, application, quiz_detail")
+            .eq("status", "finished")
+            .order("created_at", { ascending: true });
 
           // Apply lower bound to reduce result set
           if (earliestRegTime) {
@@ -222,10 +230,31 @@ export default function CompetitionDetailPage() {
                     if (playerRegTime && sessionCreatedAt < playerRegTime) {
                       return; // Skip — session was before this player registered
                     }
+                    if (data.registration_end_date && sessionCreatedAt > data.registration_end_date) {
+                      return; // Skip — session was played after registration closed
+                    }
 
-                    if (!qualStats[p.user_id]) qualStats[p.user_id] = { gamesPlayed: 0, totalScore: 0 };
+                    if (!qualStats[p.user_id]) qualStats[p.user_id] = { gamesPlayed: 0, totalScore: 0, sessions: [] };
                     qualStats[p.user_id].gamesPlayed += 1;
                     qualStats[p.user_id].totalScore += p.score || 0;
+
+                    let t = 0;
+                    if (p.time_seconds) t = p.time_seconds;
+                    else if (p.time) t = p.time;
+                    else if (p.started && p.ended) {
+                      const start = new Date(p.started).getTime();
+                      const end = new Date(p.ended).getTime();
+                      if (end > start) t = Math.floor((end - start) / 1000);
+                    }
+
+                    qualStats[p.user_id].sessions.push({
+                      id: session.id,
+                      application: session.application,
+                      quizTitle: session.quiz_detail?.title,
+                      score: p.score || 0,
+                      timeSeconds: t,
+                      createdAt: sessionCreatedAt
+                    });
                   }
                 });
               }
@@ -235,7 +264,7 @@ export default function CompetitionDetailPage() {
 
         const mappedPlayers: DummyPlayer[] = participantsData.map((p: any) => {
           const prof = profilesMap[p.user_id] || {};
-          const stats = qualStats[p.user_id] || { gamesPlayed: 0, totalScore: 0 };
+          const stats = qualStats[p.user_id] || { gamesPlayed: 0, totalScore: 0, sessions: [] };
           const avgScore = stats.gamesPlayed > 0 ? Number((stats.totalScore / stats.gamesPlayed).toFixed(1)) : 0;
 
           return {
@@ -251,6 +280,7 @@ export default function CompetitionDetailPage() {
             isFinalist: p.is_finalist || false,
             isPresent: p.is_present || false,
             category: p.category || undefined,
+            sessions: stats.sessions,
           };
         });
 
@@ -295,6 +325,7 @@ export default function CompetitionDetailPage() {
               name: g.name,
               stage: g.stage || "",
               sources: g.source_group_ids || [],
+              category: g.category || "",
               rounds: (g.rounds || []).map((r: any, idx: number) => ({
                 round: r.round || idx + 1,
                 quiz_id: r.quiz_id || "",
@@ -436,7 +467,8 @@ export default function CompetitionDetailPage() {
         name: g.name,
         stage: g.stage || "",
         rounds: g.rounds || [],
-        source_group_ids: g.sources || []
+        source_group_ids: g.sources || [],
+        category: g.category || null,
       }));
 
       if (insertGroups.length > 0) {
@@ -887,6 +919,7 @@ export default function CompetitionDetailPage() {
             isDirty={isGroupsDirty}
             onRefresh={handleRefreshData}
             isRefreshing={isRefreshing}
+            categories={detail.category ? detail.category.split(",").map((s: string) => s.trim()).filter(Boolean) : []}
           />
         </TabsContent>
 

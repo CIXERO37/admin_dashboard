@@ -8,9 +8,18 @@ import { TimeAgo } from "@/components/shared/time-ago";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SearchInput } from "@/components/shared/search-input";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { format } from "date-fns";
 
 interface PhaseRegistrationProps {
   players: DummyPlayer[];
@@ -19,6 +28,7 @@ interface PhaseRegistrationProps {
 export function PhaseRegistration({ players }: PhaseRegistrationProps) {
   const { t, locale } = useTranslation();
   const [search, setSearch] = useState("");
+  const [selectedPlayerForSessions, setSelectedPlayerForSessions] = useState<DummyPlayer | null>(null);
 
   const filtered = players.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase())
@@ -80,7 +90,7 @@ export function PhaseRegistration({ players }: PhaseRegistrationProps) {
                       )}
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
+                      <Link href={`/users/${player.userId || player.id}`} target="_blank" className="flex items-center gap-2 group p-1.5 -ml-1.5 rounded-md hover:bg-muted/50 transition-colors w-fit">
                         <Avatar className="h-7 w-7">
                           <AvatarImage src={player.avatar || ""} alt={player.name} className="object-cover" />
                           <AvatarFallback className="text-[10px]">
@@ -88,12 +98,12 @@ export function PhaseRegistration({ players }: PhaseRegistrationProps) {
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col min-w-0">
-                          <span className="font-medium text-sm truncate" title={player.name}>{player.name}</span>
+                          <span className="font-medium text-sm truncate group-hover:text-primary transition-colors" title={player.name}>{player.name}</span>
                           <span className="text-[10px] text-muted-foreground truncate" title={`@${player.username || player.name}`}>
                             @{player.username || player.name.toLowerCase().replace(/\s+/g, '')}
                           </span>
                         </div>
-                      </div>
+                      </Link>
                     </TableCell>
                     <TableCell>
                       {player.category ? (
@@ -105,16 +115,24 @@ export function PhaseRegistration({ players }: PhaseRegistrationProps) {
                       )}
                     </TableCell>
                     <TableCell className="text-center">
-                      <div className="flex items-center justify-center gap-1 text-muted-foreground">
-                        <Gamepad2 className="h-3.5 w-3.5" />
-                        <span>{player.gamesPlayed}</span>
-                      </div>
+                      <button 
+                        onClick={() => setSelectedPlayerForSessions(player)}
+                        className="flex items-center justify-center gap-1 w-full hover:bg-muted/50 p-1.5 rounded-md cursor-pointer transition-colors"
+                        title="View Sessions"
+                      >
+                        <Gamepad2 className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="text-primary hover:underline">{player.gamesPlayed}</span>
+                      </button>
                     </TableCell>
                     <TableCell className="text-center">
-                      <div className="flex items-center justify-center gap-1">
+                      <button 
+                        onClick={() => setSelectedPlayerForSessions(player)}
+                        className="flex items-center justify-center gap-1 w-full hover:bg-muted/50 p-1.5 rounded-md cursor-pointer transition-colors"
+                        title="View Sessions"
+                      >
                         <Trophy className="h-3.5 w-3.5 text-yellow-500" />
-                        <span className="font-medium">{player.avgScore.toFixed(1)}</span>
-                      </div>
+                        <span className="font-medium text-primary hover:underline">{player.avgScore.toFixed(1)}</span>
+                      </button>
                     </TableCell>
                     <TableCell className="text-right">
                       <TimeAgo date={player.registeredAt} className="text-xs text-muted-foreground" />
@@ -126,6 +144,61 @@ export function PhaseRegistration({ players }: PhaseRegistrationProps) {
           </TableBody>
         </Table>
       </div>
+
+      <Dialog open={!!selectedPlayerForSessions} onOpenChange={(open) => !open && setSelectedPlayerForSessions(null)}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Gamepad2 className="h-5 w-5 text-primary" />
+              <span>
+                Sessions for <span className="text-primary">{selectedPlayerForSessions?.name}</span>
+              </span>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <ScrollArea className="h-[400px] mt-4 pr-4">
+            {(!selectedPlayerForSessions?.sessions || selectedPlayerForSessions.sessions.length === 0) ? (
+              <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
+                <p>No valid sessions found for this competition.</p>
+                <p className="text-xs text-muted-foreground/70 mt-1">(Only finished sessions played after registration count)</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {selectedPlayerForSessions.sessions.map((sess, idx) => (
+                  <div key={idx} className="flex flex-col gap-2 p-3 border rounded-lg bg-muted/20">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">#{idx + 1}</span>
+                        <span className="font-medium text-sm truncate max-w-[220px]" title={sess.quizTitle || sess.application || "Unknown Quiz"}>
+                          {sess.quizTitle || sess.application || "Unknown Quiz"}
+                        </span>
+                        {sess.application && sess.quizTitle && (
+                          <span className="text-[10px] uppercase tracking-wider font-semibold border text-muted-foreground px-1.5 py-0.5 rounded-md bg-muted/10">
+                            {sess.application}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {format(new Date(sess.createdAt), "d MMM yyyy, HH:mm")}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm mt-1">
+                      <div className="flex items-center gap-1.5">
+                        <Trophy className="h-3.5 w-3.5 text-yellow-500" />
+                        <span className="font-semibold text-foreground">{sess.score}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <span>⏱️</span>
+                        <span>{sess.timeSeconds >= 60 ? `${Math.floor(sess.timeSeconds / 60)}m ${sess.timeSeconds % 60}s` : `${sess.timeSeconds}s`}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
