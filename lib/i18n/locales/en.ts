@@ -25,6 +25,7 @@ export const en: Record<string, string> = {
   "nav.appearance": "Appearance",
   "nav.competition": "Competition",
   "nav.competition_category": "Category",
+  "nav.blog_category": "Category",
   "nav.receptionist": "Receptionist",
   "nav.collapse": "Collapse",
 

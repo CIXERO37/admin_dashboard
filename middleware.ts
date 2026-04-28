@@ -61,11 +61,16 @@ export async function middleware(request: NextRequest) {
 
   const isLoginPage = request.nextUrl.pathname === "/login"
   const isWebhook = request.nextUrl.pathname.startsWith("/api/githubWebhook")
-  const isPaymentWebhook = request.nextUrl.pathname.startsWith("/api/payment/webhook") 
+  const isPaymentWebhook = request.nextUrl.pathname.startsWith("/api/payment/webhook")
   const isCreateInvoice = request.nextUrl.pathname.startsWith("/api/payment/create-invoice")
 
-  // If not logged in and not on login page (and not webhook), redirect to login
-  if (!user && !isLoginPage && !isWebhook && !isPaymentWebhook && !isCreateInvoice) {
+  // Bebaskan jalur untuk webhook
+  if (isWebhook || isPaymentWebhook || isCreateInvoice) {
+    return supabaseResponse;
+  }
+
+  // Jika bukan admin dan bukan di halaman login -> tendang ke login
+  if (!isAdmin && !isLoginPage) {
     const url = request.nextUrl.clone()
     url.pathname = "/login"
     // Opsional: tambahkan param error biar bisa ditangkap oleh UI (jika ada)

@@ -25,6 +25,7 @@ export const id: Record<string, string> = {
   "nav.appearance": "Tampilan",
   "nav.competition": "Kompetisi",
   "nav.competition_category": "Kategori",
+  "nav.blog_category": "Kategori",
   "nav.receptionist": "Resepsionis",
   "nav.collapse": "Lipat",
 
