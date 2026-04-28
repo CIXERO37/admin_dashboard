@@ -63,6 +63,7 @@ interface PhaseGroupStageProps {
   isDirty?: boolean;
   onRefresh?: () => void;
   isRefreshing?: boolean;
+  categories?: string[];
 }
 
 export interface RoundConfig {
@@ -81,6 +82,7 @@ export interface LocalGroup {
   members: LocalGroupMember[];
   stage?: string;
   sources?: string[];
+  category?: string;
 }
 
 export interface LocalGroupMember {
@@ -111,25 +113,27 @@ export function PhaseGroupStage({
   isDirty,
   onRefresh,
   isRefreshing,
+  categories,
 }: PhaseGroupStageProps) {
   const { t } = useTranslation();
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupStage, setNewGroupStage] = useState("Semifinal");
   const [newGroupSources, setNewGroupSources] = useState<string[]>([]);
+  const [newGroupCategory, setNewGroupCategory] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [detailDialog, setDetailDialog] = useState<LocalGroup | null>(null);
   const [detailSearch, setDetailSearch] = useState("");
   const [assignDialog, setAssignDialog] = useState<LocalGroup | null>(null);
   const [roundsDialog, setRoundsDialog] = useState<{ group: LocalGroup, rounds: { quizId: string, gameId: string, session_id?: string, game_pin?: string, lobby_id?: string }[] } | null>(null);
   const [assignSearch, setAssignSearch] = useState("");
   const [assignSelected, setAssignSelected] = useState<string[]>([]);
-  const [advanceSelected, setAdvanceSelected] = useState<Record<string, string[]>>({});
-  const [playerToUnAdvance, setPlayerToUnAdvance] = useState<{groupId: string, playerId: string, playerName: string} | null>(null);
 
   // Edit Group state
   const [editGroup, setEditGroup] = useState<LocalGroup | null>(null);
   const [editGroupName, setEditGroupName] = useState("");
   const [editGroupStage, setEditGroupStage] = useState("");
   const [editGroupSources, setEditGroupSources] = useState<string[]>([]);
+  const [editGroupCategory, setEditGroupCategory] = useState("");
 
   // Remove confirmation state
   const [removeConfirm, setRemoveConfirm] = useState<{
@@ -173,6 +177,7 @@ export function PhaseGroupStage({
       members: initialMembers,
       stage: newGroupStage,
       sources: newGroupSources,
+      category: newGroupCategory || undefined,
     };
     onGroupsChange([...groups, newGroup]);
     toast.success(`${t("competition.group_created") || "Group created"}: ${newGroupName}`);
@@ -200,6 +205,7 @@ export function PhaseGroupStage({
               name: editGroupName.trim(),
               stage: editGroupStage,
               sources: editGroupSources,
+              category: editGroupCategory || undefined,
             }
           : g
       )
@@ -287,40 +293,23 @@ export function PhaseGroupStage({
     toast.success("Rounds configured successfully");
   };
 
-  const toggleAdvance = (groupId: string, playerId: string) => {
-    setAdvanceSelected((prev) => {
-      const current = prev[groupId] || [];
-      return {
-        ...prev,
-        [groupId]: current.includes(playerId)
-          ? current.filter((id) => id !== playerId)
-          : [...current, playerId],
-      };
-    });
-  };
-
-  const handleAdvance = (groupId: string) => {
-    const ids = advanceSelected[groupId] || [];
-    if (ids.length === 0) return;
-    
+  const toggleAdvance = (groupId: string, playerId: string, forceValue?: boolean) => {
     const newGroups = groups.map((g) =>
       g.id === groupId
         ? {
             ...g,
             members: g.members.map((m) =>
-              ids.includes(m.playerId) ? { ...m, isAdvanced: true } : m
+              m.playerId === playerId
+                ? { ...m, isAdvanced: forceValue !== undefined ? forceValue : !m.isAdvanced }
+                : m
             ),
           }
         : g
     );
-
     onGroupsChange(newGroups);
     if (detailDialog?.id === groupId) {
       setDetailDialog(newGroups.find(g => g.id === groupId) || null);
     }
-
-    setAdvanceSelected((prev) => ({ ...prev, [groupId]: [] }));
-    toast.success(`${ids.length} ${t("competition.advancing")}`);
   };
 
   return (
@@ -359,6 +348,20 @@ export function PhaseGroupStage({
             <SelectItem value="Champion">Champion</SelectItem>
           </SelectContent>
         </Select>
+
+        {categories && categories.length > 0 && (
+          <Select value={newGroupCategory} onValueChange={setNewGroupCategory}>
+            <SelectTrigger className="w-[150px] h-9">
+              <SelectValue placeholder={t("table.category") || "Category"} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">{t("filter.all") || "None"}</SelectItem>
+              {categories.map(cat => (
+                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
 
         {newGroupStage !== "Semifinal" && (
           <DropdownMenu>
@@ -440,6 +443,39 @@ export function PhaseGroupStage({
         </div>
       </div>
 
+      {/* Category Filter Tabs */}
+      {categories && categories.length > 0 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <Badge
+            variant={categoryFilter === "all" ? "default" : "outline"}
+            className="cursor-pointer select-none text-xs px-3 py-1"
+            onClick={() => setCategoryFilter("all")}
+          >
+            {t("filter.all") || "All"}
+          </Badge>
+          {categories.map(cat => (
+            <Badge
+              key={cat}
+              variant={categoryFilter === cat ? "default" : "outline"}
+              className="cursor-pointer select-none text-xs px-3 py-1"
+              onClick={() => setCategoryFilter(cat)}
+            >
+              {cat}
+            </Badge>
+          ))}
+          {/* Show uncategorized filter if there are groups without category */}
+          {groups.some(g => !g.category) && (
+            <Badge
+              variant={categoryFilter === "uncategorized" ? "default" : "outline"}
+              className="cursor-pointer select-none text-xs px-3 py-1"
+              onClick={() => setCategoryFilter("uncategorized")}
+            >
+              {t("competition.uncategorized") || "Uncategorized"}
+            </Badge>
+          )}
+        </div>
+      )}
+
       {/* Groups */}
       {groups.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border bg-muted/20 p-8 text-center">
@@ -447,8 +483,13 @@ export function PhaseGroupStage({
         </div>
       ) : (
         <div className="space-y-3">
-          {groups.map((group) => {
-            const groupAdvance = advanceSelected[group.id] || [];
+          {groups
+            .filter(group => {
+              if (categoryFilter === "all") return true;
+              if (categoryFilter === "uncategorized") return !group.category;
+              return group.category === categoryFilter;
+            })
+            .map((group) => {
             const advancedCount = group.members.filter((m) => m.isAdvanced).length;
 
             return (
@@ -463,6 +504,11 @@ export function PhaseGroupStage({
                     {group.stage && (
                       <Badge variant="outline" className="text-[10px] h-5">
                         {group.stage}
+                      </Badge>
+                    )}
+                    {group.category && (
+                      <Badge variant="secondary" className="text-[10px] h-5 font-normal">
+                        {group.category}
                       </Badge>
                     )}
                     <Badge variant="secondary" className="text-[10px] gap-1 h-5">
@@ -501,6 +547,7 @@ export function PhaseGroupStage({
                         setEditGroupName(group.name);
                         setEditGroupStage(group.stage || "Semifinal");
                         setEditGroupSources(group.sources || []);
+                        setEditGroupCategory(group.category || "");
                       }}>
                       <Edit className="h-3.5 w-3.5" />
                     </Button>
@@ -521,7 +568,7 @@ export function PhaseGroupStage({
         <DialogContent className="sm:max-w-[750px]">
           {detailDialog && (() => {
             const group = detailDialog;
-            const groupAdvance = advanceSelected[group.id] || [];
+            const advancedCount = group.members.filter((m) => m.isAdvanced).length;
             return (
               <>
                 <DialogHeader className="flex flex-row items-center justify-between pr-6 gap-4">
@@ -683,8 +730,8 @@ export function PhaseGroupStage({
                         return a.timeSeconds - b.timeSeconds;
                       });
                     
-                    const availableToAdvance = visibleMembers.filter(m => !m.isAdvanced);
-                    const allSelected = availableToAdvance.length > 0 && availableToAdvance.every(m => groupAdvance.includes(m.playerId));
+                    const visibleNotAdvanced = visibleMembers.filter(m => !m.isAdvanced);
+                    const allSelected = visibleMembers.length > 0 && visibleNotAdvanced.length === 0;
 
                     return (
                     <div className="border rounded-md overflow-hidden">
@@ -692,28 +739,35 @@ export function PhaseGroupStage({
                         {group.stage === "Champion" ? <span className="text-center">#</span> : (
                           <div className="flex items-center">
                             <Checkbox 
-                              checked={availableToAdvance.length > 0 && allSelected}
+                              checked={allSelected}
                               onCheckedChange={() => {
-                                if (allSelected) {
-                                  const idsToRemove = availableToAdvance.map(m => m.playerId);
-                                  setAdvanceSelected(prev => ({
-                                    ...prev,
-                                    [group.id]: (prev[group.id] || []).filter(id => !idsToRemove.includes(id))
-                                  }));
-                                } else {
-                                  const idsToAdd = availableToAdvance.map(m => m.playerId);
-                                  setAdvanceSelected(prev => {
-                                    const current = prev[group.id] || [];
-                                    const newIds = Array.from(new Set([...current, ...idsToAdd]));
-                                    return { ...prev, [group.id]: newIds };
-                                  });
-                                }
+                                const newGroups = groups.map((g) =>
+                                  g.id === group.id
+                                    ? {
+                                        ...g,
+                                        members: g.members.map((m) =>
+                                          visibleMembers.find(v => v.playerId === m.playerId)
+                                            ? { ...m, isAdvanced: !allSelected }
+                                            : m
+                                        ),
+                                      }
+                                    : g
+                                );
+                                onGroupsChange(newGroups);
+                                setDetailDialog(newGroups.find(g => g.id === group.id) || null);
                               }}
                               className="h-4 w-4 bg-background border-muted-foreground/40 mt-0.5"
                             />
                           </div>
                         )}
-                        <span>{t("comp_detail.table_player") || "Player"}</span>
+                        <span className="flex items-center gap-2">
+                          {t("comp_detail.table_player") || "Player"}
+                          {advancedCount > 0 && (
+                            <span className="text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded text-[10px] font-bold">
+                              {advancedCount} Selected
+                            </span>
+                          )}
+                        </span>
                         <span>{t("table.category") || "Category"}</span>
                         <span className="text-center">{t("comp_detail.table_avg") || "Score"}</span>
                         <span className="text-center">{t("competition.time") || "Time"}</span>
@@ -728,19 +782,11 @@ export function PhaseGroupStage({
                               return (
                             <div key={member.playerId}
                               className={`grid ${group.stage === "Champion" ? "grid-cols-[32px_1fr_110px_80px_80px_40px_28px]" : "grid-cols-[28px_1fr_110px_80px_80px_40px_28px]"} gap-2 items-center px-4 py-2.5 text-sm border-b last:border-b-0 transition-colors ${
-                                member.isAdvanced ? "bg-emerald-500/5" : groupAdvance.includes(member.playerId) ? "bg-primary/5" : ""
+                                member.isAdvanced ? "bg-emerald-500/5" : ""
                               } ${group.stage !== "Champion" ? "cursor-pointer hover:bg-muted/40" : ""}`}
                               onClick={() => {
                                 if (group.stage === "Champion") return;
-                                if (member.isAdvanced) {
-                                  setPlayerToUnAdvance({
-                                    groupId: group.id,
-                                    playerId: member.playerId,
-                                    playerName: member.playerName,
-                                  });
-                                } else {
-                                  toggleAdvance(group.id, member.playerId);
-                                }
+                                toggleAdvance(group.id, member.playerId);
                               }}>
                               {group.stage === "Champion" ? (
                                 <span className={`text-center text-xs font-bold ${
@@ -752,17 +798,9 @@ export function PhaseGroupStage({
                               ) : (
                                 <div onClick={(e) => e.stopPropagation()}>
                                   <Checkbox
-                                    checked={groupAdvance.includes(member.playerId) || member.isAdvanced}
+                                    checked={member.isAdvanced}
                                     onCheckedChange={() => {
-                                      if (member.isAdvanced) {
-                                        setPlayerToUnAdvance({
-                                          groupId: group.id,
-                                          playerId: member.playerId,
-                                          playerName: member.playerName,
-                                        });
-                                      } else {
-                                        toggleAdvance(group.id, member.playerId);
-                                      }
+                                      toggleAdvance(group.id, member.playerId);
                                     }}
                                     className="h-4 w-4 bg-background border-muted-foreground/40"
                                   />
@@ -830,14 +868,7 @@ export function PhaseGroupStage({
                           );
                         })}
                       </div>
-                      {groupAdvance.length > 0 && (
-                        <div className="px-4 py-3 border-t bg-muted/20">
-                          <Button size="sm" className="gap-1.5 h-8 text-xs w-full font-medium" onClick={() => handleAdvance(group.id)}>
-                            <ArrowUpRight className="h-4 w-4" />
-                            {t("competition.advance_selected")} ({groupAdvance.length})
-                          </Button>
-                        </div>
-                      )}
+
                     </div>
                     );
                   })()}
@@ -1154,43 +1185,6 @@ export function PhaseGroupStage({
         </DialogContent>
       </Dialog>
 
-      {/* Un-advance Confirmation Dialog */}
-      <AlertDialog open={!!playerToUnAdvance} onOpenChange={(open) => { if (!open) setPlayerToUnAdvance(null); }}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("common.are_you_sure") || "Are you sure?"}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {(t("comp_detail.unadvance_confirm") || `Are you sure you want to revoke {name}'s advanced status?`).replace("{name}", playerToUnAdvance?.playerName || "")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("action.cancel") || "Cancel"}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (playerToUnAdvance) {
-                  const newGroups = groups.map((g) =>
-                    g.id === playerToUnAdvance.groupId
-                      ? { ...g, members: g.members.map((m) => m.playerId === playerToUnAdvance.playerId ? { ...m, isAdvanced: false } : m) }
-                      : g
-                  );
-                  onGroupsChange(newGroups);
-                  
-                  if (detailDialog?.id === playerToUnAdvance.groupId) {
-                    setDetailDialog(newGroups.find(g => g.id === playerToUnAdvance.groupId) || null);
-                  }
-
-                  setPlayerToUnAdvance(null);
-                  toast.success(t("comp_detail.unadvance_success") || "Advanced status revoked");
-                }
-              }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {t("action.revoke") || "Revoke"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       {/* Remove Confirmation Dialog */}
       <AlertDialog
         open={!!removeConfirm}
@@ -1334,6 +1328,22 @@ export function PhaseGroupStage({
                 </DropdownMenu>
               </div>
             )}
+            {categories && categories.length > 0 && (
+              <div className="grid gap-2">
+                <label className="text-sm font-medium">{t("table.category") || "Category"}</label>
+                <Select value={editGroupCategory || "none"} onValueChange={(val) => setEditGroupCategory(val === "none" ? "" : val)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("table.category") || "Category"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">{t("competition.uncategorized") || "Uncategorized"}</SelectItem>
+                    {categories.map(cat => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditGroup(null)}>{t("action.cancel") || "Cancel"}</Button>
@@ -1353,7 +1363,7 @@ export function PhaseGroupStage({
             competitionId={competitionId}
             currentUserId={currentUserId}
             finalists={finalists}
-            onManageRounds={(g) => { setDetailDialog(null); setTimeout(() => openRoundsDialog(g), 150); }} 
+            onManageRounds={(g) => { setDetailDialog(null); setTimeout(() => openRoundsDialog(g), 150); }}
           />
         </>
       )}

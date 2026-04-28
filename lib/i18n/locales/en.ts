@@ -845,6 +845,8 @@ export const en: Record<string, string> = {
   "manage_competitions.delete_confirm_desc": "Are you sure you want to delete {{name}}?",
   "manage_competitions.delete_confirm_instruction": "Please type Delete Competition to confirm.",
   "manage_competitions.delete_phrase": "Delete Competition",
+  "manage_competitions.semifinal_count": "Semifinal Groups per Category",
+  "manage_competitions.total_semifinal_groups": "Total: {{count}} semifinal groups",
 
   // Receptionist
   "receptionist.subtitle": "Select a competition to manage attendance",
@@ -898,6 +900,7 @@ export const en: Record<string, string> = {
   "competition.delete_round_desc": "This will permanently delete this round and all its groups and members. Are you sure?",
   "competition.no_rounds": "No rounds yet. Create your first round to start the competition bracket.",
   "competition.groups": "group(s)",
+  "competition.uncategorized": "Uncategorized",
   "competition.start": "Start",
   "competition.complete": "Complete",
   "competition.round": "Round",
