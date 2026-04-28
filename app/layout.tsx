@@ -5,7 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { I18nProvider } from "@/lib/i18n";
 import NextTopLoader from "nextjs-toploader";
-import { AuthSync } from "@/components/AuthSync";
+import AuthCookieSync from "@/components/AuthCookieSync";
 import "./globals.css";
 
 const _geist = Geist({ subsets: ["latin"] });
@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
-        <AuthSync />
+        <AuthCookieSync />
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
