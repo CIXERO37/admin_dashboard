@@ -237,37 +237,62 @@ export function ManageBlogForm({ initialData, blogId }: ManageBlogFormProps) {
   const isEditMode = !!blogId;
 
   return (
-    <div className="space-y-6 pb-24">
-      {/* Breadcrumb */}
-      <nav className="flex items-center text-sm text-muted-foreground">
-        <Link
-          href="/manage-blog"
-          className="hover:text-foreground transition-colors"
-        >
-          {t("manage_blog.title") || "Manage Blog"}
-        </Link>
-        <ChevronRight className="h-4 w-4 mx-2" />
-        <span className="text-foreground font-medium">
-          {isEditMode
-            ? t("manage_blog.edit_title") || "Edit Article"
-            : t("manage_blog.add_title") || "Add Article"}
-        </span>
-      </nav>
-
-      {/* Title */}
-      <h1 className="text-3xl font-bold text-foreground">
-        {isEditMode
-          ? t("manage_blog.edit_title") || "Edit Article"
-          : t("manage_blog.add_title") || "Add Article"}
-      </h1>
-
-      {/* Unsaved indicator */}
-      {isDirty && (
-        <div className="flex items-center gap-2 text-sm text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
-          <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-          {t("manage_blog.unsaved_changes") || "Unsaved changes"}
+    <div className="space-y-6 pb-8">
+      {/* Breadcrumb Header */}
+      <div className="flex items-center justify-between sticky -top-6 z-50 bg-background/95 backdrop-blur-sm py-4 -mx-6 px-6 border-b mb-6 shadow-sm">
+        <div className="space-y-1">
+          <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <Link
+              href="/manage-blog"
+              className="hover:text-foreground transition-colors cursor-pointer"
+            >
+              {t("manage_blog.title") || "Manage Blog"}
+            </Link>
+            <ChevronRight className="h-3.5 w-3.5" />
+            <span className="text-foreground font-medium">
+              {isEditMode
+                ? t("manage_blog.edit_title") || "Edit Article"
+                : t("manage_blog.add_title") || "Add Article"}
+            </span>
+          </nav>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {isEditMode
+              ? t("manage_blog.edit_title") || "Edit Article"
+              : t("manage_blog.add_title") || "Add Article"}
+          </h1>
         </div>
-      )}
+
+        <div className="flex items-center gap-2 shrink-0">
+          {isDirty && !isSaving && (
+            <span className="text-xs text-amber-500 dark:text-amber-400 animate-pulse font-medium hidden sm:inline">
+              ● {t("manage_blog.unsaved_changes") || "Unsaved changes"}
+            </span>
+          )}
+          <Button
+            onClick={handleSave}
+            disabled={isSaving}
+            className={`gap-1.5 cursor-pointer transition-all relative ${
+              isDirty && !isSaving
+                ? "ring-2 ring-amber-500/50 ring-offset-1 ring-offset-background"
+                : ""
+            }`}
+          >
+            {isSaving ? (
+              <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            {isSaving
+              ? t("action.saving") || "Saving..."
+              : isEditMode
+              ? t("action.save") || "Save"
+              : t("action.add") || "Add"}
+            {isDirty && !isSaving && (
+              <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-amber-500 animate-pulse" />
+            )}
+          </Button>
+        </div>
+      </div>
 
       {/* Section: General Information */}
       <div className="rounded-xl border bg-card p-6 space-y-5">
@@ -456,42 +481,7 @@ export function ManageBlogForm({ initialData, blogId }: ManageBlogFormProps) {
         />
       </div>
 
-      {/* Sticky Save Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex items-center justify-end gap-3 px-6 py-3 max-w-screen-2xl mx-auto">
-          {isDirty && (
-            <span className="text-sm text-amber-500 flex items-center gap-1.5 mr-auto">
-              <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-              {t("manage_blog.unsaved_changes") || "Unsaved changes"}
-            </span>
-          )}
-          <Button
-            variant="outline"
-            onClick={() => router.push("/manage-blog")}
-            disabled={isSaving}
-          >
-            {t("action.cancel") || "Cancel"}
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={isSaving}
-            className={`gap-2 ${
-              isDirty
-                ? "ring-2 ring-amber-500/50 ring-offset-2 ring-offset-background"
-                : ""
-            }`}
-          >
-            {isSaving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-            {isSaving
-              ? t("action.saving") || "Saving..."
-              : t("action.save") || "Save"}
-          </Button>
-        </div>
-      </div>
+
     </div>
   );
 }

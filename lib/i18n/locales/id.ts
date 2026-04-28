@@ -845,6 +845,8 @@ export const id: Record<string, string> = {
   "manage_competitions.delete_confirm_desc": "Apakah Anda yakin ingin menghapus {{name}}?",
   "manage_competitions.delete_confirm_instruction": "Silakan ketik Delete Competition untuk mengonfirmasi.",
   "manage_competitions.delete_phrase": "Delete Competition",
+  "manage_competitions.semifinal_count": "Jumlah Grup Semifinal per Kategori",
+  "manage_competitions.total_semifinal_groups": "Total: {{count}} grup semifinal",
 
   // Receptionist
   "receptionist.subtitle": "Pilih kompetisi untuk mengelola kehadiran",
@@ -896,6 +898,7 @@ export const id: Record<string, string> = {
   "competition.delete_round_desc": "Ini akan menghapus babak ini beserta semua grup dan anggotanya secara permanen. Apakah Anda yakin?",
   "competition.no_rounds": "Belum ada babak. Buat babak pertama untuk memulai bracket kompetisi.",
   "competition.groups": "grup",
+  "competition.uncategorized": "Tanpa Kategori",
   "competition.start": "Mulai",
   "competition.complete": "Selesai",
   "competition.round": "Babak",

@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 interface RichTextEditorProps {
   content: string;
@@ -38,11 +38,41 @@ interface RichTextEditorProps {
   placeholder?: string;
 }
 
+const ToolbarButton = ({
+  onClick,
+  isActive = false,
+  children,
+  title,
+}: {
+  onClick: () => void;
+  isActive?: boolean;
+  children: React.ReactNode;
+  title?: string;
+}) => (
+  <Button
+    type="button"
+    variant="ghost"
+    size="sm"
+    onClick={onClick}
+    title={title}
+    className={cn(
+      "h-8 w-8 p-0 cursor-pointer transition-colors",
+      isActive
+        ? "bg-primary/20 text-primary hover:bg-primary/30"
+        : "hover:bg-muted text-muted-foreground hover:text-foreground"
+    )}
+  >
+    {children}
+  </Button>
+);
+
 export function RichTextEditor({
   content,
   onChange,
   placeholder = "Start writing...",
 }: RichTextEditorProps) {
+  const [, setTick] = useState(0); // Force update mechanism
+  
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -65,6 +95,9 @@ export function RichTextEditor({
     content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
+    },
+    onTransaction: () => {
+      setTick((tick: number) => tick + 1); // Force re-render on any state change
     },
     editorProps: {
       attributes: {
@@ -95,32 +128,6 @@ export function RichTextEditor({
   }, [editor]);
 
   if (!editor) return null;
-
-  const ToolbarButton = ({
-    onClick,
-    isActive = false,
-    children,
-    title,
-  }: {
-    onClick: () => void;
-    isActive?: boolean;
-    children: React.ReactNode;
-    title?: string;
-  }) => (
-    <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      onClick={onClick}
-      title={title}
-      className={cn(
-        "h-8 w-8 p-0 cursor-pointer",
-        isActive && "bg-muted text-foreground"
-      )}
-    >
-      {children}
-    </Button>
-  );
 
   return (
     <div className="border rounded-lg overflow-hidden bg-background">
