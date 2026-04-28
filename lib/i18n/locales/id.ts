@@ -1088,15 +1088,4 @@ export const id: Record<string, string> = {
   "manage_blog.edit_success": "Artikel berhasil diperbarui!",
   "manage_blog.delete_success": "Artikel berhasil dihapus!",
   "manage_blog.unsaved_changes": "Perubahan belum disimpan",
-
-  // Blog Categories
-  "blog_category.title": "Kategori Blog",
-  "blog_category.add": "Tambah Kategori",
-  "blog_category.edit": "Edit Kategori",
-  "blog_category.name": "Nama",
-  "blog_category.slug": "Slug",
-  "blog_category.delete_confirm": "Apakah Anda yakin ingin menghapus kategori ini?",
-  "blog_category.delete_success": "Kategori berhasil dihapus",
-  "blog_category.save_success": "Kategori berhasil disimpan",
-  "blog_category.error": "Terjadi kesalahan",
 };

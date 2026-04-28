@@ -163,7 +163,6 @@ const navigation: NavItem[] = [
         icon: LayoutDashboard,
       },
       { title: "manage_blog.title", href: "/manage-blog", icon: ClipboardList },
-      { title: "nav.blog_category", href: "/blog-category", icon: Sliders },
     ],
   },
   {

@@ -41,33 +41,4 @@ export const blogsService = {
     if (error) throw error;
     return data as BlogCategory[];
   },
-
-  async createCategory(payload: { name: string; slug: string }) {
-    const supabase = getSupabaseBrowserClient();
-    const { error } = await supabase.from("blog_categories").insert([
-      { name: payload.name.trim(), slug: payload.slug.trim() },
-    ]);
-    if (error) throw error;
-    return { error: null };
-  },
-
-  async updateCategory(id: string, payload: { name: string; slug: string }) {
-    const supabase = getSupabaseBrowserClient();
-    const { error } = await supabase
-      .from("blog_categories")
-      .update({
-        name: payload.name.trim(),
-        slug: payload.slug.trim(),
-      })
-      .eq("id", id);
-    if (error) throw error;
-    return { error: null };
-  },
-
-  async deleteCategory(id: string) {
-    const supabase = getSupabaseBrowserClient();
-    const { error } = await supabase.from("blog_categories").delete().eq("id", id);
-    if (error) throw error;
-    return { error: null };
-  },
 };

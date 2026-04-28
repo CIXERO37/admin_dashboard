@@ -1090,15 +1090,4 @@ export const en: Record<string, string> = {
   "manage_blog.edit_success": "Article updated successfully!",
   "manage_blog.delete_success": "Article deleted successfully!",
   "manage_blog.unsaved_changes": "Unsaved changes",
-
-  // Blog Categories
-  "blog_category.title": "Blog Categories",
-  "blog_category.add": "Add Category",
-  "blog_category.edit": "Edit Category",
-  "blog_category.name": "Name",
-  "blog_category.slug": "Slug",
-  "blog_category.delete_confirm": "Are you sure you want to delete this category?",
-  "blog_category.delete_success": "Category deleted successfully",
-  "blog_category.save_success": "Category saved successfully",
-  "blog_category.error": "An error occurred",
 };
