@@ -63,6 +63,7 @@ interface PhaseGroupStageProps {
   isDirty?: boolean;
   onRefresh?: () => void;
   isRefreshing?: boolean;
+  categories?: string[];
 }
 
 export interface RoundConfig {
@@ -81,6 +82,7 @@ export interface LocalGroup {
   members: LocalGroupMember[];
   stage?: string;
   sources?: string[];
+  category?: string;
 }
 
 export interface LocalGroupMember {
@@ -111,11 +113,14 @@ export function PhaseGroupStage({
   isDirty,
   onRefresh,
   isRefreshing,
+  categories,
 }: PhaseGroupStageProps) {
   const { t } = useTranslation();
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupStage, setNewGroupStage] = useState("Semifinal");
   const [newGroupSources, setNewGroupSources] = useState<string[]>([]);
+  const [newGroupCategory, setNewGroupCategory] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [detailDialog, setDetailDialog] = useState<LocalGroup | null>(null);
   const [detailSearch, setDetailSearch] = useState("");
   const [assignDialog, setAssignDialog] = useState<LocalGroup | null>(null);
@@ -128,6 +133,7 @@ export function PhaseGroupStage({
   const [editGroupName, setEditGroupName] = useState("");
   const [editGroupStage, setEditGroupStage] = useState("");
   const [editGroupSources, setEditGroupSources] = useState<string[]>([]);
+  const [editGroupCategory, setEditGroupCategory] = useState("");
 
   // Remove confirmation state
   const [removeConfirm, setRemoveConfirm] = useState<{
@@ -171,6 +177,7 @@ export function PhaseGroupStage({
       members: initialMembers,
       stage: newGroupStage,
       sources: newGroupSources,
+      category: newGroupCategory || undefined,
     };
     onGroupsChange([...groups, newGroup]);
     toast.success(`${t("competition.group_created") || "Group created"}: ${newGroupName}`);
@@ -198,6 +205,7 @@ export function PhaseGroupStage({
               name: editGroupName.trim(),
               stage: editGroupStage,
               sources: editGroupSources,
+              category: editGroupCategory || undefined,
             }
           : g
       )
@@ -341,6 +349,20 @@ export function PhaseGroupStage({
           </SelectContent>
         </Select>
 
+        {categories && categories.length > 0 && (
+          <Select value={newGroupCategory} onValueChange={setNewGroupCategory}>
+            <SelectTrigger className="w-[150px] h-9">
+              <SelectValue placeholder={t("table.category") || "Category"} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">{t("filter.all") || "None"}</SelectItem>
+              {categories.map(cat => (
+                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+
         {newGroupStage !== "Semifinal" && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -421,6 +443,39 @@ export function PhaseGroupStage({
         </div>
       </div>
 
+      {/* Category Filter Tabs */}
+      {categories && categories.length > 0 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <Badge
+            variant={categoryFilter === "all" ? "default" : "outline"}
+            className="cursor-pointer select-none text-xs px-3 py-1"
+            onClick={() => setCategoryFilter("all")}
+          >
+            {t("filter.all") || "All"}
+          </Badge>
+          {categories.map(cat => (
+            <Badge
+              key={cat}
+              variant={categoryFilter === cat ? "default" : "outline"}
+              className="cursor-pointer select-none text-xs px-3 py-1"
+              onClick={() => setCategoryFilter(cat)}
+            >
+              {cat}
+            </Badge>
+          ))}
+          {/* Show uncategorized filter if there are groups without category */}
+          {groups.some(g => !g.category) && (
+            <Badge
+              variant={categoryFilter === "uncategorized" ? "default" : "outline"}
+              className="cursor-pointer select-none text-xs px-3 py-1"
+              onClick={() => setCategoryFilter("uncategorized")}
+            >
+              {t("competition.uncategorized") || "Uncategorized"}
+            </Badge>
+          )}
+        </div>
+      )}
+
       {/* Groups */}
       {groups.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border bg-muted/20 p-8 text-center">
@@ -428,7 +483,13 @@ export function PhaseGroupStage({
         </div>
       ) : (
         <div className="space-y-3">
-          {groups.map((group) => {
+          {groups
+            .filter(group => {
+              if (categoryFilter === "all") return true;
+              if (categoryFilter === "uncategorized") return !group.category;
+              return group.category === categoryFilter;
+            })
+            .map((group) => {
             const advancedCount = group.members.filter((m) => m.isAdvanced).length;
 
             return (
@@ -443,6 +504,11 @@ export function PhaseGroupStage({
                     {group.stage && (
                       <Badge variant="outline" className="text-[10px] h-5">
                         {group.stage}
+                      </Badge>
+                    )}
+                    {group.category && (
+                      <Badge variant="secondary" className="text-[10px] h-5 font-normal">
+                        {group.category}
                       </Badge>
                     )}
                     <Badge variant="secondary" className="text-[10px] gap-1 h-5">
@@ -481,6 +547,7 @@ export function PhaseGroupStage({
                         setEditGroupName(group.name);
                         setEditGroupStage(group.stage || "Semifinal");
                         setEditGroupSources(group.sources || []);
+                        setEditGroupCategory(group.category || "");
                       }}>
                       <Edit className="h-3.5 w-3.5" />
                     </Button>
@@ -1261,6 +1328,22 @@ export function PhaseGroupStage({
                 </DropdownMenu>
               </div>
             )}
+            {categories && categories.length > 0 && (
+              <div className="grid gap-2">
+                <label className="text-sm font-medium">{t("table.category") || "Category"}</label>
+                <Select value={editGroupCategory || "none"} onValueChange={(val) => setEditGroupCategory(val === "none" ? "" : val)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("table.category") || "Category"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">{t("competition.uncategorized") || "Uncategorized"}</SelectItem>
+                    {categories.map(cat => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditGroup(null)}>{t("action.cancel") || "Cancel"}</Button>
@@ -1280,7 +1363,7 @@ export function PhaseGroupStage({
             competitionId={competitionId}
             currentUserId={currentUserId}
             finalists={finalists}
-            onManageRounds={(g) => { setDetailDialog(null); setTimeout(() => openRoundsDialog(g), 150); }} 
+            onManageRounds={(g) => { setDetailDialog(null); setTimeout(() => openRoundsDialog(g), 150); }}
           />
         </>
       )}

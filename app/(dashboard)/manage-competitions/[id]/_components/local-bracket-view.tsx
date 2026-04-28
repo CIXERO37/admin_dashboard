@@ -101,10 +101,16 @@ export function LocalBracketView({ groups, quizzes = [], games = [], competition
     );
   }
 
-  // Define columns based on their stage
-  const semifinals = groups.filter(g => g.stage === "Semifinal" || !g.stage || g.stage === "Group Stage");
-  const finals = groups.filter(g => g.stage === "Final");
-  const champions = groups.filter(g => g.stage === "Champion");
+  // Define columns based on their stage, sorted by category so same-category groups cluster together
+  const sortByCategory = (a: LocalGroup, b: LocalGroup) => {
+    const catA = a.category || "";
+    const catB = b.category || "";
+    if (catA !== catB) return catA.localeCompare(catB);
+    return 0; // preserve original order within same category
+  };
+  const semifinals = groups.filter(g => g.stage === "Semifinal" || !g.stage || g.stage === "Group Stage").sort(sortByCategory);
+  const finals = groups.filter(g => g.stage === "Final").sort(sortByCategory);
+  const champions = groups.filter(g => g.stage === "Champion").sort(sortByCategory);
 
   const columns = [
     { title: "Semifinal", data: semifinals },
@@ -125,7 +131,7 @@ export function LocalBracketView({ groups, quizzes = [], games = [], competition
 
   // Calculate height to comfortably fit the biggest column
   const maxRows = Math.max(semifinals.length, finals.length, champions.length, 1);
-  const startY = 60;
+  const startY = 100;
   const minPaddingBottom = 60;
   const requiredViewportHeight = maxRows * NODE_HEIGHT + Math.max(maxRows - 1, 0) * Y_GAP + startY + minPaddingBottom;
   

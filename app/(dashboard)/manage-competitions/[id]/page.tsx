@@ -146,7 +146,7 @@ export default function CompetitionDetailPage() {
         const { data: dbGroups } = await supabase
           .from("competition_groups")
           .select(`
-            id, name, stage, rounds, source_group_ids,
+            id, name, stage, rounds, source_group_ids, category,
             competition_group_members(participant_id, score, time_seconds, is_advanced)
           `)
           .eq("competition_id", compId)
@@ -325,6 +325,7 @@ export default function CompetitionDetailPage() {
               name: g.name,
               stage: g.stage || "",
               sources: g.source_group_ids || [],
+              category: g.category || "",
               rounds: (g.rounds || []).map((r: any, idx: number) => ({
                 round: r.round || idx + 1,
                 quiz_id: r.quiz_id || "",
@@ -466,7 +467,8 @@ export default function CompetitionDetailPage() {
         name: g.name,
         stage: g.stage || "",
         rounds: g.rounds || [],
-        source_group_ids: g.sources || []
+        source_group_ids: g.sources || [],
+        category: g.category || null,
       }));
 
       if (insertGroups.length > 0) {
@@ -917,6 +919,7 @@ export default function CompetitionDetailPage() {
             isDirty={isGroupsDirty}
             onRefresh={handleRefreshData}
             isRefreshing={isRefreshing}
+            categories={detail.category ? detail.category.split(",").map((s: string) => s.trim()).filter(Boolean) : []}
           />
         </TabsContent>
 
