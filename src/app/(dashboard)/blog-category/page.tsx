@@ -1,0 +1,9 @@
+import { BlogCategoryClient } from "@/src/features/blog-category/_components/blog-category-client";
+
+export const metadata = {
+  title: "Blog Categories | Admin Dashboard",
+};
+
+export default function BlogCategoryPage() {
+  return <BlogCategoryClient />;
+}
