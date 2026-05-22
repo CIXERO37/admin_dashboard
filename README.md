@@ -71,8 +71,11 @@ _Clone_ adalah suatu proses pembuatan replika dari repository ini ke folder di l
      <img width="437" height="286" alt="Screenshot_20260522_133327" src="https://github.com/user-attachments/assets/dff2efb1-7ad0-42da-933f-6733948b7bee" />
 
      Kamu dapat tekan button **Install Zip**, lalu extract di folder project mu
+     
 
    - **_Clone_ menggunakan WEB URL**
+  
+     
      <img width="437" height="286" alt="Screenshot_20260522_133327" src="https://github.com/user-attachments/assets/dff2efb1-7ad0-42da-933f-6733948b7bee" />
 
      copy link nya, lalu buat folder untuk tempat _cloning_ nya, lalu buka terminal atau CMD di folder tersebut, kemudian masukkan command
@@ -82,9 +85,10 @@ _Clone_ adalah suatu proses pembuatan replika dari repository ini ke folder di l
      
    - **_Clone menggunakan GitHub CLI**
 
-     Jika kamu menggunakan GitHub CLI, maka tinggal buka dan ketik di terminal **_gh repo clone CIXERO37/admin_dashboard_** seperti pada gambar berikut
+     Jika kamu menggunakan GitHub CLI, maka tinggal buka dan ketik di terminal
 
-     <img width="171" height="295" alt="images" src="https://github.com/user-attachments/assets/168db899-b3e1-47ea-a469-31798f6a55c0" />
+     ```bash
+     gh repo clone CIXERO37/admin_dashboard
 
 ---
 
@@ -95,8 +99,31 @@ _Clone_ adalah suatu proses pembuatan replika dari repository ini ke folder di l
 
    <img width="342" height="332" alt="image" src="https://github.com/user-attachments/assets/328d8b50-9e72-4d2e-addc-a79c7ffe4c2f" />
 
-   Isi file nya dengan 
-   
+   Isi file nya dengan
 
+   ```bash
+   NEXT_PUBLIC_SUPABASE_URL="Your Public Supabase URL"
+   NEXT_PUBLIC_SUPABASE_ANON_KEY="Your Public Supabase Anon Key"
+   SUPABASE_SERVICE_ROLE_KEY="Your Service Role Key"
+
+3. Jalankan ini di terminal untuk memastikan semua _library_ di _node moduls_ sudah lengkap
+
+   ```bash
+   npm install
+
+4. Kemudian kita cek apakah ada error dengan tipe data dengan menjalankan ini di terminal
+
+   ```bash
+   npx tsc --noEmit
+   
+5. Lalu Cek apakah ada error Logika atau Penulisan dengan menjalankan ini di terminal
+
+   ```bash
+   npm run lint
+
+6. Terakhir kita jalankan project nya dengan menjalankan command ini di terminal
+
+   ```bash
+   npm run dev
 
 _Dokumen ini merupakan panduan konseptual proyek Admin Dashboard Gameforsmart._
