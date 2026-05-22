@@ -82,8 +82,12 @@ _Clone_ adalah suatu proses pembuatan replika dari repository ini ke folder di l
   
      ```bash
      git clone https://github.com/CIXERO37/admin_dashboard.git
+
      
    - **_Clone menggunakan GitHub CLI**
+
+  
+     <img width="419" height="282" alt="Screenshot_20260522_133343" src="https://github.com/user-attachments/assets/be20c30b-a9f1-457a-9fac-943e578470fc" />
 
      Jika kamu menggunakan GitHub CLI, maka tinggal buka dan ketik di terminal
 
