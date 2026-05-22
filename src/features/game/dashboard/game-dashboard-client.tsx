@@ -33,14 +33,14 @@ export function GameDashboardClient({ data }: GameDashboardProps) {
 
   const topHostsData =
     charts.topHosts?.map((h: any) => ({
-      name: h.fullname,
+      name: `@${h.username}`,
       count: h.count,
       id: h.id,
     })) || [];
 
   const topAppsData =
     charts.apps?.map((a: any) => ({
-      name: a.name,
+      name: a.name?.trim() ? a.name : "Unknown",
       count: a.value,
     })) || [];
 

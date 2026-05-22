@@ -511,7 +511,7 @@ export function GroupDetailClient({
                           .toUpperCase();
                         return (
                           <div
-                            key={member.user_id || index}
+                            key={`${member.user_id || 'user'}-${index}`}
                             className="group relative flex items-start gap-3 rounded-xl border border-border bg-card p-4 transition-all hover:shadow-md hover:border-primary/50"
                           >
                             <Avatar className="h-10 w-10 border border-border shrink-0">

@@ -40,6 +40,7 @@ export interface GroupsResponse {
 
 export interface GroupMember {
   user_id: string
+  id?: string
   username: string | null
   fullname: string | null
   avatar_url: string | null

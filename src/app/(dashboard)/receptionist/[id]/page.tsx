@@ -25,6 +25,7 @@ import { Button } from "@/src/components/ui/button";
 import { SearchInput } from "@/components/shared/search-input";
 import { useToast } from "@/src/components/ui/use-toast";
 import { Checkbox } from "@/src/components/ui/checkbox";
+import { Avatar, AvatarImage, AvatarFallback } from "@/src/components/ui/avatar";
 
 interface Participant {
   id: string; // competition_participants.id
@@ -458,15 +459,12 @@ export default function ReceptionistDetailPage() {
         className="data-[state=checked]:bg-emerald-500 data-[state=checked]:text-white data-[state=checked]:border-emerald-500 h-5 w-5 rounded-md"
         onClick={(e) => e.stopPropagation()} // Prevent double firing
       />
-      <div className="relative h-9 w-9 rounded-full bg-muted overflow-hidden shrink-0">
-        {p.avatar_url ? (
-          <img src={p.avatar_url} alt={p.fullname} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-xs font-medium text-muted-foreground">
-            {p.fullname.charAt(0).toUpperCase()}
-          </div>
-        )}
-      </div>
+      <Avatar className="h-9 w-9 shrink-0">
+        <AvatarImage src={p.avatar_url || ""} alt={p.fullname} className="object-cover" />
+        <AvatarFallback className="text-xs font-medium text-muted-foreground bg-muted">
+          {p.fullname.charAt(0).toUpperCase()}
+        </AvatarFallback>
+      </Avatar>
       <div className="flex-1 min-w-0">
         <p className={`text-sm font-medium truncate ${p.attended ? "text-emerald-700 dark:text-emerald-400" : "text-foreground"}`}>
           {p.fullname}

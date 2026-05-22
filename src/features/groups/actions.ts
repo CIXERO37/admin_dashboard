@@ -147,7 +147,7 @@ export async function fetchGroupById(id: string): Promise<{ data: GroupDetail | 
   const rawMembers = (group.members as GroupMember[]) ?? []
   
   // Enrich members data from profiles if missing
-  const userIds = rawMembers.map((m) => m.user_id).filter(Boolean)
+  const userIds = rawMembers.map((m) => m.user_id || m.id).filter(Boolean)
   let profilesMap: Record<string, { fullname: string | null; username: string | null; avatar_url: string | null }> = {}
   
   if (userIds.length > 0) {
@@ -164,12 +164,16 @@ export async function fetchGroupById(id: string): Promise<{ data: GroupDetail | 
     }
   }
 
-  const members = rawMembers.map((m) => ({
-    ...m,
-    fullname: m.fullname || profilesMap[m.user_id]?.fullname || null,
-    username: m.username || profilesMap[m.user_id]?.username || null,
-    avatar_url: m.avatar_url || profilesMap[m.user_id]?.avatar_url || null,
-  }))
+  const members = rawMembers.map((m) => {
+    const uId = m.user_id || (m.id as string)
+    return {
+      ...m,
+      user_id: uId,
+      fullname: m.fullname || profilesMap[uId]?.fullname || null,
+      username: m.username || profilesMap[uId]?.username || null,
+      avatar_url: m.avatar_url || profilesMap[uId]?.avatar_url || null,
+    }
+  })
 
   return {
     data: {
@@ -214,7 +218,7 @@ export async function fetchGroupMembers({
   const rawMembers = (group.members as GroupMember[]) ?? []
 
   // Enrich members data from profiles if missing
-  const userIds = rawMembers.map((m) => m.user_id).filter(Boolean)
+  const userIds = rawMembers.map((m) => m.user_id || m.id).filter(Boolean)
   let profilesMap: Record<string, { fullname: string | null; username: string | null; avatar_url: string | null }> = {}
   
   if (userIds.length > 0) {
@@ -231,12 +235,16 @@ export async function fetchGroupMembers({
     }
   }
 
-  let members = rawMembers.map((m) => ({
-    ...m,
-    fullname: m.fullname || profilesMap[m.user_id]?.fullname || null,
-    username: m.username || profilesMap[m.user_id]?.username || null,
-    avatar_url: m.avatar_url || profilesMap[m.user_id]?.avatar_url || null,
-  }))
+  let members = rawMembers.map((m) => {
+    const uId = m.user_id || (m.id as string)
+    return {
+      ...m,
+      user_id: uId,
+      fullname: m.fullname || profilesMap[uId]?.fullname || null,
+      username: m.username || profilesMap[uId]?.username || null,
+      avatar_url: m.avatar_url || profilesMap[uId]?.avatar_url || null,
+    }
+  })
 
   // Filter by role
   if (role && role !== "all") {
@@ -288,7 +296,7 @@ export async function removeGroupMember(groupId: string, userId: string) {
   }
 
   const members = (group.members as GroupMember[]) ?? []
-  const updatedMembers = members.filter((m) => m.user_id !== userId)
+  const updatedMembers = members.filter((m) => (m.user_id || m.id) !== userId)
 
   const { error } = await supabase
     .from("groups")
@@ -320,7 +328,7 @@ export async function updateMemberRole(groupId: string, userId: string, role: st
 
   const members = (group.members as GroupMember[]) ?? []
   const updatedMembers = members.map((m) =>
-    m.user_id === userId ? { ...m, role } : m
+    (m.user_id || m.id) === userId ? { ...m, role } : m
   )
 
   const { error } = await supabase

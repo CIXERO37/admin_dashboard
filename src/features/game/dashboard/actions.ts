@@ -122,8 +122,9 @@ export async function getGameDashboardStats(timeRange: string = "this-year") {
     }
 
     // By App
-    let app = session.application || "Unknown";
-    app = app.replace(/\.com$/i, "").toUpperCase(); // Clean app name
+    let app = session.application || "";
+    app = app.trim().replace(/\.com$/i, "").toUpperCase(); // Clean app name
+    if (!app) app = "UNKNOWN";
     sessionsByApp[app] = (sessionsByApp[app] || 0) + 1;
 
     // By Date (Last 30 days filter could be applied here or in query)
@@ -163,7 +164,8 @@ export async function getGameDashboardStats(timeRange: string = "this-year") {
   const appDistributionData = Object.entries(sessionsByApp).map(([name, value]) => ({
     name,
     value
-  })).sort((a, b) => b.value - a.value);
+  })).sort((a, b) => b.value - a.value).slice(0, 5);
+  // console.log("=== APP DISTRIBUTION DATA ===", appDistributionData);
 
   // 3. Top Hosts (Need to fetch names)
   const topHostIds = Object.entries(hostCounts)

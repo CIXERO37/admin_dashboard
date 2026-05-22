@@ -1,56 +1,75 @@
 ---
 name: Project Structure & Organization
-description: Guidelines for a clean, modular, and scalable folder structure in a Next.js + Supabase project.
+description: Guidelines for a clean, modular, and scalable Feature-Based architecture in a Next.js + Supabase project.
 ---
 
 # Project Structure & Organization
 
-Follow this structure to ensure the project remains "Clean, Modular, and Easy to Understand" (Poin 1 & 2 of the Briefing).
+Follow this structure to ensure the project remains "Clean, Modular, and Easy to Understand", adopting a **Feature-Based Architecture**.
 
 ## 1. High-Level Folder Overview
 
 ```txt
-├── app/                  # Routing, Layouts, and Page components
-├── components/           # UI and Feature-specific components
-├── lib/                  # Core logic, services, and shared utilities
-├── hooks/                # Global reusable React hooks
-├── types/                # Global TypeScript interfaces/types
-├── public/               # Static assets (images, icons, WebP)
-└── styles/               # Global CSS and Tailwind theme configs
+src/
+├── app/                  # Next.js App Router (Routing only, no complex logic)
+├── features/             # Core Feature Domains (The heart of the app)
+├── components/           # Global Shared UI Components (Shadcn, generic UI)
+├── lib/                  # Core infrastructure (Supabase, utils, i18n)
+├── hooks/                # Global React hooks
+├── types/                # Global TypeScript types
+└── styles/               # Global CSS and Tailwind configs
 ```
 
-## 2. The `app/` Directory (App Router) & Colocation
-Use **Colocation** extensively. Keep route-specific components, hooks, and server actions closely coupled to the route where they belong.
+## 2. The `src/features/` Directory (The Core Hub)
+
+All business logic, state, and feature-specific UI must be grouped by domain (e.g., `users`, `groups`, `manage-competitions`, `game`). 
+Inside each feature folder, adhere to this structure:
 
 ```txt
-app/(dashboard)/users/
-├── page.tsx              # Main Page (Server/Client Component)
-├── actions.ts            # Next.js Server Actions specific to this route
-├── _components/          # Private UI components (e.g., user-table.tsx)
-├── _hooks/               # Private hooks (e.g., use-users-table.ts)
-└── [id]/                 # Nested Route
-    └── page.tsx
+src/features/<feature-name>/
+├── components/           # UI components used globally across the feature
+├── _components/          # Private UI components used ONLY for specific pages/routes
+├── hooks/                # Custom hooks used globally across the feature
+├── _hooks/               # Private hooks used ONLY for specific pages/routes
+├── types/                # Types/Interfaces specific to this feature
+├── services/             # Abstractions, API calls, or Server Actions for this feature
+├── actions.ts            # Next.js Server Actions (can also be inside services/)
+├── [id]/                 # Sub-routes or detailed views for this domain
+│   ├── _components/      # Components strictly private to this sub-route
+│   └── page-client.tsx
+└── index.ts              # Public API for this feature (exporting what others can use)
 ```
 
-## 3. The `lib/` Directory (The Logic Hub)
-Avoid putting business logic in the `app/` directory.
+### The Underscore Prefix Rule (`_`)
+- **Public / Shared (No Underscore)**: Directories like `components/` and `hooks/` mean the files inside are intended to be shared and reused **globally** (across the feature or even the app).
+- **Private (With Underscore)**: Directories like `_components/` and `_hooks/` mean the files are **private** and strictly used only by the immediate surrounding pages or a few closely related pages. They should NOT be imported globally.
 
-- **`lib/services/`**: Centralized, reusable data fetching services. If logic is only for ONE route, prefer putting it in an `actions.ts` inside that route folder instead of here.
-- **`lib/utils.ts`**: Helper functions (date formatting, currency, etc.).
-- **`lib/supabase/`**: Supabase client configurations (browser/server).
+## 3. The `src/app/` Directory (App Router)
+
+Keep the `app/` directory as a **thin wrapper**. Do **not** put complex business logic here.
+Use `page.tsx` and `layout.tsx` purely for routing, fetching initial server data (if necessary), and rendering the main Client/Server components imported from `src/features/`.
+
+```txt
+src/app/(dashboard)/groups/
+├── page.tsx              # Imports <GroupDetailClient /> from src/features/groups/
+└── layout.tsx
+```
+
+## 4. The `src/components/` Directory (Global Shared UI)
+
+Use this directory ONLY for components that are truly global and cross-domain.
+- **`components/ui/`**: Base primitive components (e.g., Shadcn UI).
+- **`components/shared/`**: Generic reusable UI (e.g., `ConfirmActionDialog`, `SearchInput`).
+- **`components/dashboard/`**: Reusable primitives for dashboards (e.g., `StatCard`, generic `DataTable`).
+
+## 5. The `src/lib/` Directory (Core Infrastructure)
+Avoid putting feature business logic here. This is strictly for:
+- **`lib/supabase/`**: Supabase client configurations (browser, server, admin).
+- **`lib/utils.ts`**: Helper functions (date formatting, classNames, id generators).
 - **`lib/i18n/`**: Localization setup.
 
-## 4. The `components/` Directory
-Follow the Atomic/Layered approach:
-
-- **`components/ui/`**: Base Shadcn components.
-- **`components/dashboard/`**: Reusable dashboard-specific elements (e.g. `DataTable`, `Sidebar`).
-- **`components/shared/`**: Generic reusable UI (e.g. `ConfirmDialog`, `LoadingSpinner`).
-
-## 5. Metadata & SEO
-Every page in `app/` should have a `metadata` object or a `generateMetadata` function for SEO and browser titles.
-
 ## 6. Naming Conventions
-- **Files**: Use kebab-case (e.g., `manage-competitions.tsx`) or PascalCase for components (e.g., `DataTable.tsx`). Be consistent.
-- **Directories**: Always use kebab-case (e.g., `competition-detail`).
-- **Private Folders**: Prefix with an underscore (e.g., `_components`) to signal they are not routes.
+
+- **Files**: Use `kebab-case` for all files (e.g., `group-detail-client.tsx`, `manage-competitions.tsx`). Be consistent.
+- **Directories**: Always use `kebab-case` (e.g., `competition-detail`).
+- **Feature Folders**: Use plural names when representing collections (e.g., `users`, `groups`) or specific domain names (e.g., `manage-competitions`, `game`).

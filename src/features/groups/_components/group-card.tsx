@@ -90,7 +90,7 @@ export function GroupCard({ group, onDelete }: GroupCardProps) {
       className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-lg transition-all duration-300 hover:shadow-xl hover:border-primary/50 cursor-pointer"
       onClick={handleCardClick}
     >
-      <div className="relative p-4 bg-muted overflow-hidden h-32">
+      <div className="relative p-4 bg-muted overflow-hidden h-36">
         {coverUrl ? (
           <>
             <Image
@@ -202,7 +202,7 @@ export function GroupCard({ group, onDelete }: GroupCardProps) {
           </Avatar>
           <div className="flex-1 min-w-0">
             <h3
-              className={`font-bold text-base truncate leading-tight ${
+              className={`font-bold text-base line-clamp-2 leading-tight ${
                 coverUrl ? "text-white" : "text-foreground"
               }`}
               title={name}

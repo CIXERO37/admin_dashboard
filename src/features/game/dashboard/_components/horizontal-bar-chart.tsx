@@ -67,6 +67,7 @@ export function HorizontalBarChart({
                 tickMargin={10}
                 axisLine={false}
                 width={yAxisWidth}
+                interval={0}
                 tick={(props) => {
                   const item = data.find((d) => d.name === props.payload.value);
                   return (

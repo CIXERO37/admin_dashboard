@@ -24,13 +24,6 @@ export async function middleware(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           )
-          
-          // Manually sync the cookie header for Server Components
-          const cookieHeader = request.cookies
-            .getAll()
-            .map((c) => `${c.name}=${c.value}`)
-            .join("; ")
-          request.headers.set("cookie", cookieHeader)
 
           supabaseResponse = NextResponse.next({
             request,
