@@ -1,11 +1,11 @@
-# 🎮 Gameforsmart - Admin Dashboard
+# 🎮 GameforSmart - Admin Dashboard
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![Next.js](https://img.shields.io/badge/Next.js-14+-black?logo=next.js)
 ![Supabase](https://img.shields.io/badge/Supabase-Database-3ecf8e?logo=supabase)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-Framework-38B2AC?logo=tailwind-css)
 
-> **"Kokpit Utama"** atau ruang kendali _back-office_ untuk tim manajemen platform Gameforsmart.
+> **"Ruang Kendali"** _back-office_ untuk tim manajemen platform GameforSmart.
 
 ---
 
@@ -23,7 +23,7 @@ Lebih dari sekadar kuis biasa, platform ini memiliki skala yang jauh lebih besar
 
 ## 🎛️ Apa itu Admin Dashboard for Gameforsmart?
 
-Ini adalah **"Markas Besar"** bagi tim internal yang mengelola Gameforsmart. Karena Gameforsmart menampung ribuan pengguna, kuis, dan turnamen, tim manajemen membutuhkan antarmuka visual (UI) yang canggih untuk memantau, mengubah, dan menyetujui data tanpa harus berhadapan langsung dengan _database_ (Supabase).
+Ini adalah **"Ruang Kendali"** bagi tim internal yang mengelola Gameforsmart. Karena Gameforsmart menampung data pengguna, kuis, dan turnamen, tim manajemen membutuhkan antarmuka visual (UI) yang bagus untuk memantau, mengubah, dan menyetujui data tanpa harus berhadapan langsung dengan _database_ (Supabase).
 
 ---
 
@@ -56,17 +56,7 @@ Secara teknis, konsep pembangunannya meliputi:
 
 ---
 
-## 👁️ Visi dari Sudut Pandang Creator
+## Cara Penginstalan
 
-> _"Saya ingin membangun Gameforsmart menjadi platform edukasi interaktif nomor satu. Tapi aplikasi yang hebat di sisi pengguna saja tidak cukup. Saya butuh sebuah 'Markas Besar' (Admin Dashboard) yang canggih. Saya ingin tim saya bisa melihat dengan jelas jumlah pengguna aktif hari ini, memblokir kuis yang tidak pantas dengan satu klik, mengatur turnamen e-learning layaknya turnamen e-sports profesional lengkap dengan sistem bracket-nya, dan memastikan arus pembayaran berjalan lancar."_
-
-Visi di atas diterjemahkan dengan sangat akurat ke dalam arsitektur kode proyek ini:
-
-- 🎮 **Turnamen e-sports edukasi** ➡️ Modul `manage-competitions` (bracket, registrasi, fase ronde).
-- ⚖️ **Moderasi konten ketat** ➡️ Modul `quiz-approval` dengan `rejection-templates`.
-- 👮 **Kedisiplinan platform** ➡️ Modul `reports` dan `trash-bin`.
-- 🌍 **Platform berskala global** ➡️ Modul `address` (`country`, `state`, `city`) dan pemetaan koordinat benua.
-
----
 
 _Dokumen ini merupakan panduan konseptual proyek Admin Dashboard Gameforsmart._
