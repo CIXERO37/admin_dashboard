@@ -56,7 +56,47 @@ Secara teknis, konsep pembangunannya meliputi:
 
 ---
 
-## Cara Penginstalan
+## Cara Penginstalan atau _Clone_
+
+_Clone_ adalah suatu proses pembuatan replika dari repository ini ke folder di local. Kamu bisa melakukan Clone dengan step seperti berikut: 
+
+1. **Klik Button Code** di bagian atas repository
+   
+   <img width="253" height="68" alt="Screenshot_20260522_133255" src="https://github.com/user-attachments/assets/ff769242-b604-41c7-bbe0-ae3bddc953aa" />
+
+3. **Pilih Cara _Clone_** , Kamu bisa _clone_ dengan **_install Zip_**, **Web URL** atau **GitHub CLI**
+
+   - **Install Zip**
+  
+     <img width="437" height="286" alt="Screenshot_20260522_133327" src="https://github.com/user-attachments/assets/dff2efb1-7ad0-42da-933f-6733948b7bee" />
+
+     Kamu dapat tekan button **Install Zip**, lalu extract di folder project mu
+
+   - **_Clone_ menggunakan WEB URL**
+     <img width="437" height="286" alt="Screenshot_20260522_133327" src="https://github.com/user-attachments/assets/dff2efb1-7ad0-42da-933f-6733948b7bee" />
+
+     copy link nya, lalu buat folder untuk tempat _cloning_ nya, lalu buka terminal atau CMD di folder tersebut, kemudian masukkan command
+  
+     ```bash
+     git clone https://github.com/CIXERO37/admin_dashboard.git
+     
+   - **_Clone menggunakan GitHub CLI**
+
+     Jika kamu menggunakan GitHub CLI, maka tinggal buka dan ketik di terminal **_gh repo clone CIXERO37/admin_dashboard_** seperti pada gambar berikut
+
+     <img width="171" height="295" alt="images" src="https://github.com/user-attachments/assets/168db899-b3e1-47ea-a469-31798f6a55c0" />
+
+---
+
+## Cara Menjalankan Project nya
+
+1. Buka folder atau project nya di Antigravity atau Visual Studio Code
+2. buat file .env .local di root project
+
+   <img width="342" height="332" alt="image" src="https://github.com/user-attachments/assets/328d8b50-9e72-4d2e-addc-a79c7ffe4c2f" />
+
+   Isi file nya dengan 
+   
 
 
 _Dokumen ini merupakan panduan konseptual proyek Admin Dashboard Gameforsmart._
