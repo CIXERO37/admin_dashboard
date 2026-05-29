@@ -17,14 +17,14 @@ export async function getCompetitionDashboardStats() {
     // 2. Fetch categories
     const { data: categories, error: catError } = await supabase
       .from("competition_categories")
-      .select("id, status");
+      .select("id, name, status");
 
     if (catError) throw catError;
 
-    // 3. Fetch participants count
-    const { count: participantsCount, error: partError } = await supabase
+    // 3. Fetch participants
+    const { data: participantsData, count: participantsCount, error: partError } = await supabase
       .from("competition_participants")
-      .select("id", { count: "exact", head: true });
+      .select("competition_id", { count: "exact" });
 
     if (partError) throw partError;
 
@@ -61,6 +61,33 @@ export async function getCompetitionDashboardStats() {
       return end < now;
     }) || [];
 
+    const participantsByComp = (participantsData || []).reduce((acc: any, p: any) => {
+      acc[p.competition_id] = (acc[p.competition_id] || 0) + 1;
+      return acc;
+    }, {});
+
+    const participantsChartData = (competitions || [])
+      .map(c => ({
+        title: c.title,
+        participants: participantsByComp[c.id] || 0
+      }))
+      .filter(item => item.participants > 0)
+      .sort((a, b) => b.participants - a.participants)
+      .slice(0, 5);
+
+    const categoriesChartData = (categories || []).map(cat => {
+      let count = 0;
+      (competitions || []).forEach(c => {
+        if (c.category) {
+          const usedCats = c.category.split(",").map((s: string) => s.trim().toLowerCase());
+          if (usedCats.includes(cat.name.toLowerCase())) {
+            count++;
+          }
+        }
+      });
+      return { name: cat.name, count };
+    }).filter(item => item.count > 0).sort((a, b) => b.count - a.count);
+
     return {
       stats: {
         totalCompetitions,
@@ -71,6 +98,10 @@ export async function getCompetitionDashboardStats() {
         inactiveCategories,
         totalParticipants: participantsCount || 0,
         ongoingCount: ongoingCompetitions.length,
+      },
+      chartData: {
+        categoriesChart: categoriesChartData,
+        participantsChart: participantsChartData,
       },
       lists: {
         ongoing: ongoingCompetitions,

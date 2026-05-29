@@ -47,7 +47,7 @@ export default function GlobalDashboardPage() {
           <ActionCard
             title={t("dashboard.support_center")}
             description={t("dashboard.support_center_desc")}
-            href="/support"
+            href="/support/dashboard"
             icon={Headphones}
             stats={
               loading ? "..." : `${stats.pendingReports} ${t("stats.pending")}`
@@ -56,7 +56,7 @@ export default function GlobalDashboardPage() {
           <ActionCard
             title={t("stats.users")}
             description={t("dashboard.users_desc")}
-            href="/administrator/user"
+            href="/users"
             icon={Users}
             stats={
               loading
@@ -69,7 +69,7 @@ export default function GlobalDashboardPage() {
           <ActionCard
             title={t("nav.master_data")}
             description={t("dashboard.master_data_desc")}
-            href="/master"
+            href="/master/dashboard"
             icon={Database}
             stats={
               loading

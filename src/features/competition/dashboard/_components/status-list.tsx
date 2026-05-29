@@ -7,8 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/components/ui/ta
 import { useRouter } from "next/navigation";
 import { Image as ImageIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/src/components/ui/dialog";
+import { useTranslation } from "@/lib/i18n";
 
 export function StatusList({ lists }: { lists: any }) {
+  const { locale } = useTranslation();
   const router = useRouter();
   const [previewPoster, setPreviewPoster] = useState<{ url: string; title: string } | null>(null);
 
@@ -65,11 +67,11 @@ export function StatusList({ lists }: { lists: any }) {
               
               <div className="text-xs text-right text-muted-foreground shrink-0 ml-4">
                 <span className="block mb-1">
-                  Start: {comp.registration_start_date ? format(new Date(comp.registration_start_date), "MMM d, yyyy") : 'TBA'}
+                  {locale === "id" ? "Mulai" : "Start"}: {comp.registration_start_date ? format(new Date(comp.registration_start_date), "MMM d, yyyy") : (locale === "id" ? "Belum ditentukan" : 'TBA')}
                 </span>
                 <span>
-                  End: {comp.final_end_date ? format(new Date(comp.final_end_date), "MMM d, yyyy") : 
-                   comp.registration_end_date ? format(new Date(comp.registration_end_date), "MMM d, yyyy") : 'TBA'}
+                  {locale === "id" ? "Selesai" : "End"}: {comp.final_end_date ? format(new Date(comp.final_end_date), "MMM d, yyyy") : 
+                   comp.registration_end_date ? format(new Date(comp.registration_end_date), "MMM d, yyyy") : (locale === "id" ? "Belum ditentukan" : 'TBA')}
                 </span>
               </div>
             </div>
@@ -81,21 +83,21 @@ export function StatusList({ lists }: { lists: any }) {
 
   return (
     <div className="mt-6">
-      <h3 className="text-lg font-semibold mb-4 text-foreground">Competitions by Schedule</h3>
+      <h3 className="text-lg font-semibold mb-4 text-foreground">{locale === "id" ? "Kompetisi Berdasarkan Jadwal" : "Competitions by Schedule"}</h3>
       <Tabs defaultValue="ongoing" className="w-full">
         <TabsList className="mb-4">
-          <TabsTrigger value="ongoing">Ongoing ({lists?.ongoing?.length || 0})</TabsTrigger>
-          <TabsTrigger value="comingSoon">Coming Soon ({lists?.comingSoon?.length || 0})</TabsTrigger>
-          <TabsTrigger value="completed">Completed ({lists?.completed?.length || 0})</TabsTrigger>
+          <TabsTrigger value="ongoing">{locale === "id" ? "Berlangsung" : "Ongoing"} ({lists?.ongoing?.length || 0})</TabsTrigger>
+          <TabsTrigger value="comingSoon">{locale === "id" ? "Akan Datang" : "Coming Soon"} ({lists?.comingSoon?.length || 0})</TabsTrigger>
+          <TabsTrigger value="completed">{locale === "id" ? "Selesai" : "Completed"} ({lists?.completed?.length || 0})</TabsTrigger>
         </TabsList>
         <TabsContent value="ongoing" className="mt-0">
-          {renderList(lists?.ongoing, "No ongoing competitions at the moment.")}
+          {renderList(lists?.ongoing, locale === "id" ? "Tidak ada kompetisi yang sedang berlangsung saat ini." : "No ongoing competitions at the moment.")}
         </TabsContent>
         <TabsContent value="comingSoon" className="mt-0">
-          {renderList(lists?.comingSoon, "No upcoming competitions.")}
+          {renderList(lists?.comingSoon, locale === "id" ? "Tidak ada kompetisi yang akan datang." : "No upcoming competitions.")}
         </TabsContent>
         <TabsContent value="completed" className="mt-0">
-          {renderList(lists?.completed, "No completed competitions yet.")}
+          {renderList(lists?.completed, locale === "id" ? "Belum ada kompetisi yang selesai." : "No completed competitions yet.")}
         </TabsContent>
       </Tabs>
 
@@ -105,7 +107,7 @@ export function StatusList({ lists }: { lists: any }) {
         onOpenChange={() => setPreviewPoster(null)}
       >
         <DialogContent className="max-w-lg p-2">
-          <DialogTitle className="sr-only">Poster Preview</DialogTitle>
+          <DialogTitle className="sr-only">{locale === "id" ? "Pratinjau Poster" : "Poster Preview"}</DialogTitle>
           {previewPoster && (
             <div className="flex flex-col gap-2">
               <p className="text-sm font-medium px-2 pt-2">
