@@ -1,30 +1,29 @@
 ## Gambaran Umum Groups
 
-**Groups** berfungsi sebagai halaman daftar komunitas atau grup pengguna. Administrator dapat melihat grup, memfilter berdasarkan negara atau kategori, dan membuka detail anggota grup.
+**Groups** difungsikan sebagai wadah pendaftaran serta katalog kelompok/komunitas pengguna ekosistem. Modul ini membekali fungsionalitas bagi admin untuk mensupervisi entitas *group*, menyortirnya melalui kategori fungsional dan letak negara asal, serta menjadi batu loncatan awal untuk mendalami rincian relasi dan data anggotanya.
 
 ### Bagian-Bagian Utama
 
-1. **Data Grup dari Store** - Halaman mengambil `groups` dan `isLoading` dari `useDashboardData`.
+1. **Data Source (Pengelola State dan Actions)** 
+   - **Data Grup Pusat** - Pengumpulan muatan *list* entitas komunitas ditarik melalui injeksi *custom hook* klien bernama `useDashboardData`. Data direpresentasikan melalui instansiasi tipe objek abstrak `groups`.
+   - **Data Filter Tambahan** - Resolusi data pilihan (opsi combo dropdown) untuk *filter* letak yurisdiksi (`fetchCountries`) dan spesifikasi tipologi grup (`fetchGroupCategories`) dilangsungkan dalam level klien.
 
-2. **Data Filter Tambahan** - `fetchCountries` dan `fetchGroupCategories` dijalankan client-side untuk mengisi filter negara dan kategori.
-
-3. **Skeleton Grid** - Jika data masih loading, halaman menampilkan skeleton kartu grup dalam grid responsif.
-
-4. **Group Table** - `GroupTable` menerima data grup, daftar negara, dan daftar kategori untuk menampilkan daftar serta filter.
-
-5. **Navigasi Detail Grup** - Setiap grup dapat dibuka ke `groups/[id]` untuk melihat informasi dan anggota.
+2. **Komponen Pengelola & Interaktivitas UI**
+   - **Tabel Daftar Komunitas (`GroupTable`)** - Komponen inti klien pembungkus iterasi row. Tidak sekadar me-render grid tabel, ia juga memelihara status reaktif untuk daftar negara maupun kategori filter, serta mengikat pergerakan properti pencarian.
+   - **Skeleton Grid (Indikator Pemuatan)** - Sepanjang waktu jeda API `isLoading` mengembalikan *true*, sistem *rendering* disisipkan dengan *placeholder* kerangka (*skeleton*) baris kartu komunitas rekayasa untuk mencegah layar terlihat membeku.
+   - **Navigasi Rincian Grup** - ID referensial spesifik yang muncul dalam masing-masing grid kartu bersifat tautan (berfungsi meneruskan arah navigasi operasional ke halaman rincian `groups/[id]`).
 
 ### Struktur File & Penghubungan
 
-- **Halaman Groups** - `src/app/(dashboard)/groups/page.tsx`.
-- **Tabel Groups** - `src/features/groups/group-table.tsx`.
-- **Group Card** - `src/features/groups/_components/group-card.tsx`.
-- **Dialog Groups** - `src/features/groups/_components/group-dialogs.tsx`.
-- **Hook Tabel** - `src/features/groups/_hooks/use-groups-table.ts`.
-- **Actions Groups** - `src/features/groups/actions.ts`.
-- **Tipe Group** - `src/features/groups/types/group.ts`.
+- **Halaman Groups** - `src/app/(dashboard)/groups/page.tsx`
+- **Tabel Groups** - `src/features/groups/group-table.tsx` - pengontrol logik interaktivitas grid.
+- **Group Card** - `src/features/groups/_components/group-card.tsx` - komponen sub-elemen ubin UI tunggal.
+- **Dialog Groups** - `src/features/groups/_components/group-dialogs.tsx`
+- **Hook Tabel** - `src/features/groups/_hooks/use-groups-table.ts`
+- **Actions Groups** - `src/features/groups/actions.ts` - menampung operasi pemanggilan Supabase untuk dukungan elemen filter.
+- **Tipe Group** - `src/features/groups/types/group.ts` - kerangka interface TypeScript.
 
-Contoh penghubungan utama:
+Contoh konektivitas integrasi hook *state* dalam satu unit baris kode page:
 
 ```tsx
 import { GroupTable } from "@/src/features/groups/group-table";
@@ -33,7 +32,7 @@ import { fetchCountries, fetchGroupCategories } from "@/src/features/groups/acti
 
 ### Menambahkan Filter Grup
 
-Tambahkan data filter di `actions.ts`, simpan state filter pada hook tabel, lalu teruskan opsi filter ke `GroupTable`. Untuk filter lokasi, gunakan tipe `Country` yang sudah tersedia.
+Apabila diperlukan tambahan faset kategori (*taxonomy filter*) baru untuk pengelompokkan, jabarkan logika instruksi agregasinya di fungsi utilitas `actions.ts`. Simpan nilainya (dari tangkapan data asinkron) ke dalam *hook table* state, kemudian wariskan operannya kepada props filter yang eksis di form `GroupTable`. Khusus untuk ekstensi yang merujuk pada domisili (seperti *City* atau *State*), rekomendasikan pendaurulangan tipe referensi `Country` untuk keseragaman tipe skema global.
 
 ---
-*Deskripsi ini merangkum halaman daftar grup beserta data pendukung untuk filter.*
+*Deskripsi ini menegaskan pengadaan modul katalog daftar kumpulan anggota dan kerangka penyortir kombinasinya.*

@@ -1,28 +1,26 @@
 ## Gambaran Umum Rejection Templates
 
-**Rejection Templates** berfungsi sebagai pusat pengelolaan template alasan penolakan quiz. Halaman ini membantu administrator menjaga konsistensi pesan saat menolak konten yang tidak memenuhi standar.
+**Rejection Templates** dipersiapkan sebagai pangkalan data terpusat (*Library Hub*) dalam mengakomodasi pengaturan draf/cetakan teks justifikasi pembatalan. Eksistensi halaman peladen operasional moderasi ini memampukan tim panitia (*administrator*) mengontrol, merevisi, sekaligus menjamin penyeragaman frasa notifikasi saat menjatuhkan palu larangan pemuatan (*rejection*) terhadap karya kuis yang tidak memenuhi *Terms of Service* perusahaan.
 
 ### Bagian-Bagian Utama
 
-1. **Template Table** - Halaman merender `TemplateTable` sebagai komponen utama untuk daftar template.
+1. **Data Source (Pengelolaan API Cetakan Pesan)** - Tata kelola pemindahan kueri data templat pesan (pemanggilan, registrasi baru, mutasi modifikasi, eliminasi) direduksi secara elegan ke pangkalan modul eksekutor *Service Pattern* spesifik pada `rejection-template-service.ts`. Fungsionalitas logik sinkronisasi dan abstraksi kueri interaksinya dirajut erat melewati kerangka state pancingan (`hook`) `use-templates-table.ts`.
 
-2. **Kolom Template** - Konfigurasi kolom berada di feature rejection-templates dan menampilkan informasi template seperti judul, isi pesan, status, atau aksi.
-
-3. **Dialog CRUD** - Dialog digunakan untuk membuat, mengubah, atau menghapus template alasan penolakan.
-
-4. **Service Template** - Operasi data dipusatkan di service agar query Supabase tidak tersebar di komponen UI.
+2. **Komponen Manajerial Panel (`TemplateTable`)** - Bertindak sebagai perender utama tabel instrumen klien. Membawahi formasi matriks daftar aset *(Grid Table)*, menunjang integrasi modul utilitas filter teks *search bar* pencarian spesifik untuk lekas mensortir arsip kalimat teguran spesifik.
+   - **Kolom Definisi Tematik (`template-columns.tsx`)** - Menyediakan skema pilar-pilar matriks: Judul peruntukan (Label), potongan konten naskah pesan, serta elemen tombol interaksi opsional (indikasi aktif atau non-aktif).
+   - **Dialog Konfirmasi CRUD (`template-dialogs.tsx`)** - Sebuah modul *pop-up confirmation* khusus untuk meredam kecelakaan eksekusi *Create, Read, Update, Delete* aset-aset krusial basis teks ini.
 
 ### Struktur File & Penghubungan
 
-- **Halaman Rejection Templates** - `src/app/(dashboard)/rejection-templates/page.tsx`.
-- **Tabel Template** - `src/features/rejection-templates/template-table.tsx`.
-- **Kolom Template** - `src/features/rejection-templates/_components/template-columns.tsx`.
-- **Dialog Template** - `src/features/rejection-templates/_components/template-dialogs.tsx`.
-- **Hook Tabel** - `src/features/rejection-templates/_hooks/use-templates-table.ts`.
-- **Actions** - `src/features/rejection-templates/actions.ts`.
-- **Service** - `src/features/rejection-templates/services/rejection-template-service.ts`.
+- **Halaman Rejection Templates** - `src/app/(dashboard)/rejection-templates/page.tsx`
+- **Tabel Template** - `src/features/rejection-templates/template-table.tsx`
+- **Kolom Template** - `src/features/rejection-templates/_components/template-columns.tsx`
+- **Dialog Template** - `src/features/rejection-templates/_components/template-dialogs.tsx`
+- **Hook Tabel** - `src/features/rejection-templates/_hooks/use-templates-table.ts`
+- **Actions** - `src/features/rejection-templates/actions.ts` - menampung operasi pemanggilan aksi peladen dasar.
+- **Service** - `src/features/rejection-templates/services/rejection-template-service.ts`
 
-Contoh penghubungan utama:
+Metode integrasi pemanggilan utama perenderan kontrol antarmuka di level layer aplikasi:
 
 ```tsx
 import { TemplateTable } from "@/src/features/rejection-templates/template-table";
@@ -30,7 +28,7 @@ import { TemplateTable } from "@/src/features/rejection-templates/template-table
 
 ### Menambahkan Template Baru
 
-Tambahkan field baru pada tipe template jika diperlukan, perbarui service dan dialog form, lalu tampilkan field tersebut pada kolom tabel. Pastikan template yang aktif dapat dipakai kembali oleh alur `quiz-approval`.
+Apabila ada kebutuhan ekspansi fungsional atribut penyusunan templat penolakan (*Rejection Clause*) spesifik (umpamanya menyisipkan klasifikasi ancaman hukuman / pilar kategori hukuman *Offense Type*), wajib mengonversi nilai ekstensi itu di skema struktur (Type/Interface). Kembangkan tangkapan kriteria modul API (*Supabase CRUD Layer* pada bagian layer `service`), implementasikan ekstensi bidang rekam datanya menuju form penyusunan `template-dialogs.tsx`, lalu pantulkan relasinya membentuk tambahan blok pemaparan sel baru di barisan pilar `template-columns.tsx`. Pelihara integritas status "Aktif" template (Status Flag), dengan harapan koleksi argumen pangkalan modul templat yang masih relevan senantiasa dapat disinkronisasi alur logik integrasi layar `quiz-approval`.
 
 ---
-*Deskripsi ini merangkum halaman pengelolaan template penolakan dan hubungan file feature terkait.*
+*Deskripsi ini menegaskan pengadaan alat pengelolaan pangkalan cetakan formulasi argumentasi penahanan (*QA Rejection*).*

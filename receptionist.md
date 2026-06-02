@@ -1,27 +1,26 @@
 ## Gambaran Umum Receptionist
 
-**Receptionist** berfungsi sebagai halaman daftar kompetisi untuk kebutuhan registrasi kehadiran peserta. Halaman ini menjadi pintu masuk menuju detail attendance per kompetisi.
+**Receptionist** difungsikan sebagai konsol pengawas log operasional garda depan (*Front-Desk*) untuk pencatatan kehadiran audiens ajang perlombaan. Modul ini beroperasi selaku halaman pangkalan rujukan yang menyortir katalog kegiatan *event/competition* aktif yang berhak diproses rekam jejak kedatangannya. 
 
 ### Bagian-Bagian Utama
 
-1. **Fetch Daftar Kompetisi** - Data diambil lewat `fetchCompetitions` dari feature receptionist.
+1. **Data Source (Pengambilan Kueri Server-Side)** - Arus direktori katalog ditarik dari basis data memanfaatkan fungsionalitas asinkron *server action* `fetchCompetitions` dari utilitas servis layer (feature *receptionist*). Rekaman agregat ditransmisikan menuju komponen UI bersama dengan instrumen penahan eror *server/database* (`initialError`).
 
-2. **Tabel Receptionist** - `ReceptionistTable` menerima `initialData` dan `initialError`, lalu menampilkan daftar kompetisi yang dapat diproses oleh receptionist.
-
-3. **State Error Awal** - Error dari server action diteruskan ke tabel agar UI dapat menampilkan pesan yang sesuai.
-
-4. **Navigasi Attendance Detail** - Setiap kompetisi dapat dibuka ke route `receptionist/[id]` untuk melakukan check-in peserta.
+2. **Komponen Tabel & Antarmuka Aksi**
+   - **Tabel Antrean Manajemen Pintu Masuk (`ReceptionistTable`)** - Selubung instrumen interaktif peladen (*client wrapper*) pembangun blok kisi-kisi penyeleksi daftar kompetisi. Tabel memakan alokasi data dari *props initialData*, lalu merendernya dalam format ringkas berserta utilitas bar filter.
+   - **Status Evaluasi (Error State)** - Menurunkan instrumen penengah diagnostik kelalaian peladen ke tabel presentasional. Mencegah runtuhnya *layouting* modul serta memperlihatkan justifikasi ketiadaan kueri daftar secara manusiawi pada antarmuka.
+   - **Lompatan Menu Aksi (Attendance Router)** - Baris barisan tabel menautkan pengungkit operasional (tombol navigasi) mengarah ke laman URI pengurusan absensi pesertanya (Route Detail: `receptionist/[id]`) untuk dilaksanakannya pencetakan cek absensi otomatis/manual.
 
 ### Struktur File & Penghubungan
 
-- **Halaman Receptionist** - `src/app/(dashboard)/receptionist/page.tsx`.
-- **Actions Receptionist** - `src/features/receptionist/actions.ts`.
-- **Tabel Receptionist** - `src/features/receptionist/receptionist-table.tsx`.
-- **Kolom Receptionist** - `src/features/receptionist/_components/receptionist-columns.tsx`.
-- **Hook Tabel** - `src/features/receptionist/_hooks/use-receptionist-table.ts`.
-- **Tipe Receptionist** - `src/features/receptionist/types/receptionist.ts`.
+- **Halaman Receptionist** - `src/app/(dashboard)/receptionist/page.tsx`
+- **Actions Receptionist** - `src/features/receptionist/actions.ts` - menampung operasi pemanggilan antrean kueri kompetisi spesifik.
+- **Tabel Receptionist** - `src/features/receptionist/receptionist-table.tsx` - instrumen modul pemonitoran daftar tabel kompetisinya.
+- **Kolom Receptionist** - `src/features/receptionist/_components/receptionist-columns.tsx`
+- **Hook Tabel** - `src/features/receptionist/_hooks/use-receptionist-table.ts`
+- **Tipe Receptionist** - `src/features/receptionist/types/receptionist.ts`
 
-Contoh penghubungan utama:
+Kerangka penarikan konektivitas fungsionalitas asinkron API pangkalan data terhadap selubung panel:
 
 ```tsx
 import { fetchCompetitions } from "@/src/features/receptionist/actions";
@@ -30,7 +29,7 @@ import { ReceptionistTable } from "@/src/features/receptionist/receptionist-tabl
 
 ### Menambahkan Filter Receptionist
 
-Tambahkan filter di hook tabel dan action jika perlu query server-side. Jika filter berkaitan dengan status kompetisi atau jadwal, pastikan nilai status selaras dengan data `competitions`.
+Apabila dibutuhkan form penyaringan khusus bagi operator pengurus tiket (misalnya perombakan indikator penyortiran fase event *aktif/lampau* atau parameter domisili), jabarkan skema *state query action*-nya terpusat di fungsi instrumen *client-hook table*. Pelihara keseragaman properti kriteria tipe status pada penarikan log *Supabase* (area `actions.ts`) agar pemonitoran kalender tidak membelot dari pakem pangkalan modul kompetisinya (`competitions`).
 
 ---
-*Deskripsi ini menjelaskan fungsi halaman receptionist sebagai daftar kompetisi untuk proses attendance.*
+*Deskripsi ini menegaskan pengadaan rute fasilitas pengawalan pendaftaran antrean administrasi absensi pengunjung lomba.*

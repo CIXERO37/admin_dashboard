@@ -1,29 +1,27 @@
 ## Gambaran Umum Dashboard Master
 
-**Dashboard Master** berfungsi sebagai pusat analitik data wilayah. Halaman ini menampilkan jumlah negara, state, kota, pengguna yang memiliki lokasi, serta chart lokasi teratas.
+**Dashboard Master** difungsikan sebagai titik pantau komando geografis serta demografi agregat letak penyebaran aset (wilayah). Administrator diberkahi visibilitas laporan statistik metrik kuantitas domisili untuk skala yurisdiksi entitas (negara/provinsi/kota), juga tren popularitas basis pendaftaran partisipan pada rentang spesifik.
 
 ### Bagian-Bagian Utama
 
-1. **Filter Rentang Waktu** - Select menyediakan pilihan `this-year`, `last-year`, dan `all`. Perubahan filter memicu request ulang ke API dashboard master.
+1. **Data Source (Pengambilan API Endpoints *Client-Side*)** - Arsitektur pengadaan formasi ringkasan (*payload data*) di-trigger secara *asynchronous* pasca *layout component* dimuat, menembak langsung *custom route endpoint* lokal `/api/master-dashboard`. Indikator pengolahan reaktivitasnya disimpan pada wadah memori *State* di dalam skema komponen dashboard klien.
 
-2. **Fetch API Client-Side** - Data diambil dari `/api/master-dashboard?timeRange=...` dan disimpan di state client.
-
-3. **KPI Cards** - Kartu menampilkan total countries, states, cities, dan users with location. Tiga kartu pertama mengarah ke halaman address terkait.
-
-4. **Chart Top States dan Cities** - Dua chart bar horizontal memakai Recharts dan komponen chart shadcn untuk menampilkan lokasi dengan jumlah pengguna tertinggi.
-
-5. **Loading dan Empty State** - Skeleton ditampilkan saat request berlangsung, sedangkan chart menampilkan pesan no data jika dataset kosong.
+2. **Komponen Pembungkus Analitik Visual**
+   - **Penyaring Periode (Filter Rentang Waktu)** - Menu dropdown navigasi periode pengamatan visual (meliputi referensi metrik kalender: *this-year*, *last-year*, *all*). Manipulasi filter berakibat pada pembacaan mutasi URI _request_ parameter `timeRange=...` yang mereset integrasi rute API.
+   - **Kartu Agregasi Metrik Indikator Kunci (KPI Cards)** - Balok statistik presentasional penyaji komputasi akumulasi total wilayah Negara, wilayah Provinsi, pembagian regional Kota/Kabupaten, bersandingan dengan data total registran yang telah memverifikasi lokasi domisilinya. Elemen kartu geografis bisa diklik (sebagai navigasi kilat) membuka laman pendataan address yang ekuivalen.
+   - **Indikator Visual (*Recharts Top States & Cities*)** - Kombinasi utilitas grafik peraga dua buah blok *Bar Charts* beraliran horizontal, mengolaborasikan paket eksternal `Recharts` berbalut pondasi estetika `ChartContainer` shadcn, demi memperjelas sentralisasi wilayah dengan penumpukan dominan pemain (Top Traffic).
+   - **Resolusi Pemuatan (Load & Empty Handler)** - *Placeholder Skeleton* ditata rapi guna menghapus layar lompat (*layout shift*) saat jeda perpindahan data asinkronus; dan kanvas grafik dikondisikan melontarkan kalimat _"No Data"_ saat rentang kalender yang difilter membuktikan rasio nihil pencatatan.
 
 ### Struktur File & Penghubungan
 
-- **Halaman Dashboard Master** - `src/app/(dashboard)/master/dashboard/page.tsx`.
-- **API Dashboard Master** - `src/app/api/master-dashboard/route.ts`.
-- **Actions Master** - `src/features/master/dashboard/actions.ts`.
-- **Stat Card** - `src/components/dashboard/stat-card.tsx`.
-- **Chart UI** - `src/components/ui/chart.tsx`.
-- **Address Pages** - `src/app/(dashboard)/address/*/page.tsx`.
+- **Halaman Dashboard Master** - `src/app/(dashboard)/master/dashboard/page.tsx`
+- **API Dashboard Master** - `src/app/api/master-dashboard/route.ts` - menaungi rute orkestrasi ekstraksi *endpoint handler* di Node Runtime.
+- **Actions Master** - `src/features/master/dashboard/actions.ts` - menampung operasi pemanggilan kueri agregat *Supabase* layer *server action*.
+- **Stat Card** - `src/components/dashboard/stat-card.tsx` - abstraksi kartu metrik.
+- **Chart UI** - `src/components/ui/chart.tsx` - konfigurasi dasar grafik bawaan sistem desain *shadcn*.
+- **Address Pages (Navigasi Eksternal)** - `src/app/(dashboard)/address/*/page.tsx` - simpul pendaratan navigasi detail terhubung.
 
-Contoh penghubungan utama:
+Skema penyematan metode _rendering_ *Fetch* dalam lingkup blok penampung reaktif *client-side*:
 
 ```tsx
 const response = await fetch(`/api/master-dashboard?timeRange=${timeRange}`);
@@ -31,7 +29,7 @@ const response = await fetch(`/api/master-dashboard?timeRange=${timeRange}`);
 
 ### Menambahkan Chart Wilayah Baru
 
-Tambahkan agregasi di API atau action master dashboard, perluas interface `DashboardData`, lalu render chart baru memakai `ChartContainer`. Jaga format angka dengan `formatNumber`.
+Apabila dibutuhkan peninjauan spesifik, katakanlah presentase populasi per-subkategori Negara Bagian, pertama-tama perluas arsitektur pengolahan kueri basis data pada area rute layanan (sebaiknya pada blokasi layer `actions.ts` / perombakan API handler `route.ts`). Deklarasikan perbaikan tipenya di kontrak antarmuka balasan tipe `DashboardData`. Selanjutnya pasang konstruksi cetakan *canvas bar/pie charts* baru bersandarkan blok presentasional di komponen Client, disandingkan fungsi pemurni skala penomoran besar via modul utilitas formatur numerik bawaan (`formatNumber`).
 
 ---
-*Deskripsi ini menjelaskan dashboard master sebagai pusat analitik data negara, state, kota, dan lokasi pengguna.*
+*Deskripsi ini menegaskan pengadaan utilitas monitoring geospasial berbasis API client-fetch demi pengawasan demografi penyebaran wilayah.*

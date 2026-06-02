@@ -1,28 +1,27 @@
 ## Gambaran Umum Detail Group
 
-**Detail Group** berfungsi sebagai halaman informasi satu grup dan daftar anggotanya. Administrator dapat melihat data grup, mencari anggota, memfilter role, dan menelusuri pagination member.
+**Detail Group** berfungsi sebagai lembar profil tunggal bagi komunitas dan perantara pengolahan manajemen relasi anggota grup (*membership*). Admin dapat melakukan inspeksi mendalam untuk melihat properti detail sebuah grup, mengekstrak direktori pengurus/member, dan mendelegasikan otoritas berdasar posisi hak (*role*).
 
 ### Bagian-Bagian Utama
 
-1. **Parameter Group ID** - Route membaca `id` dari path `groups/[id]`.
+1. **Data Source (Pengambilan Relasi Grup)** - Proses fetching data (menggunakan skema *backend actions*) dipecah menjadi dua alur sinkronisasi:
+   - **Profil Komunitas (`fetchGroupById`)** - Menangkap objek profil spesifik melalui pencocokan *UUID* referensial. Mekanisme validasi langsung mendayagunakan rutinitas *error handler* kustom (`notFound()`) bila kode unik tak dikenali.
+   - **Keanggotaan Terfiltrasi (`fetchGroupMembers`)** - Mengekstraksi senarai koleksi orang-orang dengan *page parameter* pencarian (limit standar per halaman: 10 entri baris).
 
-2. **Query Parameter Member** - Halaman membaca `page`, `search`, dan `role` dari URL untuk daftar anggota.
-
-3. **Fetch Group Detail** - `fetchGroupById` mengambil data grup. Jika tidak ditemukan, halaman memanggil `notFound()`.
-
-4. **Fetch Members** - `fetchGroupMembers` mengambil anggota berdasarkan `groupId`, page, limit 10, search, dan role filter.
-
-5. **Client Detail** - `GroupDetailClient` menerima group, members, totalPages, currentPage, searchQuery, dan roleFilter.
+2. **Komponen Pembungkus & Kontrol URI**
+   - **Parameter Group ID (Route Path)** - Navigasi mendasarkan acuan kerjanya pada properti URI segmen dinamis `groups/[id]`.
+   - **URL Query Parameters (Search & Role)** - Terdapat state navigasi URL dinamis khusus mengontrol urusan formasi pencarian (*search*) tabulasi keanggotaan dan segregasi filter (*role*).
+   - **Komponen *Client-Detail*** - `GroupDetailClient` diposisikan sebagai cangkang penampung (*wrapper UI*) di sisi *browser*, bertugas menjahit injeksi properti (`group`, array `members`, `currentPage`, *state string* pencarian, serta `roleFilter`) untuk dapat dimodifikasi oleh Admin secara interaktif.
 
 ### Struktur File & Penghubungan
 
-- **Halaman Detail Group** - `src/app/(dashboard)/groups/[id]/page.tsx`.
-- **Actions Groups** - `src/features/groups/actions.ts`.
-- **Client Detail** - `src/features/groups/[id]/group-detail-client.tsx`.
-- **Tipe Group** - `src/features/groups/types/group.ts`.
-- **Halaman Groups** - `src/app/(dashboard)/groups/page.tsx`.
+- **Halaman Detail Group** - `src/app/(dashboard)/groups/[id]/page.tsx`
+- **Actions Groups** - `src/features/groups/actions.ts` - menampung operasi pemanggilan Supabase `fetchGroupById` & `fetchGroupMembers`.
+- **Client Detail** - `src/features/groups/[id]/group-detail-client.tsx` - komponen pengolahan data antarmuka presentasional.
+- **Tipe Group** - `src/features/groups/types/group.ts` - kerangka interface TypeScript struktural.
+- **Halaman Groups (Direktori)** - `src/app/(dashboard)/groups/page.tsx`
 
-Contoh penghubungan utama:
+Kumpulan utilitas impor pokok saat merekatkan fungsionalitas detail:
 
 ```tsx
 import { fetchGroupById, fetchGroupMembers } from "@/src/features/groups/actions";
@@ -31,7 +30,7 @@ import { GroupDetailClient } from "@/src/features/groups/[id]/group-detail-clien
 
 ### Menambahkan Tab Detail Group
 
-Tambahkan data fetch baru setelah group ditemukan, lalu teruskan ke `GroupDetailClient`. Jika tab memiliki pagination sendiri, gunakan query parameter terpisah agar tidak bentrok dengan pagination members.
+Untuk merealisasikan tabulasi sekunder baru di UI (misalnya: Daftar Aset Kompetisi Milik Grup), jalankan *fetch call* anyar sesaat sesudah instansiasi identitas profil (`group`) ditemukan. Turunkan hasil kembaliannya (*passing data*) menuju komponen klien `GroupDetailClient`. Pertimbangkan dengan saksama jika tabulasi baru membutuhkan sistem *paging*; berikan penanda unik kueri (seperti `?assetPage=2`) agar tak merusak logika sinkronisasi perpindahan halaman (URL Params) *pagination members*.
 
 ---
-*Deskripsi ini menjelaskan detail group sebagai halaman profil grup dan daftar anggota terfilter.*
+*Deskripsi ini menegaskan pengadaan formasi manajemen kontrol relasional spesifik pada ekosistem komunitas / grup.*

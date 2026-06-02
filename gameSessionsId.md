@@ -1,30 +1,26 @@
 ## Gambaran Umum Detail Game Session
 
-**Detail Game Session** berfungsi sebagai halaman hasil dan metadata satu sesi game. Halaman ini menampilkan host, aplikasi, PIN, kategori, status, statistik sesi, dan leaderboard peserta.
+**Detail Game Session** berfungsi sebagai rujukan tunggal pangkalan spesifik metadata dari rekaman sesi sebuah aktivitas game. Menyajikan informasi rincian mendetail seperti identitas *host*, aplikasi, kombinasi *PIN* masuk, hingga leaderboard rekapan prestasi peserta.
 
 ### Bagian-Bagian Utama
 
-1. **Parameter Session ID** - Route membaca `id` dari path `game-sessions/[id]`.
+1. **Data Source (Fetch Detail Sesi & URL Param)** - Menggunakan nomor identifikasi dari URI *path routing* Next.js, parameter ID sesi diolah (secara server-side) untuk mengaktifkan pemanggilan fungsionalitas `getGameSessionById(id)`. Pengambilan data ini membaca relasi skema spesifik dan mengekstrak metrik statistik.
+   - **Debug Not Found** - Mekanisme penjaga transisi (*fallback*): Jika payload return API bernilai *null*, sistem mengalihkannya ke rupa panel pesan diagnostik/debug yang memberitahukan ketidaksesuaian UUID.
 
-2. **Fetch Detail Sesi** - Data sesi diambil melalui `getGameSessionById(id)`.
-
-3. **Debug Not Found** - Jika sesi tidak ditemukan, halaman menampilkan panel debug berisi ID yang dicari dan kemungkinan penyebab.
-
-4. **Metadata Sesi** - Header menampilkan quiz title, host, application, game PIN, category, created date, dan badge status.
-
-5. **Session Stats** - `SessionStats` menampilkan total players, average score, max score, jumlah pertanyaan, dan durasi sesi.
-
-6. **Leaderboard Peserta** - Peserta diurutkan berdasarkan skor tertinggi dan durasi tercepat, lalu ditampilkan dalam tabel rank, player, time, dan score.
+2. **Komponen Visualisasi Metadata & Tabel**
+   - **Header Metadata Sesi** - Blok awal panel menyajikan kompilasi data atribut statis kuis (contoh: Title kuis, *Game PIN* otentikasi, informasi *Host*, dan label *Badge Status* operasional waktu nyata).
+   - **Kartu Session Stats** - Disajikan melalui komponen `SessionStats`, kartu-kartu metrik merangkum statistik performa komparatif keseluruhan sesi (rata-rata rasio ketepatan skor pemain, batas pencapaian optimal, hingga durasi).
+   - **Leaderboard Tabel Peserta** - Antarmuka tabel grid yang merender data para pemain (peserta) yang sudah diurutkan berdasarkan peringkat (sorting berpatokan dominan pada pencapaian tertinggi diikuti durasi pengerjaan). 
 
 ### Struktur File & Penghubungan
 
-- **Halaman Detail Session** - `src/app/(dashboard)/game-sessions/[id]/page.tsx`.
-- **Actions Session** - `src/features/game-sessions/actions.ts`.
-- **Session Stats** - `src/features/game-sessions/[id]/session-stats.tsx`.
-- **Statistic Button** - `src/features/game-sessions/[id]/statistic-button.tsx`.
-- **Tabel UI** - `src/components/ui/table.tsx`.
+- **Halaman Detail Session** - `src/app/(dashboard)/game-sessions/[id]/page.tsx`
+- **Actions Session** - `src/features/game-sessions/actions.ts` - menampung operasi pemanggilan Supabase `getGameSessionById`.
+- **Session Stats** - `src/features/game-sessions/[id]/session-stats.tsx` - perender infografis blok skor ringkas.
+- **Statistic Button** - `src/features/game-sessions/[id]/statistic-button.tsx` - UI pendukung pemicu rincian stats opsional.
+- **Tabel UI** - `src/components/ui/table.tsx` - *blueprint* pondasi gaya visual matriks kolom/baris.
 
-Contoh penghubungan utama:
+Contoh sintaks *rendering* dari komponen aksi data di dalam page detail:
 
 ```tsx
 import { getGameSessionById } from "@/src/features/game-sessions/actions";
@@ -33,7 +29,7 @@ import { SessionStats } from "@/src/features/game-sessions/[id]/session-stats";
 
 ### Menambahkan Data Detail Baru
 
-Perluas query `getGameSessionById`, hitung nilai turunan di halaman atau helper, lalu tampilkan pada metadata, stats, atau tabel. Untuk data peserta, pertahankan sorting leaderboard agar ranking tetap deterministik.
+Apabila ingin menyusupkan variabel laporan peserta lebih lanjut, perpanjang instruksi penyeleksian kolom *SELECT* query di fungsi `getGameSessionById`. Pastikan kalkulasi analitis kustom dikerjakan sebagai properti pembantu di level SSR dan *props-drilling* ke komponen visualisasinya (seperti penambahan kolom tabel spesifik baru). Agar akurasi sistem penentuan pemenang tidak inkonsisten, awasi urutan fungsi *sorting* rank saat merangkai iterasi baris leaderboard agar tetap deterministik.
 
 ---
-*Deskripsi ini menjelaskan detail sesi game sebagai halaman hasil, statistik, dan leaderboard.*
+*Deskripsi ini membedah operasional UI hasil rekap halaman laporan metrik leaderboard untuk suatu sesi game individual.*

@@ -1,34 +1,30 @@
 ## Gambaran Umum Detail Receptionist
 
-**Detail Receptionist** berfungsi sebagai halaman attendance finalist kompetisi. Receptionist dapat melihat peserta final per grup, menandai kehadiran manual, dan scan QR untuk check-in.
+**Detail Receptionist** berkedudukan sebagai meja komando (*attendance checking hub*) bagi pemonitoran kedatangan finalis ke area perlombaan. Modul manajemen fasilitasi *front-desk* ini menampung log riwayat anggota grup kompetisi, membekali operator akses ke kapabilitas pembubuhan absen (cek kehadiran manual *toggle*), atau pemanfaatan piranti otentikasi pengenal baris optik (layanan *QR Code Scanner*) instan.
 
 ### Bagian-Bagian Utama
 
-1. **Parameter Competition ID** - Route membaca `id` dari path `receptionist/[id]`.
+1. **Data Source (Pengambilan Asinkron Silang & Pemantauan Sinkronis *Realtime*)** 
+   - **Tangkapan Identifier URI & Supabase Client** - Melacak nomor referensial lomba (melalui ekstrak *Slug parameter* URL dinamis `receptionist/[id]`). Agregat penarikan memborong seluruh skema keterkaitan struktur perlombaan (*competitions*, *final groups*, *members*, peserta parsial `competition_participants`, dan taksonomi *profiles* pengguna).
+   - **Saluran Socket *Realtime Sync*** - Pelestari pergerakan reaktif (meng-hijack instrumen langganan/ *subscription channel*) dipasangkan kepada tabel `competition_participants`. Mekanisme canggih ini menjamin indikator `is_present` tereksekusi sinkron pada ragam tab (*client screen*) operator panitia manakala di saat persekian detik yang sama kueri kedatangan baru masuk ke database.
 
-2. **Fetch Data Attendance** - Halaman mengambil competition, final groups, group members, participant records, dan profiles melalui Supabase browser client.
-
-3. **Realtime Sync** - Subscription ke `competition_participants` memperbarui status `is_present` ketika ada update dari client lain.
-
-4. **Ringkasan Kehadiran** - Header menampilkan total participants, attended, dan not attended berdasarkan peserta unik.
-
-5. **Grouped Participant Cards** - Peserta dikelompokkan berdasarkan final group. Tiap row dapat diklik untuk toggle attendance.
-
-6. **QR Scanner** - Overlay scanner menggunakan dynamic import `html5-qrcode`, membaca QR, mencocokkan ID/userId/username, lalu mengupdate `is_present`.
-
-7. **Scan Feedback** - Result scan ditampilkan sebagai toast visual di dalam overlay scanner.
+2. **Komponen Supervisi Kehadiran & Antarmuka Skrining**
+   - **KPI Rekapitulasi (*Dashboard Inline Header*)** - Metrik kuantitatif (*Total Participants*, volume *Attended* & *Not Attended*) mencitrakan ikhtisar persentase konversi keramaian pelapor kompetitor yang datang dari sumber kueri audiens sah.
+   - **Formasi Pengelompokan Registran (*Grouped Participant Cards*)** - Panel penampil data kustom dipartisi berlandaskan keanggotaan *Final Group* (regu final). Blok nama kandidat berfungsi laksana sakelar (*toggle*) pen-tanda-kehadiran sistem ceklis klik manual.
+   - **Pemindai Optik QR (*Overlay QR Scanner*)** - Fungsionalitas modular (ter-isolasi dari paket render statis server/ *dynamic import html5-qrcode*) penyedia otentikasi biometrik-optik untuk mengenali dan mencocokkan konversi pengenal unik (ID/Username/UserID). 
+   - **Indikator Balasan Instan (*Scan Feedback Toast*)** - Pop-up animasi mini mengumandangkan rekap berhasil-tidaknya rekonsiliasi hasil verifikasi QR Scanner.
 
 ### Struktur File & Penghubungan
 
-- **Halaman Detail Receptionist** - `src/app/(dashboard)/receptionist/[id]/page.tsx`.
-- **Halaman List Receptionist** - `src/app/(dashboard)/receptionist/page.tsx`.
-- **Actions Receptionist** - `src/features/receptionist/actions.ts`.
-- **Supabase Browser Client** - `lib/supabase-browser`.
-- **Search Input** - `src/components/shared/search-input.tsx`.
-- **Avatar UI** - `src/components/ui/avatar.tsx`.
-- **Checkbox UI** - `src/components/ui/checkbox.tsx`.
+- **Halaman Detail Receptionist** - `src/app/(dashboard)/receptionist/[id]/page.tsx`
+- **Halaman List Receptionist** - `src/app/(dashboard)/receptionist/page.tsx`
+- **Actions Receptionist** - `src/features/receptionist/actions.ts` - menampung operasi pemicu logika pemantauan dan pencatatan absensi.
+- **Supabase Browser Client** - `lib/supabase-browser` - konektor soket *realtime* di browser.
+- **Search Input** - `src/components/shared/search-input.tsx`
+- **Avatar UI** - `src/components/ui/avatar.tsx`
+- **Checkbox UI** - `src/components/ui/checkbox.tsx`
 
-Contoh penghubungan utama:
+Pola impor instrumen optik pendeteksi asinkron (karena peruntukannya pada penjalanan *DOM-Browser*):
 
 ```tsx
 const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import("html5-qrcode");
@@ -36,7 +32,7 @@ const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import("html5-qrcode"
 
 ### Menambahkan Mode Check-In Baru
 
-Tambahkan pencocokan baru di `handleQrResult` atau buat action terpisah untuk validasi server-side. Jika check-in memengaruhi banyak tampilan, pertahankan realtime subscription agar semua client tersinkron.
+Peluasan peredaran jenis pintu otentikasi administrasi (seperti: penerapan mesin pembaca detektor NFC (*Near-field Communication*) maupun alat pemindai kode baris linier biasa), menuntut restrukturisasi penyesuaian kecocokan kueri di modul logika konverter `handleQrResult`. Atau lebih bijak, rakit satu fungsi validasi API penilai khusus di lapisan *server-action*. Bila proses identifikasi tersebut merembes atau memaksa pemutakhiran visual agregat daftar pesertanya, pertahankan utuh simpul ikatan *realtime websocket subscription* asalkan panitia (*client operator*) dari layar instrumen *front-desk* lainnya dapat menyelaraskan konversi keanggotaan secermat mungkin (sinkronisasi nirwaktu jeda).
 
 ---
-*Deskripsi ini menjelaskan detail receptionist sebagai halaman attendance manual dan QR scanner untuk kompetisi.*
+*Deskripsi ini menegaskan pengerjaan formasi eksekusi kehadiran partisipan finalis secara terpadu melalui skaner atau manipulasi interaktif antarmuka.*

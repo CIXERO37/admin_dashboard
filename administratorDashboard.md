@@ -4,26 +4,24 @@
 
 ### Bagian-Bagian Utama
 
-1. **Filter Rentang Waktu** - Select menyediakan `this-year`, `last-year`, dan `all`. Filter dipakai untuk menyaring profil berdasarkan tanggal relevan.
+1. **Data Source (Hook Profiles)** - Data profil pengguna ditarik dari backend menggunakan custom hook `useProfiles` (berada di fitur administrator dashboard). Hook ini menyimpan state data *raw* serta menyediakan flag indikator proses pengambilan data.
 
-2. **Hook Profiles** - Data profil diambil melalui `useProfiles` dari feature administrator dashboard.
-
-3. **Kartu Statistik Akun** - Kartu menampilkan jumlah user, admin, active, dan blocked. Beberapa kartu menautkan langsung ke halaman users dengan query filter.
-
-4. **Location Chart** - `LocationChart` menerima profil terfilter dan menampilkan distribusi lokasi.
-
-5. **Demographic Chart** - `DemographicChart` menampilkan visualisasi demografi pengguna berdasarkan data profil.
+2. **Komponen Visualisasi & Filter**
+   - **Filter Rentang Waktu** - Tersedia form input *Select* dengan opsi waktu (misal: `this-year`, `last-year`, dan `all`). Opsi ini digunakan pada level klien untuk menyaring koleksi array *profiles* sesuai rentang tanggal.
+   - **Kartu Statistik Akun** - Kumpulan elemen `StatCard` memvisualisasikan agregat data (jumlah total user, admin, active, dan blocked). Beberapa di antaranya bertindak sebagai navigasi cepat (shortcut) ke halaman `users` melalui *query parameters*.
+   - **Location Chart** - Komponen `LocationChart` menerima koleksi profil terfilter dan bertugas menyajikan persebaran domisili (peta/lokasi).
+   - **Demographic Chart** - Komponen `DemographicChart` merangkum profil berdasarkan kategori khusus, memberikan *insight* demografis (misal umur atau gender).
 
 ### Struktur File & Penghubungan
 
-- **Halaman Dashboard Administrator** - `src/app/(dashboard)/administrator/dashboard/page.tsx`.
-- **Hook Profiles** - `src/features/administrator/dashboard/_hooks/useProfiles`.
-- **Location Chart** - `src/components/dashboard/location-chart.tsx`.
-- **Demographic Chart** - `src/components/dashboard/demographic-chart.tsx`.
-- **Stat Card** - `src/components/dashboard/stat-card.tsx`.
-- **Users Page** - `src/app/(dashboard)/users/page.tsx`.
+- **Halaman Dashboard Administrator** - `src/app/(dashboard)/administrator/dashboard/page.tsx`
+- **Hook Profiles** - `src/features/administrator/dashboard/_hooks/useProfiles.ts` - menampung operasi pemanggilan data profil.
+- **Location Chart** - `src/components/dashboard/location-chart.tsx` - komponen diagram wilayah lokasi.
+- **Demographic Chart** - `src/components/dashboard/demographic-chart.tsx` - komponen infografis klasifikasi demografi.
+- **Stat Card** - `src/components/dashboard/stat-card.tsx` - UI komponen untuk kartu metrik.
+- **Users Page** - `src/app/(dashboard)/users/page.tsx`
 
-Contoh penghubungan utama:
+Contoh struktur *import* pada komponen halaman:
 
 ```tsx
 import { useProfiles } from "@/src/features/administrator/dashboard/_hooks/useProfiles";
@@ -32,7 +30,7 @@ import { LocationChart } from "@/components/dashboard/location-chart";
 
 ### Menambahkan Metrik Administrator
 
-Tambahkan perhitungan baru dari `profiles` atau perluas hook `useProfiles`. Jika metrik berbasis tanggal khusus seperti `blocked_at`, gunakan helper `checkDate` agar filter periode tetap konsisten.
+Apabila hendak menambahkan kalkulasi analitik yang baru, disarankan untuk menghitung derivasinya dari data *profiles* yang sudah ditarik atau menambah fungsionalitas di hook `useProfiles`. Pastikan untuk menggunakan helper sinkronisasi filter tanggal (seperti `checkDate`) terutama untuk kolom penanda khusus seperti `blocked_at`, agar penyaringan antar-chart tetap konsisten.
 
 ---
-*Deskripsi ini menjelaskan dashboard administrator sebagai analitik akun, lokasi, dan demografi.*
+*Deskripsi ini menjelaskan dashboard administrator sebagai pusat analitik akun, letak lokasi, dan demografi sistem.*

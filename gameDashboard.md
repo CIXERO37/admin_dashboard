@@ -1,26 +1,25 @@
 ## Gambaran Umum Dashboard Game
 
-**Dashboard Game** berfungsi sebagai pusat pemantauan performa seluruh aktivitas game. Halaman ini menampilkan ringkasan statistik sesi berdasarkan rentang waktu yang dipilih dan membantu administrator melihat tren penggunaan game secara cepat.
+**Dashboard Game** berfungsi sebagai ruang kendali (command center) pengawasan perilaku dan traksi fitur *Game*. Menyediakan fasilitas observasi kinerja sesi per-rentang periode, mencatat densitas jumlah pemain, serta metrik kelulusan atau rasio penyelesaian kuis *game*.
 
 ### Bagian-Bagian Utama
 
-1. **Filter Rentang Waktu** - Parameter `timeRange` dibaca dari query string dan memiliki nilai default `this-year`. Filter ini diteruskan ke server action untuk mengambil agregasi sesuai periode.
+1. **Data Source (Server Action Statistik)** - Pengumpulan agregasi analitik dipicu sebelum komponen termuat melalui pemanggilan server *action* `getGameDashboardStats(range)`. Sumber data ini berisikan angka metrik kalkulasi densitas *game*, sesi interaktif, dan demografi partisipan sesuai kurun parameter rentang waktu.
 
-2. **Ringkasan Statistik Game** - Data statistik diambil melalui `getGameDashboardStats(range)` dari modul feature game dashboard. Statistik mencakup performa sesi, jumlah pemain, penyelesaian game, dan metrik agregat lain yang dibutuhkan dashboard.
-
-3. **Wrapper Client Dashboard** - Komponen `GameDashboardWrapper` menerima `initialData` dari server dan mengelola tampilan client-side. Saat data sedang diproses, halaman memakai `GameDashboardSkeleton` sebagai fallback.
-
-4. **Visualisasi Dashboard** - Komponen dashboard feature menampilkan kartu metrik, chart, dan insight yang relevan untuk memantau aktivitas game dalam periode aktif.
+2. **Komponen Tabel & Visualisasi**
+   - **Filter Rentang Waktu** - Komponen form antarmuka klien (`DashboardFilter`) yang bertugas mengatur nilai rentang tanggal yang dipantau (misal *this-year* atau kustom). Nilainya secara reaktif disinkronisasi ke string URL parameter (`timeRange`).
+   - **Wrapper Client Dashboard** - Pembungkus reaktif UI (`GameDashboardWrapper`) yang memakan umpan statis dari fungsi *server* untuk diratakan ke dalam tampilan klien interaktif. Saat menanti kembalian *promise* atau perpindahan waktu filter, UI Skeleton ringan (`GameDashboardSkeleton`) dipanggil menggantikannya.
+   - **Visualisasi Dashboard** - Komponen yang bertugas menerjemahkan *insight* metrik *backend* menjadi kartu indikator kuantitatif bersusun serta grafik *charts* garis tren sesi pemakaian.
 
 ### Struktur File & Penghubungan
 
-- **Halaman Dashboard Game** - `src/app/(dashboard)/game/dashboard/page.tsx`.
-- **Server Action Statistik** - `src/features/game/dashboard/actions.ts`.
-- **Wrapper Client** - `src/features/game/dashboard/game-dashboard-wrapper.tsx`.
-- **Client UI & Skeleton** - `src/features/game/dashboard/game-dashboard-client.tsx`.
-- **Filter Dashboard** - `src/features/game/dashboard/dashboard-filter.tsx`.
+- **Halaman Dashboard Game** - `src/app/(dashboard)/game/dashboard/page.tsx`
+- **Server Action Statistik** - `src/features/game/dashboard/actions.ts` - gudang operasi database terkait perolehan metrik rekapitulasi angka.
+- **Wrapper Client** - `src/features/game/dashboard/game-dashboard-wrapper.tsx` - pengendali status sinkronisasi muatan data *client-side*.
+- **Client UI & Skeleton** - `src/features/game/dashboard/game-dashboard-client.tsx` - file layout infografik.
+- **Filter Dashboard** - `src/features/game/dashboard/dashboard-filter.tsx` - utilitas antarmuka filter tanggal/waktu.
 
-Contoh penghubungan utama:
+Contoh pola kode penggabungan awal di root page:
 
 ```tsx
 import { getGameDashboardStats } from "@/src/features/game/dashboard/actions";
@@ -29,7 +28,7 @@ import { GameDashboardWrapper } from "@/src/features/game/dashboard/game-dashboa
 
 ### Menambahkan Statistik atau Chart Baru
 
-Tambahkan query agregasi di `actions.ts`, perluas tipe data statistik, lalu render metrik baru di komponen client dashboard. Pastikan filter `timeRange` tetap diteruskan konsisten agar semua visual mengikuti periode yang sama.
+Perluas abstraksi `getGameDashboardStats` pada file *actions* beserta modifikasi perbaikan *type-declaration*-nya jika bermaksud menyisipkan *node* pengukuran data performa baru (misal *Average Playtime*). Terakhir, aplikasikan visualisasinya dengan merender blok metrik atau elemen grafik kustom pada modul Client Dashboard, sembari memastikan properti rentang filter dari `DashboardFilter` tidak terputus.
 
 ---
-*Deskripsi ini menjelaskan fungsi, sumber data, dan titik integrasi utama untuk halaman dashboard game.*
+*Deskripsi ini menegaskan kapabilitas dan komponen-komponen reaktif pemantau operasional game.*

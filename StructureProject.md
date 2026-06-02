@@ -242,12 +242,23 @@ src/                                        # Root direktori utama kode sumber p
 │   └── xendit.js                           # File integrasi modul payment gateway Xendit
 └── types                                   # Definisi tipe data statis TypeScript tingkat global
 ```
+
+<<<<<<< HEAD
+
 </details>
 
+### Konsep Pemisahan: `app/` vs `features/`
+
+- **`src/app/...` (Halaman)**: Hanya bertugas merender layout dan menentukan rute URL. Tidak dianjurkan menulis logika _database_ yang berat di sini. Halaman ini hanya merakit dan memanggil komponen jadi dari folder `features/`.
+- # **`src/features/...` (Logika)**: Tempat komponen cerdas berada. Folder ini terisolasi (_Encapsulated_). Tidak perlu meletakkan komponen tabel kota di `src/components`, cukup letakkan di `_components` milik kota itu sendiri agar kode tidak bercampur dan mudah dipelihara.
+
+</details>
 
 ### Konsep Pemisahan: `app/` vs `features/`
-- **`src/app/...` (Halaman)**: Hanya bertugas merender layout dan menentukan rute URL. Tidak dianjurkan menulis logika *database* yang berat di sini. Halaman ini hanya merakit dan memanggil komponen jadi dari folder `features/`.
-- **`src/features/...` (Logika)**: Tempat komponen cerdas berada. Folder ini terisolasi (*Encapsulated*). Tidak perlu meletakkan komponen tabel kota di `src/components`, cukup letakkan di `_components` milik kota itu sendiri agar kode tidak bercampur dan mudah dipelihara.
+
+- **`src/app/...` (Halaman)**: Hanya bertugas merender layout dan menentukan rute URL. Tidak dianjurkan menulis logika _database_ yang berat di sini. Halaman ini hanya merakit dan memanggil komponen jadi dari folder `features/`.
+- **`src/features/...` (Logika)**: Tempat komponen cerdas berada. Folder ini terisolasi (_Encapsulated_). Tidak perlu meletakkan komponen tabel kota di `src/components`, cukup letakkan di `_components` milik kota itu sendiri agar kode tidak bercampur dan mudah dipelihara.
+  > > > > > > > 7a605da (StructureProject.md)
 
 ---
 
@@ -256,42 +267,91 @@ src/                                        # Root direktori utama kode sumber p
 Setiap folder di dalam `src/app/(dashboard)/` dan `src/features/` pada dasarnya saling berpasangan untuk membentuk modul fungsional berikut:
 
 #### Master & Analytics
+
+# <<<<<<< HEAD
+
+> > > > > > > 7a605da (StructureProject.md)
+
 - **`dashboard`**: Halaman utama ringkasan metrik dan performa langsung.
 - **`master`**: Pengaturan "Data Master" inti platform.
 
 #### Users & Access Management
+
+# <<<<<<< HEAD
+
+> > > > > > > 7a605da (StructureProject.md)
+
 - **`users`**: Daftar menyeluruh anggota platform (cek status, blokir).
 - **`administrator`**: Kontrol izin admin internal (Role-Based Access).
 - **`profiles`**: Detail level keanggotaan dan capaian lencana pengguna.
 - **`groups`**: Alat pantau grup sosial atau kelas belajar buatan pengguna.
 
 #### Games & Quizzes
-- **`games` / `manage-games`**: Mengelola status ketersediaan *game engine*.
+
+<<<<<<< HEAD
+
+- **`games` / `manage-games`**: Mengelola status ketersediaan _game engine_.
 - **`quizzes` / `quiz`**: Direktori soal/kuis pengguna di dalam database.
-- **`game-sessions` / `manage-sessions`**: Pemantauan sesi kuis yang sedang *live*.
+- **`game-sessions` / `manage-sessions`**: Pemantauan sesi kuis yang sedang _live_.
 
 #### Moderation & Quality Control
+
+=======
+
+- **`games` / `manage-games`**: Mengelola status ketersediaan _game engine_.
+- **`quizzes` / `quiz`**: Direktori soal/kuis pengguna di dalam database.
+- **`game-sessions` / `manage-sessions`**: Pemantauan sesi kuis yang sedang _live_.
+
+#### Moderation & Quality Control
+
+> > > > > > > 7a605da (StructureProject.md)
+
 - **`quiz-approval`**: "Meja Moderasi" untuk me-review kuis buatan pengguna.
 - **`rejection-templates`**: Manajer "Alasan Penolakan" konten (mis: "Soal tidak lengkap").
 - **`reports`**: Sistem laporan pengguna tentang kuis/pemain bermasalah.
 - **`trash-bin`**: "Tempat Sampah" (Soft-Delete) untuk memulihkan data.
 
 #### Events & E-Sports
-- **`manage-competitions`**: Modul manajemen turnamen skala besar, *bracket*, dan kualifikasi.
+
+<<<<<<< HEAD
+
+- **`manage-competitions`**: Modul manajemen turnamen skala besar, _bracket_, dan kualifikasi.
 
 #### Monetization & Billing
+
+=======
+
+- **`manage-competitions`**: Modul manajemen turnamen skala besar, _bracket_, dan kualifikasi.
+
+#### Monetization & Billing
+
+> > > > > > > 7a605da (StructureProject.md)
+
 - **`billing`**: Laporan riwayat transaksi dan invoice pengguna.
 - **`subscriptions`**: Pengaturan paket langganan (Premium/Basic).
 
 #### Content & Localization
+
+# <<<<<<< HEAD
+
+> > > > > > > 7a605da (StructureProject.md)
+
 - **`manage-blog` / `blog` / `blog-category`**: Sistem CMS mini untuk artikel, pengumuman, dan berita platform.
 - **`address`**: Pemetaan lokasi geografis (Benua, Negara, Kota) untuk analitik.
 - **`category`**: Kategori pengelompokan topik game/kuis.
 
 #### Settings & Helpdesk
+
+<<<<<<< HEAD
+
 - **`settings`**: Konfigurasi umum platform.
 - **`appearance`**: Tema dan tampilan antarmuka dasbor (terang/gelap).
-- **`support` / `receptionist`**: Meja penanganan tiket bantuan *Customer Support*.
+- # **`support` / `receptionist`**: Meja penanganan tiket bantuan _Customer Support_.
+
+- **`settings`**: Konfigurasi umum platform.
+- **`appearance`**: Tema dan tampilan antarmuka dasbor (terang/gelap).
+- **`support` / `receptionist`**: Meja penanganan tiket bantuan _Customer Support_.
+  > > > > > > > 7a605da (StructureProject.md)
 
 ---
 
