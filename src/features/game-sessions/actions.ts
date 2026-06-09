@@ -38,7 +38,7 @@ export async function fetchGameSessions({
 
     let query = supabase
       .from("game_sessions")
-      .select(selectQuery, { count: "exact" });
+      .select(selectQuery, { count: "estimated" });
 
     // Apply Sorting
     switch (sort) {
@@ -126,21 +126,26 @@ export async function fetchGameSessions({
 
     const allUserIds = [...new Set([...hostIds, ...participantUserIds])];
 
-    const { data: profiles } = allUserIds.length > 0
-      ? await supabase
-        .from("profiles")
-        .select("id, fullname, username, avatar_url")
-        .in("id", allUserIds)
-      : { data: [] };
-
-    const profileMap = new Map(profiles?.map((p) => [p.id, p]));
-
     // Get Categories
     const quizIds = [...new Set(sessions.map(s => s.quiz_id).filter(Boolean))];
-    const { data: quizzes } = quizIds.length > 0
-      ? await supabase.from("quizzes").select("id, category").in("id", quizIds)
-      : { data: [] };
 
+    // Fetch profiles and quizzes in parallel
+    const [profilesResponse, quizzesResponse] = await Promise.all([
+      allUserIds.length > 0
+        ? supabase
+            .from("profiles")
+            .select("id, fullname, username, avatar_url")
+            .in("id", allUserIds)
+        : Promise.resolve({ data: [] }),
+      quizIds.length > 0
+        ? supabase.from("quizzes").select("id, category").in("id", quizIds)
+        : Promise.resolve({ data: [] })
+    ]);
+
+    const profiles = profilesResponse.data;
+    const quizzes = quizzesResponse.data;
+
+    const profileMap = new Map(profiles?.map((p) => [p.id, p]));
     const categoryMap = new Map(quizzes?.map(q => [q.id, q.category]));
 
     const mappedSessions: GameSession[] = sessions.map((session) => {

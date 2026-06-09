@@ -1,0 +1,152 @@
+[
+  {
+    "route": "address",
+    "status": 404,
+    "time": "32.09"
+  },
+  {
+    "route": "administrator",
+    "status": 404,
+    "time": "30.02"
+  },
+  {
+    "route": "appearance",
+    "status": 200,
+    "time": "169.66"
+  },
+  {
+    "route": "billing",
+    "status": 404,
+    "time": "27.28"
+  },
+  {
+    "route": "blog",
+    "status": 404,
+    "time": "30.62"
+  },
+  {
+    "route": "blog-category",
+    "status": 200,
+    "time": "49.24"
+  },
+  {
+    "route": "category",
+    "status": 200,
+    "time": "62.78"
+  },
+  {
+    "route": "competition",
+    "status": 404,
+    "time": "26.58"
+  },
+  {
+    "route": "dashboard",
+    "status": 200,
+    "time": "63.51"
+  },
+  {
+    "route": "game",
+    "status": 404,
+    "time": "27.48"
+  },
+  {
+    "route": "game-sessions",
+    "status": 200,
+    "time": "69.61"
+  },
+  {
+    "route": "games",
+    "status": 200,
+    "time": "48.35"
+  },
+  {
+    "route": "groups",
+    "status": 200,
+    "time": "47.22"
+  },
+  {
+    "route": "manage-blog",
+    "status": 200,
+    "time": "52.81"
+  },
+  {
+    "route": "manage-competitions",
+    "status": 200,
+    "time": "110.03"
+  },
+  {
+    "route": "manage-games",
+    "status": 200,
+    "time": "47.96"
+  },
+  {
+    "route": "manage-sessions",
+    "status": 200,
+    "time": "66.08"
+  },
+  {
+    "route": "master",
+    "status": 404,
+    "time": "25.54"
+  },
+  {
+    "route": "profiles",
+    "status": 404,
+    "time": "28.16"
+  },
+  {
+    "route": "quiz",
+    "status": 404,
+    "time": "34.44"
+  },
+  {
+    "route": "quiz-approval",
+    "status": 200,
+    "time": "59.91"
+  },
+  {
+    "route": "quizzes",
+    "status": 200,
+    "time": "40.75"
+  },
+  {
+    "route": "receptionist",
+    "status": 200,
+    "time": "238.00"
+  },
+  {
+    "route": "rejection-templates",
+    "status": 200,
+    "time": "49.08"
+  },
+  {
+    "route": "reports",
+    "status": 200,
+    "time": "56.89"
+  },
+  {
+    "route": "settings",
+    "status": 200,
+    "time": "48.63"
+  },
+  {
+    "route": "subscriptions",
+    "status": 200,
+    "time": "563.77"
+  },
+  {
+    "route": "support",
+    "status": 404,
+    "time": "41.27"
+  },
+  {
+    "route": "trash-bin",
+    "status": 200,
+    "time": "84.34"
+  },
+  {
+    "route": "users",
+    "status": 200,
+    "time": "133.70"
+  }
+]

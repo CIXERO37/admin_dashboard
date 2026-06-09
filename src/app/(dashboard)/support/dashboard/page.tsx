@@ -14,7 +14,7 @@ import {
 
 import { StatCard } from "@/components/dashboard/stat-card";
 import { useReports } from "@/src/features/reports/_hooks/useReports";
-import { SupportCharts } from "@/components/dashboard/support-charts";
+import { SupportCharts } from "@/features/support/dashboard/_components/support-charts";
 import { fetchQuizApprovals } from "@/src/features/quiz-approval/actions";
 import { fetchGroups } from "@/src/features/groups/actions";
 import { fetchGroupCategoryCounts } from "@/src/features/groups/stats-actions";

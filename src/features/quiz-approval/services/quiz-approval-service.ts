@@ -20,7 +20,7 @@ export const QuizApprovalService = {
 
     let query = supabase
       .from("quizzes")
-      .select("*", { count: "exact" })
+      .select("*", { count: "estimated" })
       .eq("request", true);
 
     if (search) {
@@ -53,23 +53,30 @@ export const QuizApprovalService = {
     }
 
     let quizApprovals: QuizApproval[] = [];
+    let categories: string[] = [];
 
     if (quizzes && quizzes.length > 0) {
       const creatorIds = [...new Set(quizzes.map((q) => q.creator_id).filter(Boolean))];
 
+      // Fetch profiles and categories in parallel
+      const [profilesResponse, catResponse] = await Promise.all([
+        creatorIds.length > 0
+          ? supabase
+              .from("profiles")
+              .select("id, fullname, username, email, avatar_url")
+              .in("id", creatorIds)
+          : Promise.resolve({ data: null }),
+        supabase.from("quizzes").select("category")
+      ]);
+
+      const profiles = profilesResponse.data;
+      const catData = catResponse.data;
+
       let profilesMap: Record<string, any> = {};
-
-      if (creatorIds.length > 0) {
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("id, fullname, username, email, avatar_url")
-          .in("id", creatorIds);
-
-        if (profiles) {
-          profiles.forEach((p) => {
-            profilesMap[p.id] = p;
-          });
-        }
+      if (profiles) {
+        profiles.forEach((p) => {
+          profilesMap[p.id] = p;
+        });
       }
 
       quizApprovals = quizzes.map((quiz) => ({
@@ -83,12 +90,16 @@ export const QuizApprovalService = {
         created_at: quiz.created_at,
         creator: profilesMap[quiz.creator_id] || null,
       }));
-    }
 
-    const { data: catData } = await supabase.from("quizzes").select("category");
-    const categories = [
-      ...new Set(catData?.map((c) => c.category).filter(Boolean) as string[]),
-    ].sort();
+      categories = [
+        ...new Set(catData?.map((c) => c.category).filter(Boolean) as string[]),
+      ].sort();
+    } else {
+      const { data: catData } = await supabase.from("quizzes").select("category");
+      categories = [
+        ...new Set(catData?.map((c) => c.category).filter(Boolean) as string[]),
+      ].sort();
+    }
 
     return {
       data: quizApprovals,

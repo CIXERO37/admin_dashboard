@@ -9,8 +9,8 @@ import {
   SelectValue,
 } from "@/src/components/ui/select";
 import { StatCard } from "@/components/dashboard/stat-card";
-import { LocationChart } from "@/components/dashboard/location-chart";
-import { DemographicChart } from "@/components/dashboard/demographic-chart";
+import { LocationChart } from "@/features/administrator/dashboard/_components/location-chart";
+import { DemographicChart } from "@/features/administrator/dashboard/_components/demographic-chart";
 import { Skeleton } from "@/src/components/ui/skeleton";
 
 import { useProfiles } from "@/src/features/administrator/dashboard/_hooks/useProfiles";

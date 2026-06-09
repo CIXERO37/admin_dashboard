@@ -1,0 +1,152 @@
+[
+  {
+    "route": "/dashboard",
+    "status": 200,
+    "time": "125.08"
+  },
+  {
+    "route": "/game/dashboard",
+    "status": 200,
+    "time": "4134.68"
+  },
+  {
+    "route": "/games",
+    "status": 200,
+    "time": "139.59"
+  },
+  {
+    "route": "/games/Quiz V2",
+    "status": 200,
+    "time": "209.18"
+  },
+  {
+    "route": "/manage-games",
+    "status": 200,
+    "time": "301.41"
+  },
+  {
+    "route": "/manage-games/01mye44x0010000001mt",
+    "status": 200,
+    "time": "584.82"
+  },
+  {
+    "route": "/game-sessions",
+    "status": 200,
+    "time": "240.84"
+  },
+  {
+    "route": "/quiz/dashboard",
+    "status": 200,
+    "time": "311.00"
+  },
+  {
+    "route": "/quizzes/01n21zf6001000000yz0",
+    "status": 200,
+    "time": "695.31"
+  },
+  {
+    "route": "/quizzes",
+    "status": 200,
+    "time": "140.38"
+  },
+  {
+    "route": "/quiz-approval/01n05t5d0010000002wq",
+    "status": 200,
+    "time": "284.39"
+  },
+  {
+    "route": "/quiz-approval",
+    "status": 200,
+    "time": "243.45"
+  },
+  {
+    "route": "/rejection-templates",
+    "status": 200,
+    "time": "129.36"
+  },
+  {
+    "route": "/competition/dashboard",
+    "status": 200,
+    "time": "592.49"
+  },
+  {
+    "route": "/manage-competitions/d7g49je71fkg000928d0",
+    "status": 200,
+    "time": "296.39"
+  },
+  {
+    "route": "/manage-competitions",
+    "status": 200,
+    "time": "164.54"
+  },
+  {
+    "route": "/category",
+    "status": 200,
+    "time": "243.98"
+  },
+  {
+    "route": "/receptionist/d7g49je71fkg000928d0",
+    "status": 200,
+    "time": "219.07"
+  },
+  {
+    "route": "/receptionist",
+    "status": 200,
+    "time": "279.84"
+  },
+  {
+    "route": "/manage-blog/01mykjzr0010000004mp",
+    "status": 200,
+    "time": "807.24"
+  },
+  {
+    "route": "/manage-blog",
+    "status": 200,
+    "time": "171.06"
+  },
+  {
+    "route": "/support/dashboard",
+    "status": 200,
+    "time": "439.06"
+  },
+  {
+    "route": "/reports",
+    "status": 200,
+    "time": "113.57"
+  },
+  {
+    "route": "/reports/01mt7n3q001000000xsd",
+    "status": 200,
+    "time": "220.01"
+  },
+  {
+    "route": "/manage-sessions",
+    "status": 200,
+    "time": "205.87"
+  },
+  {
+    "route": "/groups",
+    "status": 200,
+    "time": "117.19"
+  },
+  {
+    "route": "/groups/d8h79zf94qbztsv3b2bg",
+    "status": 200,
+    "time": "680.93"
+  },
+  {
+    "route": "/master/dashboard",
+    "status": 200,
+    "time": "193.52"
+  },
+  {
+    "route": "/administrator/dashboard",
+    "status": 200,
+    "time": "420.61"
+  },
+  {
+    "route": "/users",
+    "status": 200,
+    "time": "114.51"
+  }
+]

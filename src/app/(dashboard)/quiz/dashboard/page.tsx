@@ -17,7 +17,8 @@ import { Skeleton } from "@/src/components/ui/skeleton";
 import { useGameStats } from "@/src/features/quiz/dashboard/_hooks/useGameStats";
 import { useDashboardData } from "@/contexts/dashboard-store";
 import { useTranslation } from "@/lib/i18n";
-import { QuizStatsCharts } from "@/components/dashboard/quiz-stats-charts";
+import { QuizStatsCharts } from "@/features/quiz/dashboard/_components/quiz-stats-charts";
+import { useQuizCalculations } from "@/features/quiz/dashboard/_hooks/useQuizCalculations";
 
 export default function QuizDashboardPage() {
   const { t } = useTranslation();
@@ -28,44 +29,13 @@ export default function QuizDashboardPage() {
 
   const [timeRange, setTimeRange] = useState("this-year");
 
-  const checkDate = (dateStr: string | null | undefined, range: string) => {
-    if (range === "all") return true;
-    if (!dateStr) return false;
-
-    const date = new Date(dateStr);
-    const now = new Date();
-
-    if (range === "this-year") {
-      return isSameYear(date, now);
-    }
-    if (range === "last-year") {
-      return isSameYear(date, subYears(now, 1));
-    }
-    return true;
-  };
-
-  const filteredQuizzes = quizzes.filter((quiz) =>
-    checkDate(quiz.created_at, timeRange),
-  );
-
-  const pendingQuizzes = filteredQuizzes.filter(
-    (q) => q.request === true,
-  ).length;
-
-  // Statistics Calculation
-  const totalQuizzes = filteredQuizzes.length;
-  const publicQuizzes = filteredQuizzes.filter((q) => q.is_public).length;
-  const privateQuizzes = totalQuizzes - publicQuizzes;
-
-  const totalQuestions = filteredQuizzes.reduce((acc, quiz) => {
-    const qCount = Array.isArray(quiz.questions) ? quiz.questions.length : 0;
-    return acc + qCount;
-  }, 0);
-
-  // Safe division
-  const avgQuestions =
-    totalQuizzes > 0 ? Math.round(totalQuestions / totalQuizzes) : 0;
-
+  const { 
+    filteredQuizzes, 
+    pendingQuizzes, 
+    totalQuizzes, 
+    publicQuizzes, 
+    privateQuizzes, 
+  } = useQuizCalculations(quizzes, timeRange);
   return (
     <div className="space-y-8">
       {/* Header */}

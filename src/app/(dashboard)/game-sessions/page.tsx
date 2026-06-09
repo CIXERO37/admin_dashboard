@@ -15,6 +15,7 @@ interface PageProps {
 }
 
 export default async function GameSessionsPage({ searchParams }: PageProps) {
+  
   const params = await searchParams;
   const page = Number(params.page) || 1;
   const search = params.search || "";

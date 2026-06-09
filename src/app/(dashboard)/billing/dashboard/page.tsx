@@ -5,8 +5,8 @@ import { SectionHeader } from "@/components/dashboard/section-header";
 import { DataTable, StatusBadge } from "@/components/dashboard/data-table";
 import { activeSubscribers, unpaidUsers } from "@/lib/dummy-data";
 import { Users, AlertCircle, DollarSign, TrendingUp } from "lucide-react";
-import { RevenueChart } from "@/components/dashboard/revenue-chart";
-import { PlanDistributionPie } from "@/components/dashboard/plan-distribution-pie";
+import { RevenueChart } from "@/features/billing/dashboard/_components/revenue-chart";
+import { PlanDistributionPie } from "@/features/billing/dashboard/_components/plan-distribution-pie";
 import { useTranslation } from "@/lib/i18n";
 
 export default function BillingDashboardPage() {

@@ -22,9 +22,9 @@ export async function fetchReports({
   const supabase = await getSupabaseServerClient()
   const offset = (page - 1) * limit
 
-  let query = supabase
-    .from("reports")
-    .select("*", { count: "exact" })
+    let query = supabase
+      .from("reports")
+      .select("*", { count: "estimated" })
 
   if (search) {
     query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`)
@@ -52,27 +52,31 @@ export async function fetchReports({
   const reportedUserIds = [...new Set((data ?? []).map(r => r.reported_user_id).filter(Boolean))] as string[]
   const allProfileIds = [...new Set([...reporterIds, ...reportedUserIds])]
 
-  // Fetch profiles
-  let profilesMap: Record<string, ReportProfile> = {}
-  if (allProfileIds.length > 0) {
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("id, username, email, fullname, avatar_url")
-      .in("id", allProfileIds)
+  // Fetch profiles and stats in parallel
+  const [profilesResponse, allReportsResponse] = await Promise.all([
+    allProfileIds.length > 0
+      ? supabase
+          .from("profiles")
+          .select("id, username, email, fullname, avatar_url")
+          .in("id", allProfileIds)
+      : Promise.resolve({ data: null }),
+    supabase
+      .from("reports")
+      .select("status")
+  ]);
 
-    if (profiles) {
-      profilesMap = profiles.reduce((acc, p) => {
-        acc[p.id] = p
-        return acc
-      }, {} as Record<string, ReportProfile>)
-    }
+  const profiles = profilesResponse.data;
+  const allReports = allReportsResponse.data;
+
+  let profilesMap: Record<string, ReportProfile> = {};
+  if (profiles) {
+    profilesMap = profiles.reduce((acc, p) => {
+      acc[p.id] = p;
+      return acc;
+    }, {} as Record<string, ReportProfile>);
   }
 
   // Get stats
-  const { data: allReports } = await supabase
-    .from("reports")
-    .select("status")
-
   const stats = {
     total: allReports?.length ?? 0,
     pending: allReports?.filter(r => r.status?.toLowerCase() === "pending").length ?? 0,
